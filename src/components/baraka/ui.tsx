@@ -76,7 +76,8 @@ const navItems = [
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { cart } = useBaraka();
-  if (pathname.startsWith("/admin") || pathname.startsWith("/auth")) return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/auth") || pathname.startsWith("/produk") || pathname.startsWith("/keranjang"))
+    return null;
   const cartCount = cart.reduce((s, l) => s + l.qty, 0);
 
   return (
