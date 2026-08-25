@@ -70,48 +70,52 @@ export function ProductCard({ product }: { product: Product }) {
 const navItems = [
   { to: "/", label: "Beranda", icon: Home },
   { to: "/pesanan", label: "Pesanan", icon: ClipboardList },
+  { to: "/keranjang", label: "Keranjang", icon: ShoppingBag },
   { to: "/profil", label: "Profil", icon: User },
 ] as const;
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { cart } = useBaraka();
-  if (pathname.startsWith("/admin") || pathname.startsWith("/auth") || pathname.startsWith("/produk") || pathname.startsWith("/keranjang"))
+  if (
+    pathname.startsWith("/admin") ||
+    pathname.startsWith("/auth") ||
+    pathname.startsWith("/produk") ||
+    pathname.startsWith("/keranjang")
+  )
     return null;
   const cartCount = cart.reduce((s, l) => s + l.qty, 0);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 backdrop-blur">
-      <div className="mx-auto grid max-w-lg grid-cols-4">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
+      <div className="mx-auto grid max-w-lg grid-cols-4 px-2 pb-2 pt-1.5">
         {navItems.map((item) => {
           const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+          const showBadge = item.to === "/keranjang" && cartCount > 0;
           return (
             <Link
               key={item.to}
               to={item.to}
-              className={`flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium ${
-                active ? "text-primary" : "text-muted-foreground"
+              className={`group relative flex flex-col items-center gap-1 rounded-2xl py-2 text-[10px] font-semibold transition-all duration-200 ${
+                active ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              <item.icon className="h-5 w-5" />
+              <span
+                className={`relative grid h-9 w-12 place-items-center rounded-2xl transition-all duration-200 ${
+                  active ? "bg-primary/10 -translate-y-0.5" : "group-active:scale-95"
+                }`}
+              >
+                <item.icon className={`h-5 w-5 ${active ? "stroke-[2.4]" : ""}`} />
+                {showBadge && (
+                  <span className="absolute -right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground shadow">
+                    {cartCount}
+                  </span>
+                )}
+              </span>
               {item.label}
             </Link>
           );
         })}
-        <Link
-          to="/keranjang"
-          className={`relative flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium ${
-            pathname.startsWith("/keranjang") ? "text-primary" : "text-muted-foreground"
-          }`}
-        >
-          <ShoppingBag className="h-5 w-5" />
-          {cartCount > 0 && (
-            <span className="absolute right-4 top-1 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
-              {cartCount}
-            </span>
-          )}
-          Keranjang
-        </Link>
       </div>
     </nav>
   );
