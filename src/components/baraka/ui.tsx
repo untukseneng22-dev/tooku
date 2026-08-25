@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, ClipboardList, User, ShoppingBag, BadgeCheck } from "lucide-react";
+import { Home, ClipboardList, User, ShoppingBag, BadgeCheck, Bell } from "lucide-react";
 import { useBaraka } from "@/lib/baraka-store";
 import type { Product } from "@/lib/baraka-data";
 import { rupiah } from "@/lib/baraka-data";
