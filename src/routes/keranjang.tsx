@@ -215,7 +215,7 @@ function CartPage() {
       </div>
 
       {lines.length > 0 && (
-        <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card p-3">
+        <div className="fixed inset-x-0 bottom-[68px] z-40 border-t border-border bg-card p-3">
           <div className="mx-auto flex max-w-2xl items-center gap-3">
             <div className="min-w-0">
               <p className="text-[10px] text-muted-foreground">Total</p>
