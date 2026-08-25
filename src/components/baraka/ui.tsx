@@ -69,18 +69,18 @@ export function ProductCard({ product }: { product: Product }) {
 
 const navItems = [
   { to: "/", label: "Beranda", icon: Home },
-  { to: "/pesanan", label: "Pesanan Saya", icon: ClipboardList },
+  { to: "/pesanan", label: "Pesanan", icon: ClipboardList },
   { to: "/profil", label: "Profil", icon: User },
 ] as const;
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const { cart } = useBaraka();
-  if (pathname.startsWith("/admin")) return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/auth")) return null;
   const cartCount = cart.reduce((s, l) => s + l.qty, 0);
 
   return (
-    <nav className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 backdrop-blur">
+    <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/95 backdrop-blur">
       <div className="mx-auto grid max-w-lg grid-cols-4">
         {navItems.map((item) => {
           const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
