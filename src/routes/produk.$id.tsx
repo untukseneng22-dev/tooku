@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, BadgeCheck, MapPin, Clock, Check, X, Store } from "lucide-react";
+import { ArrowLeft, BadgeCheck, MapPin, Clock, Check, X, Store, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
 import { rupiah } from "@/lib/baraka-data";
@@ -85,9 +85,22 @@ function ProductDetail() {
             <span className="rounded-full bg-secondary px-2.5 py-1 font-medium">Kondisi: {product.condition}</span>
             <span className="rounded-full bg-secondary px-2.5 py-1 font-medium">Stok: {product.stock}</span>
           </div>
-          <p className="flex items-center gap-2 text-xs text-muted-foreground">
-            <Store className="h-4 w-4 shrink-0" /> Donatur: {product.seller}
-          </p>
+          <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10 text-primary">
+              <Store className="h-5 w-5" />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-xs font-bold">{product.seller}</p>
+              <p className="text-[11px] text-muted-foreground">Penjual terverifikasi koperasi</p>
+            </div>
+            <Link
+              to="/notifikasi"
+              search={{ tab: "chat", penjual: product.seller, produk: product.name }}
+              className="flex shrink-0 items-center gap-1.5 rounded-full border border-primary px-3 py-1.5 text-[11px] font-bold text-primary"
+            >
+              <MessageCircle className="h-3.5 w-3.5" /> Chat
+            </Link>
+          </div>
         </section>
 
         <section className="space-y-4 border-b border-border px-4 py-5">
@@ -140,6 +153,14 @@ function ProductDetail() {
 
       <div className="fixed inset-x-0 bottom-[68px] z-40 border-t border-border bg-card p-3">
         <div className="mx-auto flex max-w-2xl gap-2">
+          <Link
+            to="/notifikasi"
+            search={{ tab: "chat", penjual: product.seller, produk: product.name }}
+            aria-label="Chat penjual"
+            className="grid shrink-0 place-items-center rounded-xl border border-primary px-3 text-primary"
+          >
+            <MessageCircle className="h-5 w-5" />
+          </Link>
           <button
             onClick={() => addToCart(product.id)}
             disabled={product.stock === 0}
