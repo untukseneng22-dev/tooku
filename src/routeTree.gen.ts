@@ -10,6 +10,8 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthRouteImport } from './routes/auth'
 import { Route as KeranjangRouteImport } from './routes/keranjang'
 import { Route as PesananRouteImport } from './routes/pesanan'
 import { Route as ProfilRouteImport } from './routes/profil'
@@ -18,6 +20,16 @@ import { Route as ProdukIdRouteImport } from './routes/produk.$id'
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KeranjangRoute = KeranjangRouteImport.update({
@@ -43,6 +55,8 @@ const ProdukIdRoute = ProdukIdRouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
   '/keranjang': typeof KeranjangRoute
   '/pesanan': typeof PesananRoute
   '/profil': typeof ProfilRoute
@@ -50,6 +64,8 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
   '/keranjang': typeof KeranjangRoute
   '/pesanan': typeof PesananRoute
   '/profil': typeof ProfilRoute
@@ -58,6 +74,8 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
   '/keranjang': typeof KeranjangRoute
   '/pesanan': typeof PesananRoute
   '/profil': typeof ProfilRoute
@@ -65,14 +83,38 @@ export interface FileRoutesById {
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/keranjang' | '/pesanan' | '/profil' | '/produk/$id'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/keranjang'
+    | '/pesanan'
+    | '/profil'
+    | '/produk/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/keranjang' | '/pesanan' | '/profil' | '/produk/$id'
-  id: '__root__' | '/' | '/keranjang' | '/pesanan' | '/profil' | '/produk/$id'
+  to:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/keranjang'
+    | '/pesanan'
+    | '/profil'
+    | '/produk/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/keranjang'
+    | '/pesanan'
+    | '/profil'
+    | '/produk/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  AuthRoute: typeof AuthRoute
   KeranjangRoute: typeof KeranjangRoute
   PesananRoute: typeof PesananRoute
   ProfilRoute: typeof ProfilRoute
@@ -86,6 +128,20 @@ declare module '@tanstack/react-router' {
       path: '/'
       fullPath: '/'
       preLoaderRoute: typeof IndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/keranjang': {
@@ -121,6 +177,8 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  AuthRoute: AuthRoute,
   KeranjangRoute: KeranjangRoute,
   PesananRoute: PesananRoute,
   ProfilRoute: ProfilRoute,
