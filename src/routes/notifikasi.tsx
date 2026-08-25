@@ -4,6 +4,15 @@ import { Bell, MessageCircle, Send, ShieldCheck, Package, Tag, Clock } from "luc
 import { useBaraka } from "@/lib/baraka-store";
 
 export const Route = createFileRoute("/notifikasi")({
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { tab?: "chat" | undefined; penjual?: string | undefined; produk?: string | undefined } => ({
+    tab: search["tab"] === "chat" ? "chat" : undefined,
+    penjual: typeof search["penjual"] === "string" ? search["penjual"] : undefined,
+    produk: typeof search["produk"] === "string" ? search["produk"] : undefined,
+  }),
+
+
   head: () => ({
     meta: [
       { title: "Notifikasi & Chat Koperasi — BARAKA" },
@@ -91,10 +100,11 @@ const kindMeta: Record<NotifKind, { label: string; icon: typeof Bell }> = {
 
 function NotifikasiPage() {
   const { user } = useBaraka();
-  const [tab, setTab] = useState<"notif" | "chat">("notif");
+  const { tab: tabParam, penjual, produk } = Route.useSearch();
+  const [tab, setTab] = useState<"notif" | "chat">(tabParam === "chat" ? "chat" : "notif");
   const [notifs, setNotifs] = useState<Notif[]>(seedNotifs);
   const [chat, setChat] = useState<ChatMsg[]>(seedChat);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(produk ? `Halo, saya mau tanya soal "${produk}". Apakah masih tersedia?` : "");
   const [filter, setFilter] = useState<"semua" | NotifKind | "belum">("semua");
   const [hydrated, setHydrated] = useState(false);
   const endRef = useRef<HTMLDivElement>(null);
@@ -257,12 +267,15 @@ function NotifikasiPage() {
       ) : (
         <div className="mx-auto max-w-2xl px-4 py-4">
           <div className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
-            <span className="grid h-10 w-10 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
-              KP
+            <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary text-sm font-bold text-primary-foreground">
+              {(penjual ?? "Koperasi").slice(0, 2).toUpperCase()}
             </span>
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold">Admin Koperasi Sekolah</p>
-              <p className="text-[11px] text-muted-foreground">Online · balas cepat 07.00–15.00</p>
+              <p className="truncate text-sm font-bold">{penjual ?? "Admin Koperasi Sekolah"}</p>
+              <p className="truncate text-[11px] text-muted-foreground">
+                {produk ? `Tentang: ${produk}` : "Online · balas cepat 07.00–15.00"}
+              </p>
+
             </div>
           </div>
 
