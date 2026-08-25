@@ -235,7 +235,7 @@ export function BarakaProvider({ children }: { children: ReactNode }) {
                     ? o.timeline
                     : [...o.timeline, { status, at: Date.now() }],
                   paymentStatus: status === "Selesai" ? "Lunas" : o.paymentStatus,
-                  sold: undefined,
+                  
                 }
               : o,
           ) as Order[],

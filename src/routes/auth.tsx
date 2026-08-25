@@ -1,0 +1,180 @@
+import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
+import { useState } from "react";
+import { ShieldCheck, User as UserIcon, ArrowLeft } from "lucide-react";
+import { useBaraka, type Role } from "@/lib/baraka-store";
+
+export const Route = createFileRoute("/auth")({
+  head: () => ({
+    meta: [
+      { title: "Masuk atau Daftar — BARAKA Koperasi Sekolah" },
+      {
+        name: "description",
+        content: "Masuk sebagai Pembeli atau Admin Koperasi untuk memesan dan mengelola barang sekolah layak pakai.",
+      },
+      { property: "og:title", content: "Masuk atau Daftar — BARAKA" },
+      { property: "og:description", content: "Autentikasi berperan: Pembeli dan Admin Koperasi BARAKA." },
+    ],
+  }),
+  component: AuthPage,
+});
+
+function AuthPage() {
+  const { login, register } = useBaraka();
+  const navigate = useNavigate();
+  const [mode, setMode] = useState<"login" | "register">("login");
+  const [role, setRole] = useState<Role>("buyer");
+  const [form, setForm] = useState({ name: "", kelas: "", email: "", password: "" });
+  const [error, setError] = useState("");
+
+  const field = "w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm";
+
+  const submit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    const res =
+      mode === "login"
+        ? login(form.email, form.password)
+        : register({
+            name: form.name.trim().slice(0, 60),
+            email: form.email.trim().slice(0, 120),
+            password: form.password,
+            role,
+            ...(role === "buyer" && form.kelas ? { kelas: form.kelas.trim().slice(0, 30) } : {}),
+          });
+    if (!res.ok) {
+      setError(res.error ?? "Gagal masuk.");
+      return;
+    }
+    navigate({ to: res.role === "admin" ? "/admin" : "/" });
+  };
+
+  return (
+    <div className="min-h-screen bg-background">
+      <header className="bg-primary px-4 pb-10 pt-6 text-primary-foreground">
+        <Link to="/" className="inline-flex items-center gap-1.5 text-xs opacity-80">
+          <ArrowLeft className="h-4 w-4" /> Kembali
+        </Link>
+        <h1 className="mt-4 text-xl font-extrabold tracking-tight">BARAKA</h1>
+        <p className="text-xs opacity-80">Barang Apik Koperasi Akademik</p>
+      </header>
+
+      <div className="mx-auto -mt-6 max-w-md px-4 pb-16">
+        <div className="rounded-3xl border border-border bg-card p-4 shadow-sm">
+          <div className="mb-4 grid grid-cols-2 gap-1 rounded-xl bg-secondary p-1">
+            {(["login", "register"] as const).map((m) => (
+              <button
+                key={m}
+                onClick={() => {
+                  setMode(m);
+                  setError("");
+                }}
+                className={`rounded-lg py-2 text-xs font-bold ${
+                  mode === m ? "bg-card text-primary shadow-sm" : "text-muted-foreground"
+                }`}
+              >
+                {m === "login" ? "Masuk" : "Daftar"}
+              </button>
+            ))}
+          </div>
+
+          <form onSubmit={submit} className="space-y-3">
+            {mode === "register" && (
+              <>
+                <div className="grid grid-cols-2 gap-2">
+                  {(
+                    [
+                      { r: "buyer" as Role, label: "Pembeli", icon: UserIcon },
+                      { r: "admin" as Role, label: "Admin Koperasi", icon: ShieldCheck },
+                    ] as const
+                  ).map((o) => (
+                    <button
+                      type="button"
+                      key={o.r}
+                      onClick={() => setRole(o.r)}
+                      className={`flex flex-col items-start gap-1 rounded-xl border p-3 text-left text-xs font-semibold ${
+                        role === o.r ? "border-primary bg-primary/5 text-primary" : "border-border text-muted-foreground"
+                      }`}
+                    >
+                      <o.icon className="h-4 w-4" />
+                      {o.label}
+                    </button>
+                  ))}
+                </div>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-semibold" htmlFor="nm">
+                    Nama Lengkap
+                  </label>
+                  <input
+                    id="nm"
+                    required
+                    maxLength={60}
+                    className={field}
+                    value={form.name}
+                    onChange={(e) => setForm({ ...form, name: e.target.value })}
+                  />
+                </div>
+                {role === "buyer" && (
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-semibold" htmlFor="kl">
+                      Kelas
+                    </label>
+                    <input
+                      id="kl"
+                      maxLength={30}
+                      placeholder="X IPA 1"
+                      className={field}
+                      value={form.kelas}
+                      onChange={(e) => setForm({ ...form, kelas: e.target.value })}
+                    />
+                  </div>
+                )}
+              </>
+            )}
+
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold" htmlFor="em">
+                Email
+              </label>
+              <input
+                id="em"
+                type="email"
+                required
+                maxLength={120}
+                className={field}
+                value={form.email}
+                onChange={(e) => setForm({ ...form, email: e.target.value })}
+              />
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-semibold" htmlFor="pw">
+                Password
+              </label>
+              <input
+                id="pw"
+                type="password"
+                required
+                minLength={6}
+                maxLength={64}
+                className={field}
+                value={form.password}
+                onChange={(e) => setForm({ ...form, password: e.target.value })}
+              />
+            </div>
+
+            {error && <p className="text-xs font-semibold text-destructive">{error}</p>}
+
+            <button type="submit" className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground">
+              {mode === "login" ? "Masuk" : "Daftar & Masuk"}
+            </button>
+          </form>
+
+          <div className="mt-4 rounded-xl bg-secondary/60 p-3 text-[11px] text-muted-foreground">
+            <p className="font-semibold text-foreground">Akun demo</p>
+            <p>Pembeli: siti@sekolah.id / 123456</p>
+            <p>Admin Koperasi: admin@koperasi.id / admin123</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
