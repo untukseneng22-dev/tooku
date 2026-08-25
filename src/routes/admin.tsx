@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type ChangeEvent } from "react";
 import {
   ArrowLeft,
@@ -12,8 +12,11 @@ import {
   Package,
   Wallet,
   Clock,
+  LogOut,
+  ShieldCheck,
+  BanknoteIcon,
 } from "lucide-react";
-import { useBaraka, useCountdown, type Order } from "@/lib/baraka-store";
+import { useBaraka, useCountdown, statusFlow, type Order, type OrderStatus } from "@/lib/baraka-store";
 import { categories, rupiah, type Category } from "@/lib/baraka-data";
 import { ProductThumb } from "@/components/baraka/ui";
 
@@ -23,13 +26,13 @@ export const Route = createFileRoute("/admin")({
       { title: "Admin Koperasi — Dashboard BARAKA" },
       {
         name: "description",
-        content: "Dashboard koperasi sekolah: statistik penjualan, validasi pesanan, dan manajemen produk BARAKA.",
+        content: "Dashboard koperasi sekolah: statistik penjualan, proses status pesanan, dan manajemen produk BARAKA.",
       },
       { property: "og:title", content: "Admin Koperasi — Dashboard BARAKA" },
-      { property: "og:description", content: "Kelola pesanan, stok, dan kurasi barang koperasi sekolah." },
+      { property: "og:description", content: "Kelola pesanan, status, stok, dan kurasi barang koperasi sekolah." },
     ],
   }),
-  component: AdminPage;
+  component: AdminPage,
 });
 
 type Tab = "dashboard" | "orders" | "products" | "new";
@@ -42,19 +45,53 @@ const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
 ];
 
 function AdminPage() {
+  const { user, isAdmin, logout } = useBaraka();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("dashboard");
+
+  if (!isAdmin) {
+    return (
+      <div className="mx-auto max-w-md px-6 py-20 text-center">
+        <ShieldCheck className="mx-auto h-10 w-10 text-primary" />
+        <h1 className="mt-4 text-lg font-bold">Area Admin Koperasi</h1>
+        <p className="mt-2 text-sm text-muted-foreground">
+          {user
+            ? "Akunmu terdaftar sebagai Pembeli. Masuk dengan akun Admin Koperasi untuk mengelola pesanan."
+            : "Masuk sebagai Admin Koperasi untuk membuka dashboard."}
+        </p>
+        <Link
+          to="/auth"
+          className="mt-5 inline-block rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground"
+        >
+          Masuk sebagai Admin
+        </Link>
+        <Link to="/" className="mt-3 block text-sm font-semibold text-primary">
+          Kembali ke beranda
+        </Link>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-secondary/40">
       <header className="bg-primary text-primary-foreground">
-        <div className="mx-auto flex max-w-6xl items-center gap-3 px-4 py-4">
+        <div className="mx-auto grid max-w-6xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-4">
           <Link to="/" aria-label="Kembali ke aplikasi siswa">
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div className="min-w-0">
             <p className="truncate text-sm font-bold">Admin Koperasi BARAKA</p>
-            <p className="truncate text-[11px] opacity-80">Koperasi Sekolah — Gedung B</p>
+            <p className="truncate text-[11px] opacity-80">{user?.name}</p>
           </div>
+          <button
+            onClick={() => {
+              logout();
+              navigate({ to: "/auth" });
+            }}
+            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold"
+          >
+            <LogOut className="h-3.5 w-3.5" /> Keluar
+          </button>
         </div>
       </header>
 
@@ -86,13 +123,13 @@ function AdminPage() {
 
 function Dashboard() {
   const { orders, products } = useBaraka();
-  const waiting = orders.filter((o) => o.status === "Menunggu Pengambilan");
+  const active = orders.filter((o) => o.status !== "Selesai" && o.status !== "Dibatalkan");
   const done = orders.filter((o) => o.status === "Selesai");
   const revenue = done.reduce((s, o) => s + o.total, 0);
   const stock = products.reduce((s, p) => s + p.stock, 0);
 
   const stats = [
-    { label: "Pesanan Menunggu", value: String(waiting.length), icon: Clock },
+    { label: "Pesanan Aktif", value: String(active.length), icon: Clock },
     { label: "Pesanan Selesai", value: String(done.length), icon: CheckCircle2 },
     { label: "Pendapatan Koperasi", value: rupiah(revenue), icon: Wallet },
     { label: "Total Stok Barang", value: String(stock), icon: Package },
@@ -117,7 +154,7 @@ function Dashboard() {
       </div>
 
       <div className="rounded-2xl border border-border bg-card p-4">
-        <h2 className="text-sm font-bold">Sebaran Stok per Kategori</h2>
+        <h2 className="text-sm font-bold">Sebaran Produk per Kategori</h2>
         <div className="mt-3 space-y-2.5">
           {perCat.map((c) => (
             <div key={c.name} className="space-y-1">
@@ -136,7 +173,9 @@ function Dashboard() {
       <div className="rounded-2xl border border-border bg-card p-4">
         <h2 className="text-sm font-bold">Perlu Tindakan</h2>
         <p className="mt-1 text-xs text-muted-foreground">
-          {waiting.length} pesanan menunggu validasi pengambilan di koperasi.
+          {orders.filter((o) => o.status === "Booking").length} pesanan baru menunggu diproses ·{" "}
+          {orders.filter((o) => o.paymentStatus === "Menunggu Konfirmasi").length} pembayaran online menunggu
+          konfirmasi.
         </p>
       </div>
     </div>
@@ -144,9 +183,10 @@ function Dashboard() {
 }
 
 function AdminOrderRow({ order }: { order: Order }) {
-  const { completeOrder, cancelOrder } = useBaraka();
+  const { setOrderStatus, cancelOrder, markPaid } = useBaraka();
   const { label, expired } = useCountdown(order.deadline);
-  const waiting = order.status === "Menunggu Pengambilan";
+  const activeFlow = order.status !== "Selesai" && order.status !== "Dibatalkan";
+  const nextStatus: OrderStatus | undefined = statusFlow[statusFlow.indexOf(order.status) + 1];
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
@@ -159,14 +199,15 @@ function AdminOrderRow({ order }: { order: Order }) {
           className={`shrink-0 rounded-full px-2.5 py-1 text-[10px] font-bold ${
             order.status === "Selesai"
               ? "bg-primary/10 text-primary"
-              : waiting
-                ? "bg-accent/20 text-accent-foreground"
-                : "bg-destructive/10 text-destructive"
+              : order.status === "Dibatalkan"
+                ? "bg-destructive/10 text-destructive"
+                : "bg-accent/20 text-accent-foreground"
           }`}
         >
-          {waiting && expired ? "Kedaluwarsa" : order.status}
+          {order.status}
         </span>
       </div>
+
       <div className="mt-2 space-y-0.5">
         {order.items.map((i) => (
           <p key={i.productId} className="text-xs text-muted-foreground">
@@ -174,27 +215,52 @@ function AdminOrderRow({ order }: { order: Order }) {
           </p>
         ))}
       </div>
+
+      <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
+        <span className="rounded-full bg-secondary px-2 py-0.5 font-medium">
+          {order.paymentMethod === "online" ? `Online · ${order.paymentChannel ?? "-"}` : "Bayar di Koperasi"}
+        </span>
+        <span
+          className={`rounded-full px-2 py-0.5 font-semibold ${
+            order.paymentStatus === "Lunas" ? "bg-primary/10 text-primary" : "bg-accent/20 text-accent-foreground"
+          }`}
+        >
+          {order.paymentStatus}
+        </span>
+      </div>
+
       <p className="mt-2 text-sm font-bold text-primary">{rupiah(order.total)}</p>
-      {waiting && (
-        <>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            Sisa waktu: <span className="font-semibold tabular-nums">{expired ? "00:00:00" : label}</span>
-          </p>
-          <div className="mt-3 flex gap-2">
+      {activeFlow && (
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Batas pengambilan: <span className="font-semibold tabular-nums">{expired ? "habis" : label}</span>
+        </p>
+      )}
+
+      {activeFlow && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {nextStatus && (
             <button
-              onClick={() => completeOrder(order.id)}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary py-2.5 text-xs font-bold text-primary-foreground"
+              onClick={() => setOrderStatus(order.id, nextStatus)}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2.5 text-xs font-bold text-primary-foreground"
             >
-              <CheckCircle2 className="h-4 w-4" /> Validasi & Selesaikan
+              <CheckCircle2 className="h-4 w-4" /> Tandai {nextStatus}
             </button>
+          )}
+          {order.paymentStatus !== "Lunas" && (
             <button
-              onClick={() => cancelOrder(order.id)}
-              className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2.5 text-xs font-semibold text-destructive"
+              onClick={() => markPaid(order.id)}
+              className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2.5 text-xs font-semibold text-primary"
             >
-              <XCircle className="h-4 w-4" /> Batalkan
+              <BanknoteIcon className="h-4 w-4" /> Konfirmasi Bayar
             </button>
-          </div>
-        </>
+          )}
+          <button
+            onClick={() => cancelOrder(order.id)}
+            className="flex items-center gap-1.5 rounded-xl border border-border px-3 py-2.5 text-xs font-semibold text-destructive"
+          >
+            <XCircle className="h-4 w-4" /> Batalkan
+          </button>
+        </div>
       )}
     </div>
   );
@@ -202,16 +268,16 @@ function AdminOrderRow({ order }: { order: Order }) {
 
 function OrdersAdmin() {
   const { orders } = useBaraka();
-  const [filter, setFilter] = useState<"Semua" | Order["status"]>("Semua");
+  const [filter, setFilter] = useState<"Semua" | OrderStatus>("Semua");
   const list = orders.filter((o) => filter === "Semua" || o.status === filter);
 
   return (
     <div className="space-y-3">
       <div className="flex gap-2 overflow-x-auto">
-        {(["Semua", "Menunggu Pengambilan", "Selesai", "Dibatalkan"] as const).map((f) => (
+        {(["Semua", ...statusFlow, "Dibatalkan"] as const).map((f) => (
           <button
             key={f}
-            onClick={() => setFilter(f)}
+            onClick={() => setFilter(f as "Semua" | OrderStatus)}
             className={`shrink-0 rounded-full px-3 py-1.5 text-[11px] font-semibold ${
               filter === f ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"
             }`}
@@ -234,7 +300,7 @@ function OrdersAdmin() {
 function ProductsAdmin() {
   const { products, deleteProduct } = useBaraka();
   return (
-    <div className="space-y-3">
+    <div className="grid gap-3 lg:grid-cols-2">
       {products.map((p) => (
         <div key={p.id} className="flex gap-3 rounded-2xl border border-border bg-card p-3">
           <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl">
@@ -270,7 +336,7 @@ function NewProduct({ onDone }: { onDone: () => void }) {
     condition: "Baik (85%)",
     plus: "",
     minus: "",
-    photo: "" as string,
+    photo: "",
   });
 
   const onPhoto = (e: ChangeEvent<HTMLInputElement>) => {
@@ -288,13 +354,13 @@ function NewProduct({ onDone }: { onDone: () => void }) {
       onSubmit={(e) => {
         e.preventDefault();
         addProduct({
-          name: form.name,
+          name: form.name.trim().slice(0, 120),
           category: form.category,
-          price: Number(form.price) || 0,
-          stock: Number(form.stock) || 0,
-          condition: form.condition,
-          plus: form.plus.split("\n").filter(Boolean),
-          minus: form.minus.split("\n").filter(Boolean),
+          price: Math.max(0, Number(form.price) || 0),
+          stock: Math.max(0, Number(form.stock) || 0),
+          condition: form.condition.trim().slice(0, 40),
+          plus: form.plus.split("\n").filter(Boolean).slice(0, 6),
+          minus: form.minus.split("\n").filter(Boolean).slice(0, 6),
           curated: true,
           featured: false,
           seller: "Koperasi Sekolah",
@@ -327,6 +393,7 @@ function NewProduct({ onDone }: { onDone: () => void }) {
         <input
           id="nm"
           required
+          maxLength={120}
           className={field}
           value={form.name}
           onChange={(e) => setForm({ ...form, name: e.target.value })}
@@ -358,6 +425,7 @@ function NewProduct({ onDone }: { onDone: () => void }) {
           </label>
           <input
             id="cd"
+            maxLength={40}
             className={field}
             value={form.condition}
             onChange={(e) => setForm({ ...form, condition: e.target.value })}
