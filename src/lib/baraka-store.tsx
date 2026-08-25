@@ -208,7 +208,8 @@ export function BarakaProvider({ children }: { children: ReactNode }) {
           userId: user.id,
           buyer: user.kelas ? `${user.name} — ${user.kelas}` : user.name,
           items,
-          total: items.reduce((s, i) => s + i.price * i.qty, 0),
+          total:
+            items.reduce((s, i) => s + i.price * i.qty, 0) + (paymentMethod === "online" ? 2500 : 0),
           createdAt: now,
           deadline: now + 1000 * 60 * 60 * 24,
           status: "Booking",
