@@ -71,6 +71,7 @@ const navItems = [
   { to: "/", label: "Beranda", icon: Home },
   { to: "/pesanan", label: "Pesanan", icon: ClipboardList },
   { to: "/keranjang", label: "Keranjang", icon: ShoppingBag },
+  { to: "/notifikasi", label: "Notifikasi", icon: Bell },
   { to: "/profil", label: "Profil", icon: User },
 ] as const;
 
@@ -83,7 +84,7 @@ export function BottomNav() {
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
-      <div className="mx-auto grid max-w-lg grid-cols-4 px-2 pb-2 pt-1.5">
+      <div className="mx-auto grid max-w-lg grid-cols-5 px-2 pb-2 pt-1.5">
         {navItems.map((item) => {
           const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
           const showBadge = item.to === "/keranjang" && cartCount > 0;
