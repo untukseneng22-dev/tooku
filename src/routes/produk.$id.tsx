@@ -138,7 +138,7 @@ function ProductDetail() {
         )}
       </div>
 
-      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card p-3">
+      <div className="fixed inset-x-0 bottom-[68px] z-40 border-t border-border bg-card p-3">
         <div className="mx-auto flex max-w-2xl gap-2">
           <button
             onClick={() => addToCart(product.id)}
