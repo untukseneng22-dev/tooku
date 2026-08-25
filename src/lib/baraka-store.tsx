@@ -115,6 +115,7 @@ export function BarakaProvider({ children }: { children: ReactNode }) {
   const [orders, setOrders] = useState<Order[]>(seedOrders);
   const [users, setUsers] = useState<User[]>(seedUsers);
   const [userId, setUserId] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
     try {
@@ -130,15 +131,17 @@ export function BarakaProvider({ children }: { children: ReactNode }) {
     } catch {
       /* ignore */
     }
+    setHydrated(true);
   }, []);
 
   useEffect(() => {
+    if (!hydrated) return;
     try {
       localStorage.setItem(KEY, JSON.stringify({ products, cart, orders, users, userId }));
     } catch {
       /* ignore */
     }
-  }, [products, cart, orders, users, userId]);
+  }, [hydrated, products, cart, orders, users, userId]);
 
   const addToCart = useCallback((id: string, qty = 1) => {
     setCart((c) =>
