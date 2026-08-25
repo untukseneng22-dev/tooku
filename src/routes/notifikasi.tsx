@@ -267,8 +267,11 @@ function NotifikasiPage() {
               {(penjual ?? "Koperasi").slice(0, 2).toUpperCase()}
             </span>
             <div className="min-w-0">
-              <p className="truncate text-sm font-bold">Admin Koperasi Sekolah</p>
-              <p className="text-[11px] text-muted-foreground">Online · balas cepat 07.00–15.00</p>
+              <p className="truncate text-sm font-bold">{penjual ?? "Admin Koperasi Sekolah"}</p>
+              <p className="truncate text-[11px] text-muted-foreground">
+                {produk ? `Tentang: ${produk}` : "Online · balas cepat 07.00–15.00"}
+              </p>
+
             </div>
           </div>
 
