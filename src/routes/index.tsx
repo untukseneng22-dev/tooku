@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Search, Zap, LayoutDashboard, ShieldCheck } from "lucide-react";
+import { Search, Zap, ShieldCheck, SlidersHorizontal, Bell } from "lucide-react";
 import { useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
 import { categories, type Category } from "@/lib/baraka-data";
@@ -28,12 +28,32 @@ function Home() {
   const { products } = useBaraka();
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Category | "Semua">("Semua");
+  const [showFilter, setShowFilter] = useState(false);
+  const [maxPrice, setMaxPrice] = useState(50000);
+  const [minCondition, setMinCondition] = useState(0);
+  const [sort, setSort] = useState<"populer" | "termurah" | "termahal" | "kondisi">("populer");
 
-  const filtered = products.filter(
-    (p) =>
-      (cat === "Semua" || p.category === cat) &&
-      (p.name.toLowerCase().includes(query.toLowerCase()) || p.category.toLowerCase().includes(query.toLowerCase())),
-  );
+  const conditionPct = (c: string) => Number(c.match(/(\d+)%/)?.[1] ?? 0);
+
+  const filtered = products
+    .filter(
+      (p) =>
+        (cat === "Semua" || p.category === cat) &&
+        p.price <= maxPrice &&
+        conditionPct(p.condition) >= minCondition &&
+        (p.name.toLowerCase().includes(query.toLowerCase()) ||
+          p.category.toLowerCase().includes(query.toLowerCase())),
+    )
+    .sort((a, b) =>
+      sort === "termurah"
+        ? a.price - b.price
+        : sort === "termahal"
+          ? b.price - a.price
+          : sort === "kondisi"
+            ? conditionPct(b.condition) - conditionPct(a.condition)
+            : b.sold - a.sold,
+    );
+  const activeFilters = (maxPrice < 50000 ? 1 : 0) + (minCondition > 0 ? 1 : 0) + (sort !== "populer" ? 1 : 0);
   const featured = products.filter((p) => p.featured).slice(0, 6);
 
   return (
@@ -46,12 +66,11 @@ function Home() {
               <p className="truncate text-[11px] opacity-80">Barang Apik Koperasi Akademik</p>
             </div>
             <Link
-              to="/admin"
-              className="shrink-0 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold"
+              to="/notifikasi"
+              aria-label="Notifikasi"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15"
             >
-              <span className="inline-flex items-center gap-1">
-                <LayoutDashboard className="h-3.5 w-3.5" /> Admin
-              </span>
+              <Bell className="h-4 w-4" />
             </Link>
           </div>
 
@@ -116,7 +135,100 @@ function Home() {
 
         {/* Grid */}
         <section>
-          <h2 className="mb-3 text-sm font-bold">{cat === "Semua" ? "Semua Barang Terkurasi" : cat}</h2>
+          <div className="mb-3 flex items-center justify-between gap-2">
+            <h2 className="truncate text-sm font-bold">{cat === "Semua" ? "Semua Barang Terkurasi" : cat}</h2>
+            <button
+              onClick={() => setShowFilter((v) => !v)}
+              className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-bold transition-colors ${
+                showFilter || activeFilters > 0
+                  ? "border-primary bg-primary text-primary-foreground"
+                  : "border-border bg-card text-muted-foreground"
+              }`}
+            >
+              <SlidersHorizontal className="h-3.5 w-3.5" /> Filter
+              {activeFilters > 0 && (
+                <span className="grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] text-accent-foreground">
+                  {activeFilters}
+                </span>
+              )}
+            </button>
+          </div>
+
+          {showFilter && (
+            <div className="mb-4 space-y-4 rounded-2xl border border-border bg-card p-4">
+              <div>
+                <div className="flex items-center justify-between text-[11px] font-semibold">
+                  <span>Harga maksimum</span>
+                  <span className="text-primary">Rp{maxPrice.toLocaleString("id-ID")}</span>
+                </div>
+                <input
+                  type="range"
+                  min={5000}
+                  max={50000}
+                  step={1000}
+                  value={maxPrice}
+                  onChange={(e) => setMaxPrice(Number(e.target.value))}
+                  className="mt-2 w-full accent-primary"
+                />
+              </div>
+
+              <div>
+                <p className="text-[11px] font-semibold">Kondisi minimum</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {[0, 70, 80, 90].map((v) => (
+                    <button
+                      key={v}
+                      onClick={() => setMinCondition(v)}
+                      className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold ${
+                        minCondition === v
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground"
+                      }`}
+                    >
+                      {v === 0 ? "Semua" : `${v}%+`}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-[11px] font-semibold">Urutkan</p>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {(
+                    [
+                      ["populer", "Terpopuler"],
+                      ["termurah", "Harga termurah"],
+                      ["termahal", "Harga tertinggi"],
+                      ["kondisi", "Kondisi terbaik"],
+                    ] as const
+                  ).map(([key, label]) => (
+                    <button
+                      key={key}
+                      onClick={() => setSort(key)}
+                      className={`rounded-full border px-3 py-1.5 text-[11px] font-semibold ${
+                        sort === key
+                          ? "border-primary bg-primary/10 text-primary"
+                          : "border-border text-muted-foreground"
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <button
+                onClick={() => {
+                  setMaxPrice(50000);
+                  setMinCondition(0);
+                  setSort("populer");
+                }}
+                className="w-full rounded-xl border border-border py-2 text-[11px] font-bold text-muted-foreground"
+              >
+                Reset filter
+              </button>
+            </div>
+          )}
           {filtered.length === 0 ? (
             <p className="py-10 text-center text-sm text-muted-foreground">Barang tidak ditemukan.</p>
           ) : (

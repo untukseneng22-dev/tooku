@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as KeranjangRouteImport } from './routes/keranjang'
+import { Route as NotifikasiRouteImport } from './routes/notifikasi'
 import { Route as PesananRouteImport } from './routes/pesanan'
 import { Route as ProfilRouteImport } from './routes/profil'
 import { Route as ProdukIdRouteImport } from './routes/produk.$id'
@@ -37,6 +38,11 @@ const KeranjangRoute = KeranjangRouteImport.update({
   path: '/keranjang',
   getParentRoute: () => rootRouteImport,
 } as any)
+const NotifikasiRoute = NotifikasiRouteImport.update({
+  id: '/notifikasi',
+  path: '/notifikasi',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const PesananRoute = PesananRouteImport.update({
   id: '/pesanan',
   path: '/pesanan',
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/keranjang': typeof KeranjangRoute
+  '/notifikasi': typeof NotifikasiRoute
   '/pesanan': typeof PesananRoute
   '/profil': typeof ProfilRoute
   '/produk/$id': typeof ProdukIdRoute
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/keranjang': typeof KeranjangRoute
+  '/notifikasi': typeof NotifikasiRoute
   '/pesanan': typeof PesananRoute
   '/profil': typeof ProfilRoute
   '/produk/$id': typeof ProdukIdRoute
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/keranjang': typeof KeranjangRoute
+  '/notifikasi': typeof NotifikasiRoute
   '/pesanan': typeof PesananRoute
   '/profil': typeof ProfilRoute
   '/produk/$id': typeof ProdukIdRoute
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/keranjang'
+    | '/notifikasi'
     | '/pesanan'
     | '/profil'
     | '/produk/$id'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/keranjang'
+    | '/notifikasi'
     | '/pesanan'
     | '/profil'
     | '/produk/$id'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/keranjang'
+    | '/notifikasi'
     | '/pesanan'
     | '/profil'
     | '/produk/$id'
@@ -116,6 +128,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   KeranjangRoute: typeof KeranjangRoute
+  NotifikasiRoute: typeof NotifikasiRoute
   PesananRoute: typeof PesananRoute
   ProfilRoute: typeof ProfilRoute
   ProdukIdRoute: typeof ProdukIdRoute
@@ -151,6 +164,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof KeranjangRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/notifikasi': {
+      id: '/notifikasi'
+      path: '/notifikasi'
+      fullPath: '/notifikasi'
+      preLoaderRoute: typeof NotifikasiRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/pesanan': {
       id: '/pesanan'
       path: '/pesanan'
@@ -180,6 +200,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   KeranjangRoute: KeranjangRoute,
+  NotifikasiRoute: NotifikasiRoute,
   PesananRoute: PesananRoute,
   ProfilRoute: ProfilRoute,
   ProdukIdRoute: ProdukIdRoute,
