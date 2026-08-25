@@ -4,11 +4,14 @@ import { Bell, MessageCircle, Send, ShieldCheck, Package, Tag, Clock } from "luc
 import { useBaraka } from "@/lib/baraka-store";
 
 export const Route = createFileRoute("/notifikasi")({
-  validateSearch: (search: Record<string, unknown>) => ({
-    tab: search["tab"] === "chat" ? ("chat" as const) : undefined,
-    penjual: typeof search["penjual"] === "string" ? (search["penjual"] as string) : undefined,
-    produk: typeof search["produk"] === "string" ? (search["produk"] as string) : undefined,
+  validateSearch: (
+    search: Record<string, unknown>,
+  ): { tab?: "chat"; penjual?: string; produk?: string } => ({
+    tab: search["tab"] === "chat" ? "chat" : undefined,
+    penjual: typeof search["penjual"] === "string" ? search["penjual"] : undefined,
+    produk: typeof search["produk"] === "string" ? search["produk"] : undefined,
   }),
+
   head: () => ({
     meta: [
       { title: "Notifikasi & Chat Koperasi — BARAKA" },
