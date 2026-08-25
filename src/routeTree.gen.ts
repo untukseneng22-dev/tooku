@@ -10,33 +10,115 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as AdminRouteImport } from './routes/admin'
+import { Route as AuthRouteImport } from './routes/auth'
+import { Route as KeranjangRouteImport } from './routes/keranjang'
+import { Route as PesananRouteImport } from './routes/pesanan'
+import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as ProdukIdRouteImport } from './routes/produk.$id'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AdminRoute = AdminRouteImport.update({
+  id: '/admin',
+  path: '/admin',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthRoute = AuthRouteImport.update({
+  id: '/auth',
+  path: '/auth',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const KeranjangRoute = KeranjangRouteImport.update({
+  id: '/keranjang',
+  path: '/keranjang',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PesananRoute = PesananRouteImport.update({
+  id: '/pesanan',
+  path: '/pesanan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfilRoute = ProfilRouteImport.update({
+  id: '/profil',
+  path: '/profil',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProdukIdRoute = ProdukIdRouteImport.update({
+  id: '/produk/$id',
+  path: '/produk/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
+  '/keranjang': typeof KeranjangRoute
+  '/pesanan': typeof PesananRoute
+  '/profil': typeof ProfilRoute
+  '/produk/$id': typeof ProdukIdRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
+  '/keranjang': typeof KeranjangRoute
+  '/pesanan': typeof PesananRoute
+  '/profil': typeof ProfilRoute
+  '/produk/$id': typeof ProdukIdRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/admin': typeof AdminRoute
+  '/auth': typeof AuthRoute
+  '/keranjang': typeof KeranjangRoute
+  '/pesanan': typeof PesananRoute
+  '/profil': typeof ProfilRoute
+  '/produk/$id': typeof ProdukIdRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/keranjang'
+    | '/pesanan'
+    | '/profil'
+    | '/produk/$id'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/keranjang'
+    | '/pesanan'
+    | '/profil'
+    | '/produk/$id'
+  id:
+    | '__root__'
+    | '/'
+    | '/admin'
+    | '/auth'
+    | '/keranjang'
+    | '/pesanan'
+    | '/profil'
+    | '/produk/$id'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AdminRoute: typeof AdminRoute
+  AuthRoute: typeof AuthRoute
+  KeranjangRoute: typeof KeranjangRoute
+  PesananRoute: typeof PesananRoute
+  ProfilRoute: typeof ProfilRoute
+  ProdukIdRoute: typeof ProdukIdRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +130,59 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/admin': {
+      id: '/admin'
+      path: '/admin'
+      fullPath: '/admin'
+      preLoaderRoute: typeof AdminRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth': {
+      id: '/auth'
+      path: '/auth'
+      fullPath: '/auth'
+      preLoaderRoute: typeof AuthRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/keranjang': {
+      id: '/keranjang'
+      path: '/keranjang'
+      fullPath: '/keranjang'
+      preLoaderRoute: typeof KeranjangRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/pesanan': {
+      id: '/pesanan'
+      path: '/pesanan'
+      fullPath: '/pesanan'
+      preLoaderRoute: typeof PesananRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profil': {
+      id: '/profil'
+      path: '/profil'
+      fullPath: '/profil'
+      preLoaderRoute: typeof ProfilRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/produk/$id': {
+      id: '/produk/$id'
+      path: '/produk/$id'
+      fullPath: '/produk/$id'
+      preLoaderRoute: typeof ProdukIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AdminRoute: AdminRoute,
+  AuthRoute: AuthRoute,
+  KeranjangRoute: KeranjangRoute,
+  PesananRoute: PesananRoute,
+  ProfilRoute: ProfilRoute,
+  ProdukIdRoute: ProdukIdRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
