@@ -6,11 +6,12 @@ import { useBaraka } from "@/lib/baraka-store";
 export const Route = createFileRoute("/notifikasi")({
   validateSearch: (
     search: Record<string, unknown>,
-  ): { tab?: "chat"; penjual?: string; produk?: string } => ({
+  ): { tab?: "chat" | undefined; penjual?: string | undefined; produk?: string | undefined } => ({
     tab: search["tab"] === "chat" ? "chat" : undefined,
     penjual: typeof search["penjual"] === "string" ? search["penjual"] : undefined,
     produk: typeof search["produk"] === "string" ? search["produk"] : undefined,
   }),
+
 
   head: () => ({
     meta: [
