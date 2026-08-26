@@ -47,12 +47,37 @@ const seedUsers: User[] = [
   {
     id: "u1",
     name: "Siti Aisyah",
+    username: "sitiaisyah",
     email: "siti@sekolah.id",
     password: "123456",
     role: "buyer",
     kelas: "X IPA 1",
   },
-  { id: "u2", name: "Bu Rina (Koperasi)", email: "admin@koperasi.id", password: "admin123", role: "admin" },
+  {
+    id: "u2",
+    name: "Budi Santoso",
+    username: "budisantoso",
+    email: "budisantoso@sekolah.id",
+    password: "magetanngangeni",
+    role: "buyer",
+    kelas: "XI IPS 2",
+  },
+  {
+    id: "u3",
+    name: "Koperasi SMAS PGRI 1 Maospati",
+    username: "smaspgrimaospati",
+    email: "smaspgrimaospati@koperasi.id",
+    password: "magetanngangeni",
+    role: "admin",
+  },
+  {
+    id: "u4",
+    name: "Pengelola Pusat BARAKA",
+    username: "superadmin",
+    email: "superadmin@baraka.id",
+    password: "barakapusat2026",
+    role: "superadmin",
+  },
 ];
 
 const seedOrders: Order[] = [
