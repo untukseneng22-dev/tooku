@@ -7,6 +7,97 @@ export const categories: { name: Category; icon: string }[] = [
   { name: "Alat Tulis", icon: "✏️" },
 ];
 
+/** Jenjang sekolah di Kabupaten Magetan. */
+export type SchoolLevel = "SD" | "SMP" | "SMA" | "SMK";
+
+export type School = {
+  id: string;
+  name: string;
+  level: SchoolLevel;
+  koperasi: string;
+  district: string;
+  pickup: string;
+};
+
+/**
+ * Penjual di TOOKU HANYA koperasi sekolah. Barang alumni/siswa tetap
+ * dititipkan dan dijual lewat koperasi sekolahnya masing-masing,
+ * sehingga marketplace ini lintas sekolah se-Kabupaten Magetan.
+ */
+export const schools: School[] = [
+  {
+    id: "s1",
+    name: "SMA PGRI 1 Maospati",
+    level: "SMA",
+    koperasi: "Koperasi SMA PGRI 1 Maospati",
+    district: "Maospati",
+    pickup: "Koperasi Sekolah — Gedung B lt. 1",
+  },
+  {
+    id: "s2",
+    name: "SMA Negeri 1 Magetan",
+    level: "SMA",
+    koperasi: "Koperasi SMAN 1 Magetan",
+    district: "Magetan",
+    pickup: "Koperasi Siswa — samping perpustakaan",
+  },
+  {
+    id: "s3",
+    name: "SMK Negeri 1 Magetan",
+    level: "SMK",
+    koperasi: "Koperasi SMKN 1 Magetan",
+    district: "Magetan",
+    pickup: "Business Center SMKN 1 — lobi depan",
+  },
+  {
+    id: "s4",
+    name: "SMK Negeri 2 Magetan",
+    level: "SMK",
+    koperasi: "Koperasi SMKN 2 Magetan",
+    district: "Magetan",
+    pickup: "Koperasi Sekolah — dekat ruang praktik",
+  },
+  {
+    id: "s5",
+    name: "SMP Negeri 1 Magetan",
+    level: "SMP",
+    koperasi: "Koperasi SMPN 1 Magetan",
+    district: "Magetan",
+    pickup: "Koperasi Siswa — lantai 1 gedung utama",
+  },
+  {
+    id: "s6",
+    name: "SMP Negeri 1 Barat",
+    level: "SMP",
+    koperasi: "Koperasi SMPN 1 Barat",
+    district: "Barat",
+    pickup: "Koperasi Sekolah — depan ruang guru",
+  },
+  {
+    id: "s7",
+    name: "SD Negeri Kraton 1 Maospati",
+    level: "SD",
+    koperasi: "Koperasi SDN Kraton 1 Maospati",
+    district: "Maospati",
+    pickup: "Koperasi Sekolah — ruang UKS sebelah",
+  },
+  {
+    id: "s8",
+    name: "SD Negeri Sukowidi Kawedanan",
+    level: "SD",
+    koperasi: "Koperasi SDN Sukowidi",
+    district: "Kawedanan",
+    pickup: "Koperasi Sekolah — aula kecil",
+  },
+];
+
+export const schoolById = (id: string) => schools.find((s) => s.id === id);
+
+/** Nama penjual (koperasi) per sekolah — dipakai sebagai field seller produk. */
+export const SCHOOLS_SELLER: Record<string, string> = Object.fromEntries(
+  schools.map((s) => [s.id, s.koperasi]),
+);
+
 export type Product = {
   id: string;
   name: string;
