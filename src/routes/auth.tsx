@@ -186,10 +186,11 @@ function AuthPage() {
             </button>
           </form>
 
-          <div className="mt-4 rounded-xl bg-secondary/60 p-3 text-[11px] text-muted-foreground">
-            <p className="font-semibold text-foreground">Akun demo</p>
-            <p>Pembeli: siti@sekolah.id / 123456</p>
-            <p>Admin Koperasi: admin@koperasi.id / admin123</p>
+          <div className="mt-4 space-y-1 rounded-xl bg-secondary/60 p-3 text-[11px] text-muted-foreground">
+            <p className="font-semibold text-foreground">Akun tersedia (username / sandi)</p>
+            <p>Pembeli: budisantoso / magetanngangeni</p>
+            <p>Admin Koperasi: smaspgrimaospati / magetanngangeni</p>
+            <p>Super Admin: superadmin / barakapusat2026</p>
           </div>
         </div>
       </div>
