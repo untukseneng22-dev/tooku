@@ -7,6 +7,97 @@ export const categories: { name: Category; icon: string }[] = [
   { name: "Alat Tulis", icon: "✏️" },
 ];
 
+/** Jenjang sekolah di Kabupaten Magetan. */
+export type SchoolLevel = "SD" | "SMP" | "SMA" | "SMK";
+
+export type School = {
+  id: string;
+  name: string;
+  level: SchoolLevel;
+  koperasi: string;
+  district: string;
+  pickup: string;
+};
+
+/**
+ * Penjual di TOOKU HANYA koperasi sekolah. Barang alumni/siswa tetap
+ * dititipkan dan dijual lewat koperasi sekolahnya masing-masing,
+ * sehingga marketplace ini lintas sekolah se-Kabupaten Magetan.
+ */
+export const schools: School[] = [
+  {
+    id: "s1",
+    name: "SMA PGRI 1 Maospati",
+    level: "SMA",
+    koperasi: "Koperasi SMA PGRI 1 Maospati",
+    district: "Maospati",
+    pickup: "Koperasi Sekolah — Gedung B lt. 1",
+  },
+  {
+    id: "s2",
+    name: "SMA Negeri 1 Magetan",
+    level: "SMA",
+    koperasi: "Koperasi SMAN 1 Magetan",
+    district: "Magetan",
+    pickup: "Koperasi Siswa — samping perpustakaan",
+  },
+  {
+    id: "s3",
+    name: "SMK Negeri 1 Magetan",
+    level: "SMK",
+    koperasi: "Koperasi SMKN 1 Magetan",
+    district: "Magetan",
+    pickup: "Business Center SMKN 1 — lobi depan",
+  },
+  {
+    id: "s4",
+    name: "SMK Negeri 2 Magetan",
+    level: "SMK",
+    koperasi: "Koperasi SMKN 2 Magetan",
+    district: "Magetan",
+    pickup: "Koperasi Sekolah — dekat ruang praktik",
+  },
+  {
+    id: "s5",
+    name: "SMP Negeri 1 Magetan",
+    level: "SMP",
+    koperasi: "Koperasi SMPN 1 Magetan",
+    district: "Magetan",
+    pickup: "Koperasi Siswa — lantai 1 gedung utama",
+  },
+  {
+    id: "s6",
+    name: "SMP Negeri 1 Barat",
+    level: "SMP",
+    koperasi: "Koperasi SMPN 1 Barat",
+    district: "Barat",
+    pickup: "Koperasi Sekolah — depan ruang guru",
+  },
+  {
+    id: "s7",
+    name: "SD Negeri Kraton 1 Maospati",
+    level: "SD",
+    koperasi: "Koperasi SDN Kraton 1 Maospati",
+    district: "Maospati",
+    pickup: "Koperasi Sekolah — ruang UKS sebelah",
+  },
+  {
+    id: "s8",
+    name: "SD Negeri Sukowidi Kawedanan",
+    level: "SD",
+    koperasi: "Koperasi SDN Sukowidi",
+    district: "Kawedanan",
+    pickup: "Koperasi Sekolah — aula kecil",
+  },
+];
+
+export const schoolById = (id: string) => schools.find((s) => s.id === id);
+
+/** Nama penjual (koperasi) per sekolah — dipakai sebagai field seller produk. */
+export const SCHOOLS_SELLER: Record<string, string> = Object.fromEntries(
+  schools.map((s) => [s.id, s.koperasi]),
+);
+
 export type Product = {
   id: string;
   name: string;
@@ -20,6 +111,8 @@ export type Product = {
   curated: boolean;
   featured: boolean;
   seller: string;
+  schoolId: string;
+  contributor?: string;
   sold: number;
   photo?: string;
   specs?: Record<string, string>;
@@ -38,7 +131,9 @@ export const seedProducts: Product[] = [
     minus: ["Warna putih sedikit pudar di bagian kerah"],
     curated: true,
     featured: true,
-    seller: "Alumni 2024 — Kelas XII IPA 2",
+    seller: SCHOOLS_SELLER["s1"]!,
+    schoolId: "s1",
+    contributor: "Alumni 2024 — Kelas XII IPA 2",
     sold: 12,
     specs: {
       "Jenis": "Seragam harian putih",
@@ -64,7 +159,9 @@ export const seedProducts: Product[] = [
     minus: ["Ada stabilo di bab 3-5", "Sudut cover sedikit terlipat"],
     curated: true,
     featured: true,
-    seller: "Rafi — XII IPS 1",
+    seller: SCHOOLS_SELLER["s2"]!,
+    schoolId: "s2",
+    contributor: "Rafi — XII IPS 1",
     sold: 23,
     specs: {
       "Jenis": "Buku pelajaran",
@@ -90,7 +187,9 @@ export const seedProducts: Product[] = [
     minus: ["Label ukuran sudah lepas"],
     curated: true,
     featured: false,
-    seller: "Alumni 2025",
+    seller: SCHOOLS_SELLER["s3"]!,
+    schoolId: "s3",
+    contributor: "Alumni 2025",
     sold: 5,
     specs: {
       "Jenis": "Rok seragam lipit",
@@ -116,7 +215,9 @@ export const seedProducts: Product[] = [
     minus: ["Ada bekas lipatan pada topi"],
     curated: true,
     featured: true,
-    seller: "Koperasi — Donasi Alumni",
+    seller: SCHOOLS_SELLER["s4"]!,
+    schoolId: "s4",
+    contributor: "Koperasi — Donasi Alumni",
     sold: 31,
     specs: {
       "Jenis": "Atribut sekolah",
@@ -140,7 +241,9 @@ export const seedProducts: Product[] = [
     minus: ["Ada coretan nama pemilik lama"],
     curated: true,
     featured: false,
-    seller: "Nadia — XI IPA 3",
+    seller: SCHOOLS_SELLER["s5"]!,
+    schoolId: "s5",
+    contributor: "Nadia — XI IPA 3",
     sold: 18,
     specs: {
       "Jenis": "Alat tulis",
@@ -164,7 +267,9 @@ export const seedProducts: Product[] = [
     minus: ["Beberapa halaman sudah diisi pensil", "Cover agak kusam"],
     curated: true,
     featured: false,
-    seller: "Bima — XI IPS 2",
+    seller: SCHOOLS_SELLER["s6"]!,
+    schoolId: "s6",
+    contributor: "Bima — XI IPS 2",
     sold: 9,
     specs: {
       "Jenis": "Buku latihan (workbook)",
@@ -189,7 +294,9 @@ export const seedProducts: Product[] = [
     minus: ["Tidak ada minus berarti"],
     curated: true,
     featured: true,
-    seller: "Koperasi Sekolah",
+    seller: SCHOOLS_SELLER["s7"]!,
+    schoolId: "s7",
+    contributor: "Koperasi Sekolah",
     sold: 27,
     specs: {
       "Jenis": "Atribut sekolah",
@@ -214,7 +321,9 @@ export const seedProducts: Product[] = [
     minus: ["Satu kancing bawah diganti (warna mirip)"],
     curated: true,
     featured: false,
-    seller: "Alumni 2024",
+    seller: SCHOOLS_SELLER["s8"]!,
+    schoolId: "s8",
+    contributor: "Alumni 2024",
     sold: 6,
     specs: {
       "Jenis": "Seragam batik sekolah",
@@ -233,13 +342,17 @@ export const rupiah = (n: number) =>
   "Rp" + n.toLocaleString("id-ID", { maximumFractionDigits: 0 });
 
 export const productSpecs = (p: Product): [string, string][] => {
+  const school = schoolById(p.schoolId);
   const base: Record<string, string> = {
     Kategori: p.category,
     Kondisi: p.condition,
     "Stok Tersedia": `${p.stock} unit`,
-    Penjual: p.seller,
+    "Penjual (Koperasi)": p.seller,
+    "Sekolah Asal": school ? `${school.name} (${school.level})` : "-",
+    Kecamatan: school?.district ?? "-",
+    ...(p.contributor ? { "Barang Titipan": p.contributor } : {}),
     Kurasi: p.curated ? "Lolos kurasi koperasi" : "Belum dikurasi",
-    "Lokasi Ambil": "Koperasi Sekolah — Gedung B lt. 1",
+    "Lokasi Ambil": school?.pickup ?? "Koperasi Sekolah",
   };
   return Object.entries({ ...base, ...(p.specs ?? {}) });
 };

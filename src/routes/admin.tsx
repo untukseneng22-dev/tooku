@@ -18,7 +18,7 @@ import {
   Users,
 } from "lucide-react";
 import { useBaraka, useCountdown, statusFlow, roleLabel, type Order, type OrderStatus } from "@/lib/baraka-store";
-import { categories, rupiah, type Category } from "@/lib/baraka-data";
+import { categories, rupiah, schools, type Category } from "@/lib/baraka-data";
 import { ProductThumb } from "@/components/baraka/ui";
 
 export const Route = createFileRoute("/admin")({
@@ -392,6 +392,7 @@ function NewProduct({ onDone }: { onDone: () => void }) {
     plus: "",
     minus: "",
     photo: "",
+    schoolId: schools[0]!.id,
   });
 
   const onPhoto = (e: ChangeEvent<HTMLInputElement>) => {
@@ -418,7 +419,8 @@ function NewProduct({ onDone }: { onDone: () => void }) {
           minus: form.minus.split("\n").filter(Boolean).slice(0, 6),
           curated: true,
           featured: false,
-          seller: "Koperasi Sekolah",
+          seller: schools.find((sc) => sc.id === form.schoolId)!.koperasi,
+          schoolId: form.schoolId,
           ...(form.photo ? { photo: form.photo } : {}),
         });
         onDone();
@@ -426,6 +428,24 @@ function NewProduct({ onDone }: { onDone: () => void }) {
       className="space-y-4 rounded-2xl border border-border bg-card p-4 lg:max-w-2xl"
     >
       <h2 className="text-sm font-bold">Tambah Produk Terkurasi</h2>
+
+      <div className="space-y-1.5">
+        <label className="text-xs font-semibold">Koperasi Sekolah Penjual</label>
+        <select
+          value={form.schoolId}
+          onChange={(e) => setForm((f) => ({ ...f, schoolId: e.target.value }))}
+          className={field}
+        >
+          {schools.map((sc) => (
+            <option key={sc.id} value={sc.id}>
+              {sc.koperasi} · {sc.level} {sc.district}
+            </option>
+          ))}
+        </select>
+        <p className="text-[11px] text-muted-foreground">
+          Barang alumni/siswa tetap dijual lewat koperasi sekolahnya.
+        </p>
+      </div>
 
       <div className="space-y-1.5">
         <label className="text-xs font-semibold">Foto Barang</label>

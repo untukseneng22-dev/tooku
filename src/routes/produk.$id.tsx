@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, BadgeCheck, MapPin, Clock, Check, X, Store, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
-import { rupiah, productSpecs } from "@/lib/baraka-data";
+import { rupiah, productSpecs, schoolById } from "@/lib/baraka-data";
 import { ProductThumb, CuratedBadge, ProductCard } from "@/components/baraka/ui";
 
 export const Route = createFileRoute("/produk/$id")({
@@ -91,7 +91,12 @@ function ProductDetail() {
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-bold">{product.seller}</p>
-              <p className="text-[11px] text-muted-foreground">Penjual terverifikasi koperasi</p>
+              <p className="truncate text-[11px] text-muted-foreground">
+                {schoolById(product.schoolId)
+                  ? `${schoolById(product.schoolId)!.level} · Kec. ${schoolById(product.schoolId)!.district}`
+                  : "Koperasi sekolah terverifikasi"}
+                {product.contributor ? ` · titipan ${product.contributor}` : ""}
+              </p>
             </div>
             <Link
               to="/chat"
