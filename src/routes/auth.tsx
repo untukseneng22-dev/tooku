@@ -133,19 +133,36 @@ function AuthPage() {
             )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold" htmlFor="em">
-                Email
+              <label className="text-xs font-semibold" htmlFor="un">
+                {mode === "login" ? "Username atau Email" : "Username"}
               </label>
               <input
-                id="em"
-                type="email"
+                id="un"
                 required
-                maxLength={120}
+                maxLength={mode === "login" ? 120 : 24}
+                autoCapitalize="none"
+                placeholder={mode === "login" ? "budisantoso" : "huruf kecil, tanpa spasi"}
                 className={field}
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
               />
             </div>
+            {mode === "register" && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold" htmlFor="em">
+                  Email
+                </label>
+                <input
+                  id="em"
+                  type="email"
+                  required
+                  maxLength={120}
+                  className={field}
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+              </div>
+            )}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold" htmlFor="pw">
                 Password
