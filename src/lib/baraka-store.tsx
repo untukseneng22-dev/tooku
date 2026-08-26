@@ -148,7 +148,7 @@ type Store = {
 };
 
 const StoreContext = createContext<Store | null>(null);
-const KEY = "baraka-state-v2";
+const KEY = "baraka-state-v3";
 
 export function BarakaProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(seedProducts);
