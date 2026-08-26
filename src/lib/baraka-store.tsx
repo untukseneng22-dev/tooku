@@ -130,8 +130,10 @@ type Store = {
   users: User[];
   user: User | null;
   isAdmin: boolean;
-  login: (email: string, password: string) => { ok: boolean; error?: string; role?: Role };
+  isSuperAdmin: boolean;
+  login: (identifier: string, password: string) => { ok: boolean; error?: string; role?: Role };
   register: (input: Omit<User, "id">) => { ok: boolean; error?: string; role?: Role };
+  deleteUser: (id: string) => void;
   logout: () => void;
   addToCart: (id: string, qty?: number) => void;
   removeFromCart: (id: string) => void;
