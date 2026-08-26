@@ -27,4 +27,20 @@ describe("useBaraka", () => {
 
     expect(screen.getByText(/Produk tersedia: [1-9]/)).toBeInTheDocument();
   });
+
+  it("memblokir BarakaProvider ganda saat development", () => {
+    const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
+
+    render(
+      <BarakaProvider>
+        <BarakaProvider>
+          <StoreConsumer />
+        </BarakaProvider>
+      </BarakaProvider>,
+    );
+
+    expect(screen.getByText(/Produk tersedia: [1-9]/)).toBeInTheDocument();
+    expect(consoleError).toHaveBeenCalledWith(expect.stringContaining("Duplicate BarakaProvider blocked"));
+    consoleError.mockRestore();
+  });
 });

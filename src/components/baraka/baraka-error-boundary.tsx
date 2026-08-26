@@ -7,13 +7,13 @@ type Props = { children: ReactNode };
 type State = { error: Error | null };
 
 export class BarakaErrorBoundary extends Component<Props, State> {
-  state: State = { error: null };
+  override state: State = { error: null };
 
   static getDerivedStateFromError(error: Error): State {
     return { error };
   }
 
-  componentDidCatch(error: Error, info: ErrorInfo) {
+  override componentDidCatch(error: Error, info: ErrorInfo) {
     reportLovableError(error, {
       boundary: "baraka_context_error_boundary",
       componentStack: info.componentStack,
@@ -24,7 +24,7 @@ export class BarakaErrorBoundary extends Component<Props, State> {
     this.setState({ error: null });
   };
 
-  render() {
+  override render() {
     const { error } = this.state;
     if (!error) return this.props.children;
 

@@ -169,6 +169,7 @@ contextRegistry.__barakaStoreContext = StoreContext;
 const KEY = "baraka-state-v3";
 
 export function BarakaProvider({ children }: { children: ReactNode }) {
+  const parentStore = useContext(StoreContext);
   const [products, setProducts] = useState<Product[]>(seedProducts);
   const [cart, setCart] = useState<CartLine[]>([]);
   const [orders, setOrders] = useState<Order[]>(seedOrders);
@@ -331,6 +332,15 @@ export function BarakaProvider({ children }: { children: ReactNode }) {
     }),
     [products, cart, orders, users, user, addToCart],
   );
+
+  if (parentStore) {
+    if (import.meta.env.DEV) {
+      console.error(
+        "[BARAKA] Duplicate BarakaProvider blocked. Keep exactly one provider at the application root.",
+      );
+    }
+    return children;
+  }
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }

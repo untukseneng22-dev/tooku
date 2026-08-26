@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BarakaProvider } from "@/lib/baraka-store";
 import { BottomNav } from "@/components/baraka/ui";
+import { BarakaErrorBoundary } from "@/components/baraka/baraka-error-boundary";
 
 function NotFoundComponent() {
   return (
@@ -132,11 +133,13 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BarakaProvider>
-        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-        <Outlet />
-        <BottomNav />
-      </BarakaProvider>
+      <BarakaErrorBoundary>
+        <BarakaProvider>
+          {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+          <Outlet />
+          <BottomNav />
+        </BarakaProvider>
+      </BarakaErrorBoundary>
     </QueryClientProvider>
   );
 }
