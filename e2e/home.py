@@ -12,11 +12,11 @@ async def main() -> None:
         page.on("pageerror", lambda error: page_errors.append(str(error)))
 
         await page.goto("http://localhost:8080/", wait_until="networkidle")
-        await expect(page.get_by_text("BARAKA", exact=True).first).to_be_visible()
+        await expect(page.get_by_alt_text("Logo TOOKU").first).to_be_visible()
         await expect(page.get_by_role("navigation")).to_be_visible()
 
         await page.reload(wait_until="networkidle")
-        await expect(page.get_by_text("BARAKA", exact=True).first).to_be_visible()
+        await expect(page.get_by_alt_text("Logo TOOKU").first).to_be_visible()
         await expect(page.locator('a[href^="/produk/"]').first).to_be_visible()
 
         await page.get_by_role("link", name="Pesanan").click()
@@ -24,7 +24,7 @@ async def main() -> None:
 
         await page.get_by_role("link", name="Beranda").click()
         await expect(page).to_have_url("http://localhost:8080/")
-        await expect(page.get_by_text("BARAKA", exact=True).first).to_be_visible()
+        await expect(page.get_by_alt_text("Logo TOOKU").first).to_be_visible()
 
         assert page_errors == [], page_errors
         await browser.close()

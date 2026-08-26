@@ -8,13 +8,13 @@ import { ProductThumb, CuratedBadge, ProductCard } from "@/components/baraka/ui"
 export const Route = createFileRoute("/produk/$id")({
   head: () => ({
     meta: [
-      { title: "Detail Barang — BARAKA Koperasi Sekolah" },
+      { title: "Detail Barang — TOOKU Koperasi Sekolah" },
       {
         name: "description",
         content:
           "Lihat kondisi, harga, dan informasi pengambilan barang sekolah bekas layak pakai yang sudah lolos kurasi koperasi.",
       },
-      { property: "og:title", content: "Detail Barang — BARAKA Koperasi Sekolah" },
+      { property: "og:title", content: "Detail Barang — TOOKU Koperasi Sekolah" },
       {
         property: "og:description",
         content: "Barang sekolah bekas terkurasi koperasi: kondisi transparan, harga hemat, ambil di koperasi.",

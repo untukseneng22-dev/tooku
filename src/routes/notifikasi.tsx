@@ -6,13 +6,13 @@ import { useBaraka } from "@/lib/baraka-store";
 export const Route = createFileRoute("/notifikasi")({
   head: () => ({
     meta: [
-      { title: "Notifikasi Pesanan & Promo — BARAKA" },
+      { title: "Notifikasi Pesanan & Promo — TOOKU" },
       {
         name: "description",
         content:
-          "Pantau notifikasi status pesanan, promo terkurasi, dan pengingat batas ambil 1x24 jam di koperasi sekolah BARAKA.",
+          "Pantau notifikasi status pesanan, promo terkurasi, dan pengingat batas ambil 1x24 jam di koperasi sekolah TOOKU.",
       },
-      { property: "og:title", content: "Notifikasi Pesanan & Promo — BARAKA" },
+      { property: "og:title", content: "Notifikasi Pesanan & Promo — TOOKU" },
       {
         property: "og:description",
         content: "Update status pesanan, promo koperasi, dan pengingat batas pengambilan barang.",

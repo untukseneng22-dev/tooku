@@ -6,9 +6,9 @@ import { rupiah } from "@/lib/baraka-data";
 export const Route = createFileRoute("/profil")({
   head: () => ({
     meta: [
-      { title: "Profil Saya — BARAKA Koperasi Sekolah" },
-      { name: "description", content: "Profil akun, dampak penghematan, dan akses mode Admin Koperasi BARAKA." },
-      { property: "og:title", content: "Profil Saya — BARAKA Koperasi Sekolah" },
+      { title: "Profil Saya — TOOKU Koperasi Sekolah" },
+      { name: "description", content: "Profil akun, dampak penghematan, dan akses mode Admin Koperasi TOOKU." },
+      { property: "og:title", content: "Profil Saya — TOOKU Koperasi Sekolah" },
       { property: "og:description", content: "Kelola akun dan lihat dampak belanja barang layak pakai di sekolah." },
     ],
   }),
@@ -37,7 +37,7 @@ function ProfilePage() {
         <div className="mx-auto -mt-5 max-w-2xl px-4">
           <div className="rounded-2xl border border-border bg-card p-5 text-center">
             <LogIn className="mx-auto h-8 w-8 text-primary" />
-            <p className="mt-3 text-sm text-muted-foreground">Belum masuk ke akun BARAKA.</p>
+            <p className="mt-3 text-sm text-muted-foreground">Belum masuk ke akun TOOKU.</p>
             <Link
               to="/auth"
               className="mt-4 inline-block rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground"

@@ -24,12 +24,12 @@ import { ProductThumb } from "@/components/baraka/ui";
 export const Route = createFileRoute("/admin")({
   head: () => ({
     meta: [
-      { title: "Admin Koperasi — Dashboard BARAKA" },
+      { title: "Admin Koperasi — Dashboard TOOKU" },
       {
         name: "description",
-        content: "Dashboard koperasi sekolah: statistik penjualan, proses status pesanan, dan manajemen produk BARAKA.",
+        content: "Dashboard koperasi sekolah: statistik penjualan, proses status pesanan, dan manajemen produk TOOKU.",
       },
-      { property: "og:title", content: "Admin Koperasi — Dashboard BARAKA" },
+      { property: "og:title", content: "Admin Koperasi — Dashboard TOOKU" },
       { property: "og:description", content: "Kelola pesanan, status, stok, dan kurasi barang koperasi sekolah." },
     ],
   }),
@@ -53,7 +53,7 @@ function AccountsAdmin() {
       <div className="rounded-2xl border border-border bg-card p-4">
         <h2 className="text-sm font-bold">Semua Akun</h2>
         <p className="mt-0.5 text-[11px] text-muted-foreground">
-          Super Admin mengelola seluruh akun dan transaksi BARAKA.
+          Super Admin mengelola seluruh akun dan transaksi TOOKU.
         </p>
         <div className="mt-3 space-y-2">
           {users.map((u) => {
@@ -129,7 +129,7 @@ function AdminPage() {
           </Link>
           <div className="min-w-0">
             <p className="truncate text-sm font-bold">
-              {isSuperAdmin ? "Super Admin BARAKA" : "Admin Koperasi BARAKA"}
+              {isSuperAdmin ? "Super Admin TOOKU" : "Admin Koperasi TOOKU"}
             </p>
             <p className="truncate text-[11px] opacity-80">
               {user?.name} · @{user?.username}

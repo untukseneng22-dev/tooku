@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BarakaProvider } from "@/lib/baraka-store";
 import { BottomNav } from "@/components/baraka/ui";
 import { BarakaErrorBoundary } from "@/components/baraka/baraka-error-boundary";
+import { SplashScreen } from "@/components/baraka/splash-screen";
 
 function NotFoundComponent() {
   return (
@@ -80,13 +81,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "BARAKA — Barang Apik Koperasi Akademik" },
+      { title: "TOOKU — Marketplace Koperasi Sekolah" },
       {
         name: "description",
         content: "Marketplace barang sekolah bekas layak pakai yang dikurasi koperasi sekolah.",
       },
       { name: "author", content: "Koperasi Sekolah" },
-      { property: "og:title", content: "BARAKA — Barang Apik Koperasi Akademik" },
+      { property: "og:title", content: "TOOKU — Marketplace Koperasi Sekolah" },
       {
         property: "og:description",
         content: "Marketplace barang sekolah bekas layak pakai yang dikurasi koperasi sekolah.",
@@ -99,7 +100,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         rel: "stylesheet",
         href: appCss,
       },
-      { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
+      { rel: "icon", href: "/favicon.png", type: "image/png" },
       { rel: "preconnect", href: "https://fonts.googleapis.com" },
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
@@ -135,6 +136,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <BarakaErrorBoundary>
         <BarakaProvider>
+          <SplashScreen />
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           <BottomNav />

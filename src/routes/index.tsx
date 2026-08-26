@@ -4,17 +4,18 @@ import { useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
 import { categories, type Category } from "@/lib/baraka-data";
 import { ProductCard } from "@/components/baraka/ui";
+import logoAsset from "@/assets/tooku-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BARAKA — Marketplace Barang Sekolah Bekas Koperasi" },
+      { title: "TOOKU — Marketplace Barang Sekolah Bekas Koperasi" },
       {
         name: "description",
         content:
-          "BARAKA (Barang Apik Koperasi Akademik): beli seragam, buku, atribut, dan alat tulis bekas layak pakai yang lolos kurasi koperasi sekolah.",
+          "TOOKU (Marketplace Koperasi Sekolah): beli seragam, buku, atribut, dan alat tulis bekas layak pakai yang lolos kurasi koperasi sekolah.",
       },
-      { property: "og:title", content: "BARAKA — Marketplace Barang Sekolah Bekas Koperasi" },
+      { property: "og:title", content: "TOOKU — Marketplace Barang Sekolah Bekas Koperasi" },
       {
         property: "og:description",
         content: "Barang sekolah layak pakai, harga hemat, terkurasi koperasi. Booking online, ambil di koperasi.",
@@ -61,9 +62,13 @@ function Home() {
       <header className="bg-primary px-4 pb-6 pt-5 text-primary-foreground">
         <div className="mx-auto max-w-2xl">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-            <div className="min-w-0">
-              <p className="truncate text-lg font-extrabold tracking-tight">BARAKA</p>
-              <p className="truncate text-[11px] opacity-80">Barang Apik Koperasi Akademik</p>
+            <div className="flex min-w-0 items-center gap-2.5">
+              <img
+                src={logoAsset.url}
+                alt="Logo TOOKU"
+                className="h-10 w-10 shrink-0 rounded-2xl shadow-sm"
+              />
+              <p className="truncate text-[11px] opacity-80">Marketplace Koperasi Sekolah</p>
             </div>
             <Link
               to="/chat"

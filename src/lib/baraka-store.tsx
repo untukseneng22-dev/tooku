@@ -81,7 +81,7 @@ const seedUsers: User[] = [
   },
   {
     id: "u4",
-    name: "Pengelola Pusat BARAKA",
+    name: "Pengelola Pusat TOOKU",
     username: "superadmin",
     email: "superadmin@baraka.id",
     password: "barakapusat2026",
@@ -175,7 +175,7 @@ export function BarakaProvider({ children }: { children: ReactNode }) {
   if (parentStore) {
     if (import.meta.env.DEV) {
       console.error(
-        "[BARAKA] Duplicate BarakaProvider blocked. Keep exactly one provider at the application root.",
+        "[TOOKU] Duplicate BarakaProvider blocked. Keep exactly one provider at the application root.",
       );
     }
     return children;
@@ -197,7 +197,7 @@ function BarakaStoreProvider({ children }: { children: ReactNode }) {
       contextRegistry.__barakaActiveProviderCount = (contextRegistry.__barakaActiveProviderCount ?? 0) + 1;
       if (contextRegistry.__barakaActiveProviderCount > 1) {
         console.error(
-          "[BARAKA] Multiple active BarakaProvider instances detected during hot reload.",
+          "[TOOKU] Multiple active BarakaProvider instances detected during hot reload.",
         );
       }
     }

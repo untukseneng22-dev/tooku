@@ -13,13 +13,13 @@ export const Route = createFileRoute("/chat")({
   }),
   head: () => ({
     meta: [
-      { title: "Chat Penjual & Koperasi — BARAKA" },
+      { title: "Chat Penjual & Koperasi — TOOKU" },
       {
         name: "description",
         content:
-          "Chat langsung dengan para penjual barang sekolah bekas dan admin koperasi BARAKA untuk tanya stok, ukuran, dan kondisi barang.",
+          "Chat langsung dengan para penjual barang sekolah bekas dan admin koperasi TOOKU untuk tanya stok, ukuran, dan kondisi barang.",
       },
-      { property: "og:title", content: "Chat Penjual & Koperasi — BARAKA" },
+      { property: "og:title", content: "Chat Penjual & Koperasi — TOOKU" },
       {
         property: "og:description",
         content: "Tanya stok, ukuran, dan kondisi barang langsung ke penjual atau admin koperasi sekolah.",
