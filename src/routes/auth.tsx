@@ -23,7 +23,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [role, setRole] = useState<Role>("buyer");
-  const [form, setForm] = useState({ name: "", kelas: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", kelas: "", username: "", email: "", password: "" });
   const [error, setError] = useState("");
 
   const field = "w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm";
@@ -33,9 +33,10 @@ function AuthPage() {
     setError("");
     const res =
       mode === "login"
-        ? login(form.email, form.password)
+        ? login(form.username, form.password)
         : register({
             name: form.name.trim().slice(0, 60),
+            username: form.username.trim().slice(0, 24),
             email: form.email.trim().slice(0, 120),
             password: form.password,
             role,
@@ -45,7 +46,7 @@ function AuthPage() {
       setError(res.error ?? "Gagal masuk.");
       return;
     }
-    navigate({ to: res.role === "admin" ? "/admin" : "/" });
+    navigate({ to: res.role === "buyer" ? "/" : "/admin" });
   };
 
   return (
@@ -132,19 +133,36 @@ function AuthPage() {
             )}
 
             <div className="space-y-1.5">
-              <label className="text-xs font-semibold" htmlFor="em">
-                Email
+              <label className="text-xs font-semibold" htmlFor="un">
+                {mode === "login" ? "Username atau Email" : "Username"}
               </label>
               <input
-                id="em"
-                type="email"
+                id="un"
                 required
-                maxLength={120}
+                maxLength={mode === "login" ? 120 : 24}
+                autoCapitalize="none"
+                placeholder={mode === "login" ? "budisantoso" : "huruf kecil, tanpa spasi"}
                 className={field}
-                value={form.email}
-                onChange={(e) => setForm({ ...form, email: e.target.value })}
+                value={form.username}
+                onChange={(e) => setForm({ ...form, username: e.target.value })}
               />
             </div>
+            {mode === "register" && (
+              <div className="space-y-1.5">
+                <label className="text-xs font-semibold" htmlFor="em">
+                  Email
+                </label>
+                <input
+                  id="em"
+                  type="email"
+                  required
+                  maxLength={120}
+                  className={field}
+                  value={form.email}
+                  onChange={(e) => setForm({ ...form, email: e.target.value })}
+                />
+              </div>
+            )}
             <div className="space-y-1.5">
               <label className="text-xs font-semibold" htmlFor="pw">
                 Password
@@ -168,10 +186,11 @@ function AuthPage() {
             </button>
           </form>
 
-          <div className="mt-4 rounded-xl bg-secondary/60 p-3 text-[11px] text-muted-foreground">
-            <p className="font-semibold text-foreground">Akun demo</p>
-            <p>Pembeli: siti@sekolah.id / 123456</p>
-            <p>Admin Koperasi: admin@koperasi.id / admin123</p>
+          <div className="mt-4 space-y-1 rounded-xl bg-secondary/60 p-3 text-[11px] text-muted-foreground">
+            <p className="font-semibold text-foreground">Akun tersedia (username / sandi)</p>
+            <p>Pembeli: budisantoso / magetanngangeni</p>
+            <p>Admin Koperasi: smaspgrimaospati / magetanngangeni</p>
+            <p>Super Admin: superadmin / barakapusat2026</p>
           </div>
         </div>
       </div>

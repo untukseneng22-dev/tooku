@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, LogIn } from "lucide-react";
-import { useBaraka } from "@/lib/baraka-store";
+import { useBaraka, roleLabel } from "@/lib/baraka-store";
 import { rupiah } from "@/lib/baraka-data";
 
 export const Route = createFileRoute("/profil")({
@@ -60,8 +60,10 @@ function ProfilePage() {
           <div className="min-w-0">
             <p className="truncate text-base font-bold">{user.name}</p>
             <p className="truncate text-xs opacity-80">
-              {isAdmin ? "Admin Koperasi" : `Pembeli${user.kelas ? " · " + user.kelas : ""}`} · {user.email}
+              @{user.username} · {roleLabel[user.role]}
+              {user.role === "buyer" && user.kelas ? ` · ${user.kelas}` : ""}
             </p>
+            <p className="truncate text-[11px] opacity-70">{user.email}</p>
           </div>
         </div>
       </header>

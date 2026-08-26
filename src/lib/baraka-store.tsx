@@ -1,8 +1,22 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { seedProducts, type Product } from "./baraka-data";
 
-export type Role = "buyer" | "admin";
-export type User = { id: string; name: string; email: string; password: string; role: Role; kelas?: string };
+export type Role = "buyer" | "admin" | "superadmin";
+export type User = {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  role: Role;
+  kelas?: string;
+};
+
+export const roleLabel: Record<Role, string> = {
+  buyer: "Pembeli",
+  admin: "Admin Koperasi",
+  superadmin: "Super Admin",
+};
 
 export type OrderItem = { productId: string; name: string; price: number; qty: number };
 export type OrderStatus = "Booking" | "Diproses" | "Siap Diambil" | "Selesai" | "Dibatalkan";
@@ -33,12 +47,37 @@ const seedUsers: User[] = [
   {
     id: "u1",
     name: "Siti Aisyah",
+    username: "sitiaisyah",
     email: "siti@sekolah.id",
     password: "123456",
     role: "buyer",
     kelas: "X IPA 1",
   },
-  { id: "u2", name: "Bu Rina (Koperasi)", email: "admin@koperasi.id", password: "admin123", role: "admin" },
+  {
+    id: "u2",
+    name: "Budi Santoso",
+    username: "budisantoso",
+    email: "budisantoso@sekolah.id",
+    password: "magetanngangeni",
+    role: "buyer",
+    kelas: "XI IPS 2",
+  },
+  {
+    id: "u3",
+    name: "Koperasi SMAS PGRI 1 Maospati",
+    username: "smaspgrimaospati",
+    email: "smaspgrimaospati@koperasi.id",
+    password: "magetanngangeni",
+    role: "admin",
+  },
+  {
+    id: "u4",
+    name: "Pengelola Pusat BARAKA",
+    username: "superadmin",
+    email: "superadmin@baraka.id",
+    password: "barakapusat2026",
+    role: "superadmin",
+  },
 ];
 
 const seedOrders: Order[] = [
@@ -91,8 +130,10 @@ type Store = {
   users: User[];
   user: User | null;
   isAdmin: boolean;
-  login: (email: string, password: string) => { ok: boolean; error?: string; role?: Role };
+  isSuperAdmin: boolean;
+  login: (identifier: string, password: string) => { ok: boolean; error?: string; role?: Role };
   register: (input: Omit<User, "id">) => { ok: boolean; error?: string; role?: Role };
+  deleteUser: (id: string) => void;
   logout: () => void;
   addToCart: (id: string, qty?: number) => void;
   removeFromCart: (id: string) => void;
@@ -107,7 +148,7 @@ type Store = {
 };
 
 const StoreContext = createContext<Store | null>(null);
-const KEY = "baraka-state-v2";
+const KEY = "baraka-state-v3";
 
 export function BarakaProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(seedProducts);
@@ -168,22 +209,33 @@ export function BarakaProvider({ children }: { children: ReactNode }) {
       orders,
       users,
       user,
-      isAdmin: user?.role === "admin",
+      isAdmin: user?.role === "admin" || user?.role === "superadmin",
+      isSuperAdmin: user?.role === "superadmin",
       myOrders: user ? orders.filter((o) => o.userId === user.id) : [],
-      login: (email, password) => {
-        const found = users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
+      login: (identifier, password) => {
+        const key = identifier.trim().toLowerCase();
+        const found = users.find((u) => u.username.toLowerCase() === key || u.email.toLowerCase() === key);
         if (!found) return { ok: false, error: "Akun tidak ditemukan." };
         if (found.password !== password) return { ok: false, error: "Password salah." };
         setUserId(found.id);
         return { ok: true, role: found.role };
       },
       register: (input) => {
+        const uname = input.username.trim().toLowerCase();
+        if (!/^[a-z0-9._]{4,24}$/.test(uname))
+          return { ok: false, error: "Username 4–24 karakter, huruf/angka/titik/underscore." };
+        if (users.some((u) => u.username.toLowerCase() === uname))
+          return { ok: false, error: "Username sudah dipakai." };
         if (users.some((u) => u.email.toLowerCase() === input.email.trim().toLowerCase()))
           return { ok: false, error: "Email sudah terdaftar." };
-        const newUser: User = { ...input, id: "u" + Date.now(), email: input.email.trim() };
+        const newUser: User = { ...input, id: "u" + Date.now(), username: uname, email: input.email.trim() };
         setUsers((us) => [...us, newUser]);
         setUserId(newUser.id);
         return { ok: true, role: newUser.role };
+      },
+      deleteUser: (id) => {
+        if (user?.role !== "superadmin" || id === user.id) return;
+        setUsers((us) => us.filter((u) => u.id !== id));
       },
       logout: () => setUserId(null),
       addToCart,
