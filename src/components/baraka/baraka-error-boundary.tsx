@@ -37,11 +37,11 @@ export class BarakaErrorBoundary extends Component<Props, State> {
             <AlertTriangle className="h-6 w-6" aria-hidden="true" />
           </div>
           <h1 className="mt-4 text-xl font-bold text-card-foreground">
-            {isProviderError ? "Koneksi aplikasi belum siap" : "BARAKA gagal memuat halaman"}
+            {isProviderError ? "Koneksi aplikasi belum siap" : "TOOKU gagal memuat halaman"}
           </h1>
           <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
             {isProviderError
-              ? "Konteks data BARAKA tidak tersedia. Muat ulang halaman untuk menyambungkan aplikasi kembali."
+              ? "Konteks data TOOKU tidak tersedia. Muat ulang halaman untuk menyambungkan aplikasi kembali."
               : "Terjadi kendala saat menampilkan halaman. Silakan coba lagi atau kembali ke Beranda."}
           </p>
           {import.meta.env.DEV && (

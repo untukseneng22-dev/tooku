@@ -8,13 +8,13 @@ import { ProductCard } from "@/components/baraka/ui";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "BARAKA — Marketplace Barang Sekolah Bekas Koperasi" },
+      { title: "TOOKU — Marketplace Barang Sekolah Bekas Koperasi" },
       {
         name: "description",
         content:
-          "BARAKA (Barang Apik Koperasi Akademik): beli seragam, buku, atribut, dan alat tulis bekas layak pakai yang lolos kurasi koperasi sekolah.",
+          "TOOKU (Barang Apik Koperasi Akademik): beli seragam, buku, atribut, dan alat tulis bekas layak pakai yang lolos kurasi koperasi sekolah.",
       },
-      { property: "og:title", content: "BARAKA — Marketplace Barang Sekolah Bekas Koperasi" },
+      { property: "og:title", content: "TOOKU — Marketplace Barang Sekolah Bekas Koperasi" },
       {
         property: "og:description",
         content: "Barang sekolah layak pakai, harga hemat, terkurasi koperasi. Booking online, ambil di koperasi.",
@@ -62,7 +62,7 @@ function Home() {
         <div className="mx-auto max-w-2xl">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
             <div className="min-w-0">
-              <p className="truncate text-lg font-extrabold tracking-tight">BARAKA</p>
+              <p className="truncate text-lg font-extrabold tracking-tight">TOOKU</p>
               <p className="truncate text-[11px] opacity-80">Barang Apik Koperasi Akademik</p>
             </div>
             <Link

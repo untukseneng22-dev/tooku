@@ -8,13 +8,13 @@ import { ProductThumb } from "@/components/baraka/ui";
 export const Route = createFileRoute("/keranjang")({
   head: () => ({
     meta: [
-      { title: "Keranjang & Checkout — BARAKA" },
+      { title: "Keranjang & Checkout — TOOKU" },
       {
         name: "description",
         content:
           "Kelola item keranjang, pilih pembayaran online atau bayar di koperasi, dan dapatkan kode pengambilan 1x24 jam.",
       },
-      { property: "og:title", content: "Keranjang & Checkout — BARAKA" },
+      { property: "og:title", content: "Keranjang & Checkout — TOOKU" },
       { property: "og:description", content: "Checkout multi-item barang koperasi sekolah dengan kode pengambilan." },
     ],
   }),

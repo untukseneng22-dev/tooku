@@ -6,12 +6,12 @@ import { rupiah } from "@/lib/baraka-data";
 export const Route = createFileRoute("/pesanan")({
   head: () => ({
     meta: [
-      { title: "Pesanan Saya — BARAKA" },
+      { title: "Pesanan Saya — TOOKU" },
       {
         name: "description",
         content: "Timeline pesanan: Booking, Diproses, Siap Diambil, Selesai — lengkap dengan kode pengambilan.",
       },
-      { property: "og:title", content: "Pesanan Saya — BARAKA" },
+      { property: "og:title", content: "Pesanan Saya — TOOKU" },
       { property: "og:description", content: "Pantau status, pembayaran, dan batas waktu pengambilan pesananmu." },
     ],
   }),
