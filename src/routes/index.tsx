@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
 import { categories, type Category } from "@/lib/baraka-data";
 import { ProductCard } from "@/components/baraka/ui";
+import logoAsset from "@/assets/tooku-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
