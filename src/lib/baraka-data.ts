@@ -20,6 +20,8 @@ export type Product = {
   curated: boolean;
   featured: boolean;
   seller: string;
+  schoolId: string;
+  contributor?: string;
   sold: number;
   photo?: string;
   specs?: Record<string, string>;
@@ -38,7 +40,9 @@ export const seedProducts: Product[] = [
     minus: ["Warna putih sedikit pudar di bagian kerah"],
     curated: true,
     featured: true,
-    seller: "Alumni 2024 — Kelas XII IPA 2",
+    seller: SCHOOLS_SELLER["s1"],
+    schoolId: "s1",
+    contributor: "Alumni 2024 — Kelas XII IPA 2",
     sold: 12,
     specs: {
       "Jenis": "Seragam harian putih",
@@ -64,7 +68,9 @@ export const seedProducts: Product[] = [
     minus: ["Ada stabilo di bab 3-5", "Sudut cover sedikit terlipat"],
     curated: true,
     featured: true,
-    seller: "Rafi — XII IPS 1",
+    seller: SCHOOLS_SELLER["s2"],
+    schoolId: "s2",
+    contributor: "Rafi — XII IPS 1",
     sold: 23,
     specs: {
       "Jenis": "Buku pelajaran",
@@ -90,7 +96,9 @@ export const seedProducts: Product[] = [
     minus: ["Label ukuran sudah lepas"],
     curated: true,
     featured: false,
-    seller: "Alumni 2025",
+    seller: SCHOOLS_SELLER["s3"],
+    schoolId: "s3",
+    contributor: "Alumni 2025",
     sold: 5,
     specs: {
       "Jenis": "Rok seragam lipit",
@@ -116,7 +124,9 @@ export const seedProducts: Product[] = [
     minus: ["Ada bekas lipatan pada topi"],
     curated: true,
     featured: true,
-    seller: "Koperasi — Donasi Alumni",
+    seller: SCHOOLS_SELLER["s4"],
+    schoolId: "s4",
+    contributor: "Koperasi — Donasi Alumni",
     sold: 31,
     specs: {
       "Jenis": "Atribut sekolah",
@@ -140,7 +150,9 @@ export const seedProducts: Product[] = [
     minus: ["Ada coretan nama pemilik lama"],
     curated: true,
     featured: false,
-    seller: "Nadia — XI IPA 3",
+    seller: SCHOOLS_SELLER["s5"],
+    schoolId: "s5",
+    contributor: "Nadia — XI IPA 3",
     sold: 18,
     specs: {
       "Jenis": "Alat tulis",
@@ -164,7 +176,9 @@ export const seedProducts: Product[] = [
     minus: ["Beberapa halaman sudah diisi pensil", "Cover agak kusam"],
     curated: true,
     featured: false,
-    seller: "Bima — XI IPS 2",
+    seller: SCHOOLS_SELLER["s6"],
+    schoolId: "s6",
+    contributor: "Bima — XI IPS 2",
     sold: 9,
     specs: {
       "Jenis": "Buku latihan (workbook)",
@@ -189,7 +203,9 @@ export const seedProducts: Product[] = [
     minus: ["Tidak ada minus berarti"],
     curated: true,
     featured: true,
-    seller: "Koperasi Sekolah",
+    seller: SCHOOLS_SELLER["s7"],
+    schoolId: "s7",
+    contributor: "Koperasi Sekolah",
     sold: 27,
     specs: {
       "Jenis": "Atribut sekolah",
@@ -214,7 +230,9 @@ export const seedProducts: Product[] = [
     minus: ["Satu kancing bawah diganti (warna mirip)"],
     curated: true,
     featured: false,
-    seller: "Alumni 2024",
+    seller: SCHOOLS_SELLER["s8"],
+    schoolId: "s8",
+    contributor: "Alumni 2024",
     sold: 6,
     specs: {
       "Jenis": "Seragam batik sekolah",
