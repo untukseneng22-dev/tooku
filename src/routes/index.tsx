@@ -66,9 +66,8 @@ function Home() {
               <p className="truncate text-[11px] opacity-80">Barang Apik Koperasi Akademik</p>
             </div>
             <Link
-              to="/notifikasi"
-              search={{ tab: "chat" }}
-              aria-label="Chat"
+              to="/chat"
+              aria-label="Chat penjual"
               className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15"
             >
               <MessageCircle className="h-4 w-4" />

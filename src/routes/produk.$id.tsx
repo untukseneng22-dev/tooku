@@ -94,8 +94,8 @@ function ProductDetail() {
               <p className="text-[11px] text-muted-foreground">Penjual terverifikasi koperasi</p>
             </div>
             <Link
-              to="/notifikasi"
-              search={{ tab: "chat", penjual: product.seller, produk: product.name }}
+              to="/chat"
+              search={{ penjual: product.seller, produk: product.name }}
               className="flex shrink-0 items-center gap-1.5 rounded-full border border-primary px-3 py-1.5 text-[11px] font-bold text-primary"
             >
               <MessageCircle className="h-3.5 w-3.5" /> Chat
@@ -154,8 +154,8 @@ function ProductDetail() {
       <div className="fixed inset-x-0 bottom-[68px] z-40 border-t border-border bg-card p-3">
         <div className="mx-auto flex max-w-2xl gap-2">
           <Link
-            to="/notifikasi"
-            search={{ tab: "chat", penjual: product.seller, produk: product.name }}
+            to="/chat"
+            search={{ penjual: product.seller, produk: product.name }}
             aria-label="Chat penjual"
             className="grid shrink-0 place-items-center rounded-xl border border-primary px-3 text-primary"
           >
