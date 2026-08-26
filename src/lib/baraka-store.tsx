@@ -209,22 +209,33 @@ export function BarakaProvider({ children }: { children: ReactNode }) {
       orders,
       users,
       user,
-      isAdmin: user?.role === "admin",
+      isAdmin: user?.role === "admin" || user?.role === "superadmin",
+      isSuperAdmin: user?.role === "superadmin",
       myOrders: user ? orders.filter((o) => o.userId === user.id) : [],
-      login: (email, password) => {
-        const found = users.find((u) => u.email.toLowerCase() === email.trim().toLowerCase());
+      login: (identifier, password) => {
+        const key = identifier.trim().toLowerCase();
+        const found = users.find((u) => u.username.toLowerCase() === key || u.email.toLowerCase() === key);
         if (!found) return { ok: false, error: "Akun tidak ditemukan." };
         if (found.password !== password) return { ok: false, error: "Password salah." };
         setUserId(found.id);
         return { ok: true, role: found.role };
       },
       register: (input) => {
+        const uname = input.username.trim().toLowerCase();
+        if (!/^[a-z0-9._]{4,24}$/.test(uname))
+          return { ok: false, error: "Username 4–24 karakter, huruf/angka/titik/underscore." };
+        if (users.some((u) => u.username.toLowerCase() === uname))
+          return { ok: false, error: "Username sudah dipakai." };
         if (users.some((u) => u.email.toLowerCase() === input.email.trim().toLowerCase()))
           return { ok: false, error: "Email sudah terdaftar." };
-        const newUser: User = { ...input, id: "u" + Date.now(), email: input.email.trim() };
+        const newUser: User = { ...input, id: "u" + Date.now(), username: uname, email: input.email.trim() };
         setUsers((us) => [...us, newUser]);
         setUserId(newUser.id);
         return { ok: true, role: newUser.role };
+      },
+      deleteUser: (id) => {
+        if (user?.role !== "superadmin" || id === user.id) return;
+        setUsers((us) => us.filter((u) => u.id !== id));
       },
       logout: () => setUserId(null),
       addToCart,
