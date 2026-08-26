@@ -1,10 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Search, Zap, ShieldCheck, SlidersHorizontal, MessageCircle } from "lucide-react";
-import { useState } from "react";
+import {
+  Search,
+  Zap,
+  ShieldCheck,
+  SlidersHorizontal,
+  MessageCircle,
+  ShoppingCart,
+  TrendingUp,
+  Clock,
+  X as XIcon,
+} from "lucide-react";
+import { useRef, useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
 import { categories, type Category } from "@/lib/baraka-data";
 import { ProductCard } from "@/components/baraka/ui";
-import logoAsset from "@/assets/tooku-logo.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -26,13 +35,35 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { products } = useBaraka();
+  const { products, cart } = useBaraka();
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Category | "Semua">("Semua");
   const [showFilter, setShowFilter] = useState(false);
   const [maxPrice, setMaxPrice] = useState(50000);
   const [minCondition, setMinCondition] = useState(0);
   const [sort, setSort] = useState<"populer" | "termurah" | "termahal" | "kondisi">("populer");
+  const [focused, setFocused] = useState(false);
+  const [recent, setRecent] = useState<string[]>(["seragam putih", "buku matematika"]);
+  const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const cartCount = cart.reduce((n, l) => n + l.qty, 0);
+  const popular = ["seragam putih", "rok abu", "dasi navy", "buku kelas XI", "kotak pensil", "topi sekolah"];
+  const suggestions = query.trim()
+    ? products
+        .filter(
+          (p) =>
+            p.name.toLowerCase().includes(query.toLowerCase()) ||
+            p.category.toLowerCase().includes(query.toLowerCase()),
+        )
+        .slice(0, 6)
+    : [];
+
+  const submitSearch = (q: string) => {
+    const t = q.trim();
+    setQuery(t);
+    setFocused(false);
+    if (t) setRecent((r) => [t, ...r.filter((x) => x !== t)].slice(0, 6));
+  };
 
   const conditionPct = (c: string) => Number(c.match(/(\d+)%/)?.[1] ?? 0);
 
@@ -59,38 +90,134 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <header className="bg-primary px-4 pb-6 pt-5 text-primary-foreground">
+      <header className="sticky top-0 z-40 bg-primary relative px-3 pb-3 pt-3 text-primary-foreground shadow-sm">
         <div className="mx-auto max-w-2xl">
-          <div className="flex items-center justify-between gap-3">
-            <img
-              src={logoAsset.url}
-              alt="Logo TOOKU"
-              className="h-11 w-11 shrink-0 rounded-2xl shadow-sm"
-            />
+          <div className="flex items-center gap-2">
+            <div className="relative flex min-w-0 flex-1 items-center gap-2 rounded-lg bg-card px-2.5 py-2">
+              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <input
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                onFocus={() => {
+                  if (blurTimer.current) clearTimeout(blurTimer.current);
+                  setFocused(true);
+                }}
+                onBlur={() => {
+                  blurTimer.current = setTimeout(() => setFocused(false), 150);
+                }}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter") submitSearch(query);
+                }}
+                placeholder="Cari seragam, buku, atribut…"
+                className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              />
+              {query && (
+                <button
+                  onClick={() => setQuery("")}
+                  aria-label="Hapus pencarian"
+                  className="shrink-0 text-muted-foreground"
+                >
+                  <XIcon className="h-4 w-4" />
+                </button>
+              )}
+              <button
+                onClick={() => {
+                  setShowFilter(true);
+                  setFocused(false);
+                }}
+                aria-label="Filter pencarian"
+                className="relative flex shrink-0 items-center gap-1 border-l border-border pl-2 text-primary"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                {activeFilters > 0 && (
+                  <span className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
+                    {activeFilters}
+                  </span>
+                )}
+              </button>
+            </div>
+
+            <Link
+              to="/keranjang"
+              aria-label="Keranjang"
+              className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15"
+            >
+              <ShoppingCart className="h-[18px] w-[18px]" />
+              {cartCount > 0 && (
+                <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
+                  {cartCount}
+                </span>
+              )}
+            </Link>
             <Link
               to="/chat"
               aria-label="Chat penjual"
               className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15"
             >
-              <MessageCircle className="h-4 w-4" />
+              <MessageCircle className="h-[18px] w-[18px]" />
             </Link>
           </div>
 
-          <div className="mt-4 flex items-center gap-2 rounded-2xl bg-card px-3 py-2.5">
-            <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Cari seragam, buku, atribut…"
-              className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-            />
-          </div>
+          {focused && (
+            <div className="absolute inset-x-3 top-[calc(100%-6px)] z-50 max-h-[60vh] overflow-y-auto rounded-b-2xl border border-border bg-card p-3 text-foreground shadow-lg">
+              {suggestions.length > 0 ? (
+                <div className="space-y-1">
+                  <p className="px-1 pb-1 text-[11px] font-bold text-muted-foreground">Saran barang</p>
+                  {suggestions.map((p) => (
+                    <button
+                      key={p.id}
+                      onMouseDown={() => submitSearch(p.name)}
+                      className="flex w-full items-center gap-2 rounded-lg px-1 py-2 text-left hover:bg-secondary"
+                    >
+                      <Search className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                      <span className="min-w-0 flex-1 truncate text-xs">{p.name}</span>
+                      <span className="shrink-0 text-[10px] text-muted-foreground">{p.category}</span>
+                    </button>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {recent.length > 0 && (
+                    <div>
+                      <p className="px-1 pb-1 text-[11px] font-bold text-muted-foreground">Pencarian terakhir</p>
+                      {recent.map((r) => (
+                        <button
+                          key={r}
+                          onMouseDown={() => submitSearch(r)}
+                          className="flex w-full items-center gap-2 rounded-lg px-1 py-2 text-left hover:bg-secondary"
+                        >
+                          <Clock className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+                          <span className="min-w-0 flex-1 truncate text-xs">{r}</span>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <div>
+                    <p className="flex items-center gap-1.5 px-1 pb-2 text-[11px] font-bold text-muted-foreground">
+                      <TrendingUp className="h-3.5 w-3.5" /> Paling dicari siswa
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {popular.map((k) => (
+                        <button
+                          key={k}
+                          onMouseDown={() => submitSearch(k)}
+                          className="rounded-full border border-border px-3 py-1.5 text-[11px] font-semibold text-muted-foreground"
+                        >
+                          {k}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </header>
 
       <div className="mx-auto max-w-2xl space-y-6 px-4">
         {/* Banner impact */}
-        <div className="-mt-4 overflow-hidden rounded-3xl bg-gradient-to-br from-accent to-accent/70 p-4 text-accent-foreground shadow-sm">
+        <div className="mt-4 overflow-hidden rounded-3xl bg-gradient-to-br from-accent to-accent/70 p-4 text-accent-foreground shadow-sm">
           <p className="text-[11px] font-bold uppercase tracking-wide opacity-80">Promo Awal Semester</p>
           <p className="mt-1 text-base font-extrabold leading-snug">Hemat hingga 70% untuk seragam & buku layak pakai</p>
           <p className="mt-1.5 flex items-center gap-1 text-[11px]">
