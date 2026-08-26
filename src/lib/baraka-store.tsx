@@ -1,4 +1,13 @@
-import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useState,
+  type Context,
+  type ReactNode,
+} from "react";
 import { seedProducts, type Product } from "./baraka-data";
 
 export type Role = "buyer" | "admin" | "superadmin";
@@ -147,7 +156,16 @@ type Store = {
   deleteProduct: (id: string) => void;
 };
 
-const StoreContext = createContext<Store | null>(null);
+type BarakaContextRegistry = typeof globalThis & {
+  __barakaStoreContext?: Context<Store | null>;
+};
+
+// Keep one context identity across route chunk loading and Vite hot updates.
+// Without this, a stale route chunk can briefly read a different context
+// instance from the one mounted by the root provider.
+const contextRegistry = globalThis as BarakaContextRegistry;
+const StoreContext = contextRegistry.__barakaStoreContext ?? createContext<Store | null>(null);
+contextRegistry.__barakaStoreContext = StoreContext;
 const KEY = "baraka-state-v3";
 
 export function BarakaProvider({ children }: { children: ReactNode }) {
