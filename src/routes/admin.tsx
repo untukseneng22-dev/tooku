@@ -128,8 +128,12 @@ function AdminPage() {
             <ArrowLeft className="h-5 w-5" />
           </Link>
           <div className="min-w-0">
-            <p className="truncate text-sm font-bold">Admin Koperasi BARAKA</p>
-            <p className="truncate text-[11px] opacity-80">{user?.name}</p>
+            <p className="truncate text-sm font-bold">
+              {isSuperAdmin ? "Super Admin BARAKA" : "Admin Koperasi BARAKA"}
+            </p>
+            <p className="truncate text-[11px] opacity-80">
+              {user?.name} · @{user?.username}
+            </p>
           </div>
           <button
             onClick={() => {
@@ -145,17 +149,19 @@ function AdminPage() {
 
       <div className="mx-auto max-w-6xl gap-6 px-4 py-5 lg:flex">
         <nav className="mb-4 flex gap-2 overflow-x-auto lg:mb-0 lg:w-56 lg:shrink-0 lg:flex-col lg:overflow-visible">
-          {tabs.map((t) => (
-            <button
-              key={t.id}
-              onClick={() => setTab(t.id)}
-              className={`flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold ${
-                tab === t.id ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"
-              }`}
-            >
-              <t.icon className="h-4 w-4" /> {t.label}
-            </button>
-          ))}
+          {tabs
+            .filter((t) => !t.superOnly || isSuperAdmin)
+            .map((t) => (
+              <button
+                key={t.id}
+                onClick={() => setTab(t.id)}
+                className={`flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold ${
+                  tab === t.id ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"
+                }`}
+              >
+                <t.icon className="h-4 w-4" /> {t.label}
+              </button>
+            ))}
         </nav>
 
         <main className="min-w-0 flex-1">
@@ -163,6 +169,7 @@ function AdminPage() {
           {tab === "orders" && <OrdersAdmin />}
           {tab === "products" && <ProductsAdmin />}
           {tab === "new" && <NewProduct onDone={() => setTab("products")} />}
+          {tab === "accounts" && isSuperAdmin && <AccountsAdmin />}
         </main>
       </div>
     </div>
