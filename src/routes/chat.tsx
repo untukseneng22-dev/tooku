@@ -153,7 +153,7 @@ function ChatPage() {
         <div className="mx-auto max-w-2xl px-4 py-4">
           <div className="space-y-2.5">
             {contacts.length === 0 ? (
-              <p className="py-12 text-center text-sm text-muted-foreground">Penjual tidak ditemukan.</p>
+              <p className="py-12 text-center text-sm text-muted-foreground">{isAdmin ? "Pembeli tidak ditemukan." : "Belum ada kontak."}</p>
             ) : (
               contacts.map((s: string) => {
                 const msgs = threads[s] ?? [];
@@ -173,7 +173,7 @@ function ChatPage() {
                         {last && <span className="shrink-0 text-[10px] text-muted-foreground">{last.time}</span>}
                       </span>
                       <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">
-                        {last ? last.text : "Mulai percakapan tentang barangnya"}
+                        {last ? last.text : "{isAdmin ? "Mulai percakapan dengan pembeli" : "Tanya stok, ukuran, atau kondisi barang"}"}
                       </span>
                     </span>
                   </button>
@@ -214,7 +214,7 @@ function ChatPage() {
       <div className="mx-auto max-w-2xl space-y-2.5 px-4 py-4">
         {messages.length === 0 && (
           <p className="py-8 text-center text-[12px] text-muted-foreground">
-            Belum ada pesan. Sapa penjualnya dulu yuk!
+            Belum ada pesan. {isAdmin ? "Sapa pembelinya dulu yuk!" : "Sapa admin koperasinya dulu yuk!"}
           </p>
         )}
         {messages.map((m) => (
