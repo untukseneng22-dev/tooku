@@ -64,7 +64,7 @@ function sellerReply(name: string) {
 }
 
 function ChatPage() {
-  const { user } = useBaraka();
+  const { user, users, isAdmin } = useBaraka();
   const { penjual, produk } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [threads, setThreads] = useState<Threads>(seedThreads);
@@ -91,13 +91,21 @@ function ChatPage() {
     if (penjual) endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [penjual, threads]);
 
-  const sellers = useMemo(() => {
-    const fromProducts = Array.from(new Set(seedProducts.map((p) => p.seller)));
-    const all = Array.from(new Set([KOPERASI, ...Object.keys(threads), ...fromProducts]));
-    return all.filter((s) => s.toLowerCase().includes(q.trim().toLowerCase()));
-  }, [threads, q]);
+  // Pembeli hanya boleh chat ke koperasi sekolah (penjual resmi);
+  // admin koperasi bisa chat ke semua akun pembeli.
+  const contacts = useMemo(() => {
+    const list = isAdmin
+      ? Array.from(
+          new Set([
+            ...users.filter((u) => u.role === "buyer").map((u) => u.name),
+            ...Object.keys(threads).filter((k) => k !== KOPERASI && !seedProducts.some((p) => p.seller === k)),
+          ]),
+        )
+      : [KOPERASI];
+    return list.filter((s) => s.toLowerCase().includes(q.trim().toLowerCase()));
+  }, [isAdmin, users, threads, q]);
 
-  const active = penjual ?? null;
+  const active = penjual ? (isAdmin ? penjual : KOPERASI) : null;
   const messages = (active && threads[active]) || [];
 
   function send() {
