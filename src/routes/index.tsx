@@ -67,10 +67,11 @@ function Home() {
             </div>
             <Link
               to="/notifikasi"
-              aria-label="Notifikasi"
+              search={{ tab: "chat" }}
+              aria-label="Chat"
               className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15"
             >
-              <Bell className="h-4 w-4" />
+              <MessageCircle className="h-4 w-4" />
             </Link>
           </div>
 
