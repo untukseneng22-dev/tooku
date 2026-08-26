@@ -121,7 +121,7 @@ function ChatPage() {
     setTimeout(() => {
       setThreads((prev) => ({
         ...prev,
-        [active]: [...(prev[active] ?? []), { id: `m${Date.now() + 1}`, from: "them", text: sellerReply(active), time }],
+        [active]: [...(prev[active] ?? []), { id: `m${Date.now() + 1}`, from: "them", text: autoReply(active, isAdmin), time }],
       }));
     }, 900);
   }
