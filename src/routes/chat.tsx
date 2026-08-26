@@ -136,17 +136,16 @@ function ChatPage() {
               {user ? `Hai ${user.name.split(" ")[0]}, ` : ""}
               {isAdmin ? "balas pertanyaan para pembeli" : "tanya langsung ke penjual & admin koperasi"}
             </p>
-            {(
-              <div className="mt-4 flex items-center gap-2 rounded-2xl bg-card px-3 py-2.5">
-                <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-                <input
-                  value={q}
-                  onChange={(e) => setQ(e.target.value)}
-                  placeholder={isAdmin ? "Cari pembeli…" : "Cari penjual atau koperasi…"}
-                  className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-                />
-              </div>
-            )}
+            <div className="mt-4 flex items-center gap-2 rounded-2xl bg-card px-3 py-2.5">
+              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+              <input
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder={isAdmin ? "Cari pembeli…" : "Cari penjual atau koperasi…"}
+                className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+              />
+            </div>
+
           </div>
         </header>
 
