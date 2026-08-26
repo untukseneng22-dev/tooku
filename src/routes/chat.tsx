@@ -133,17 +133,20 @@ function ChatPage() {
           <div className="mx-auto max-w-2xl">
             <h1 className="text-lg font-extrabold tracking-tight">Chat</h1>
             <p className="text-[11px] opacity-80">
-              {user ? `Hai ${user.name.split(" ")[0]}, ` : ""}ngobrol dengan para penjual & admin koperasi
+              {user ? `Hai ${user.name.split(" ")[0]}, ` : ""}
+              {isAdmin ? "balas pertanyaan para pembeli" : "chat resmi dengan koperasi sekolah"}
             </p>
-            <div className="mt-4 flex items-center gap-2 rounded-2xl bg-card px-3 py-2.5">
-              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Cari penjual…"
-                className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-              />
-            </div>
+            {isAdmin && (
+              <div className="mt-4 flex items-center gap-2 rounded-2xl bg-card px-3 py-2.5">
+                <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Cari pembeli…"
+                  className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                />
+              </div>
+            )}
           </div>
         </header>
 
