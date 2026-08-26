@@ -60,8 +60,10 @@ function ProfilePage() {
           <div className="min-w-0">
             <p className="truncate text-base font-bold">{user.name}</p>
             <p className="truncate text-xs opacity-80">
-              {isAdmin ? "Admin Koperasi" : `Pembeli${user.kelas ? " · " + user.kelas : ""}`} · {user.email}
+              @{user.username} · {roleLabel[user.role]}
+              {user.role === "buyer" && user.kelas ? ` · ${user.kelas}` : ""}
             </p>
+            <p className="truncate text-[11px] opacity-70">{user.email}</p>
           </div>
         </div>
       </header>
