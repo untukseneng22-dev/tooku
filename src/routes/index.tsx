@@ -61,15 +61,12 @@ function Home() {
     <div className="min-h-screen bg-background pb-24">
       <header className="bg-primary px-4 pb-6 pt-5 text-primary-foreground">
         <div className="mx-auto max-w-2xl">
-          <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-            <div className="flex min-w-0 items-center gap-2.5">
-              <img
-                src={logoAsset.url}
-                alt="Logo TOOKU"
-                className="h-10 w-10 shrink-0 rounded-2xl shadow-sm"
-              />
-              <p className="truncate text-[11px] opacity-80">Marketplace Koperasi Sekolah</p>
-            </div>
+          <div className="flex items-center justify-between gap-3">
+            <img
+              src={logoAsset.url}
+              alt="Logo TOOKU"
+              className="h-11 w-11 shrink-0 rounded-2xl shadow-sm"
+            />
             <Link
               to="/chat"
               aria-label="Chat penjual"
