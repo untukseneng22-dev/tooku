@@ -11,8 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { BarakaProvider } from "../lib/baraka-store";
-import { BottomNav } from "../components/baraka/ui";
+import { BarakaProvider } from "@/lib/baraka-store";
+import { BottomNav } from "@/components/baraka/ui";
 
 function NotFoundComponent() {
   return (
