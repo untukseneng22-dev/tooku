@@ -12,7 +12,7 @@ export const Route = createFileRoute("/")({
       {
         name: "description",
         content:
-          "TOOKU (Barang Apik Koperasi Akademik): beli seragam, buku, atribut, dan alat tulis bekas layak pakai yang lolos kurasi koperasi sekolah.",
+          "TOOKU (Marketplace Koperasi Sekolah): beli seragam, buku, atribut, dan alat tulis bekas layak pakai yang lolos kurasi koperasi sekolah.",
       },
       { property: "og:title", content: "TOOKU — Marketplace Barang Sekolah Bekas Koperasi" },
       {
@@ -63,7 +63,7 @@ function Home() {
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
             <div className="min-w-0">
               <p className="truncate text-lg font-extrabold tracking-tight">TOOKU</p>
-              <p className="truncate text-[11px] opacity-80">Barang Apik Koperasi Akademik</p>
+              <p className="truncate text-[11px] opacity-80">Marketplace Koperasi Sekolah</p>
             </div>
             <Link
               to="/chat"

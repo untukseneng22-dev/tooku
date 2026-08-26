@@ -56,7 +56,7 @@ function AuthPage() {
           <ArrowLeft className="h-4 w-4" /> Kembali
         </Link>
         <h1 className="mt-4 text-xl font-extrabold tracking-tight">TOOKU</h1>
-        <p className="text-xs opacity-80">Barang Apik Koperasi Akademik</p>
+        <p className="text-xs opacity-80">Marketplace Koperasi Sekolah</p>
       </header>
 
       <div className="mx-auto -mt-6 max-w-md px-4 pb-16">

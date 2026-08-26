@@ -80,13 +80,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "TOOKU — Barang Apik Koperasi Akademik" },
+      { title: "TOOKU — Marketplace Koperasi Sekolah" },
       {
         name: "description",
         content: "Marketplace barang sekolah bekas layak pakai yang dikurasi koperasi sekolah.",
       },
       { name: "author", content: "Koperasi Sekolah" },
-      { property: "og:title", content: "TOOKU — Barang Apik Koperasi Akademik" },
+      { property: "og:title", content: "TOOKU — Marketplace Koperasi Sekolah" },
       {
         property: "og:description",
         content: "Marketplace barang sekolah bekas layak pakai yang dikurasi koperasi sekolah.",
