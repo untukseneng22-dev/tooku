@@ -14,6 +14,8 @@ import { useRef, useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
 import { categories, type Category } from "@/lib/baraka-data";
 import { ProductCard } from "@/components/baraka/ui";
+import { PromoCarousel } from "@/components/baraka/promo-carousel";
+import { HScroll, ScrollDownHint } from "@/components/baraka/scroll-hint";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -216,18 +218,12 @@ function Home() {
       </header>
 
       <div className="mx-auto max-w-2xl space-y-6 px-4">
-        {/* Banner impact */}
-        <div className="mt-4 overflow-hidden rounded-3xl bg-gradient-to-br from-accent to-accent/70 p-4 text-accent-foreground shadow-sm">
-          <p className="text-[11px] font-bold uppercase tracking-wide opacity-80">Promo Awal Semester</p>
-          <p className="mt-1 text-base font-extrabold leading-snug">Hemat hingga 70% untuk seragam & buku layak pakai</p>
-          <p className="mt-1.5 flex items-center gap-1 text-[11px]">
-            <ShieldCheck className="h-3.5 w-3.5" /> 1.248 barang terselamatkan · Rp18,4 jt dihemat siswa
-          </p>
-        </div>
+        {/* Promo carousel */}
+        <PromoCarousel />
 
         {/* Kategori */}
         <section>
-          <div className="flex gap-3 overflow-x-auto pb-1">
+          <HScroll className="gap-3 pb-1">
             {(["Semua", ...categories.map((c) => c.name)] as const).map((name) => {
               const icon = categories.find((c) => c.name === name)?.icon ?? "🛍️";
               const active = cat === name;
@@ -244,7 +240,7 @@ function Home() {
                 </button>
               );
             })}
-          </div>
+          </HScroll>
         </section>
 
         {/* Unggulan */}
@@ -252,14 +248,15 @@ function Home() {
           <div className="mb-3 flex items-center gap-2">
             <Zap className="h-4 w-4 text-accent-foreground" />
             <h2 className="text-sm font-bold">Flash Unggulan Koperasi</h2>
+            <span className="ml-auto text-[10px] font-semibold text-muted-foreground">Geser →</span>
           </div>
-          <div className="flex gap-3 overflow-x-auto pb-1">
+          <HScroll className="gap-3 pb-1">
             {featured.map((p) => (
               <div key={p.id} className="w-36 shrink-0">
                 <ProductCard product={p} />
               </div>
             ))}
-          </div>
+          </HScroll>
         </section>
 
         {/* Grid */}
@@ -369,6 +366,7 @@ function Home() {
           )}
         </section>
       </div>
+      <ScrollDownHint label="Masih ada di bawah" />
     </div>
   );
 }
