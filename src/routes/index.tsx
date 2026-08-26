@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Search, Zap, ShieldCheck, SlidersHorizontal, Bell } from "lucide-react";
+import { Search, Zap, ShieldCheck, SlidersHorizontal, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
 import { categories, type Category } from "@/lib/baraka-data";
