@@ -1,6 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, MessageCircle, Search, Send, Store } from "lucide-react";
+import { schools } from "@/lib/baraka-data";
 import { useBaraka } from "@/lib/baraka-store";
 
 export const Route = createFileRoute("/chat")({
@@ -94,7 +95,8 @@ function ChatPage() {
   // Pembeli bisa chat langsung ke admin koperasi & para penjual (seller) barang;
   // admin koperasi melihat semua percakapan dari pembeli.
   const contacts = useMemo(() => {
-    const sellerNames = Array.from(new Set(products.map((p) => p.seller)));
+    // Penjual di TOOKU hanya koperasi sekolah (lintas sekolah se-Kab. Magetan).
+    const sellerNames = Array.from(new Set([...schools.map((sc) => sc.koperasi), ...products.map((p) => p.seller)]));
     const list = isAdmin
       ? Array.from(
           new Set([
