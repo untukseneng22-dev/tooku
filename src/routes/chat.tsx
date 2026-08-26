@@ -57,14 +57,15 @@ const seedThreads: Threads = {
   ],
 };
 
-function sellerReply(name: string) {
+function autoReply(name: string, asAdmin: boolean) {
+  if (asAdmin) return `Terima kasih infonya! Saya (${name}) akan ambil barangnya di koperasi sesuai kode pengambilan 🙏`;
   return name === KOPERASI
     ? "Pesan kamu diterima admin koperasi, akan dibalas pada jam operasional (07.00–15.00)."
     : "Siap kak! Barangnya masih tersedia. Silakan booking lewat aplikasi, pengambilan di koperasi sekolah ya 🙏";
 }
 
 function ChatPage() {
-  const { user } = useBaraka();
+  const { user, users, isAdmin } = useBaraka();
   const { penjual, produk } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [threads, setThreads] = useState<Threads>(seedThreads);
@@ -91,13 +92,21 @@ function ChatPage() {
     if (penjual) endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [penjual, threads]);
 
-  const sellers = useMemo(() => {
-    const fromProducts = Array.from(new Set(seedProducts.map((p) => p.seller)));
-    const all = Array.from(new Set([KOPERASI, ...Object.keys(threads), ...fromProducts]));
-    return all.filter((s) => s.toLowerCase().includes(q.trim().toLowerCase()));
-  }, [threads, q]);
+  // Pembeli hanya boleh chat ke koperasi sekolah (penjual resmi);
+  // admin koperasi bisa chat ke semua akun pembeli.
+  const contacts = useMemo(() => {
+    const list = isAdmin
+      ? Array.from(
+          new Set([
+            ...users.filter((u) => u.role === "buyer").map((u) => u.name),
+            ...Object.keys(threads).filter((k) => k !== KOPERASI && !seedProducts.some((p) => p.seller === k)),
+          ]),
+        )
+      : [KOPERASI];
+    return list.filter((s) => s.toLowerCase().includes(q.trim().toLowerCase()));
+  }, [isAdmin, users, threads, q]);
 
-  const active = penjual ?? null;
+  const active = penjual ? (isAdmin ? penjual : KOPERASI) : null;
   const messages = (active && threads[active]) || [];
 
   function send() {
@@ -112,7 +121,7 @@ function ChatPage() {
     setTimeout(() => {
       setThreads((prev) => ({
         ...prev,
-        [active]: [...(prev[active] ?? []), { id: `m${Date.now() + 1}`, from: "them", text: sellerReply(active), time }],
+        [active]: [...(prev[active] ?? []), { id: `m${Date.now() + 1}`, from: "them", text: autoReply(active, isAdmin), time }],
       }));
     }, 900);
   }
@@ -124,26 +133,29 @@ function ChatPage() {
           <div className="mx-auto max-w-2xl">
             <h1 className="text-lg font-extrabold tracking-tight">Chat</h1>
             <p className="text-[11px] opacity-80">
-              {user ? `Hai ${user.name.split(" ")[0]}, ` : ""}ngobrol dengan para penjual & admin koperasi
+              {user ? `Hai ${user.name.split(" ")[0]}, ` : ""}
+              {isAdmin ? "balas pertanyaan para pembeli" : "chat resmi dengan koperasi sekolah"}
             </p>
-            <div className="mt-4 flex items-center gap-2 rounded-2xl bg-card px-3 py-2.5">
-              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
-              <input
-                value={q}
-                onChange={(e) => setQ(e.target.value)}
-                placeholder="Cari penjual…"
-                className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-              />
-            </div>
+            {isAdmin && (
+              <div className="mt-4 flex items-center gap-2 rounded-2xl bg-card px-3 py-2.5">
+                <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+                <input
+                  value={q}
+                  onChange={(e) => setQ(e.target.value)}
+                  placeholder="Cari pembeli…"
+                  className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                />
+              </div>
+            )}
           </div>
         </header>
 
         <div className="mx-auto max-w-2xl px-4 py-4">
           <div className="space-y-2.5">
-            {sellers.length === 0 ? (
-              <p className="py-12 text-center text-sm text-muted-foreground">Penjual tidak ditemukan.</p>
+            {contacts.length === 0 ? (
+              <p className="py-12 text-center text-sm text-muted-foreground">{isAdmin ? "Pembeli tidak ditemukan." : "Belum ada kontak."}</p>
             ) : (
-              sellers.map((s) => {
+              contacts.map((s: string) => {
                 const msgs = threads[s] ?? [];
                 const last = msgs[msgs.length - 1];
                 return (
@@ -161,7 +173,11 @@ function ChatPage() {
                         {last && <span className="shrink-0 text-[10px] text-muted-foreground">{last.time}</span>}
                       </span>
                       <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">
-                        {last ? last.text : "Mulai percakapan tentang barangnya"}
+                        {last
+                          ? last.text
+                          : isAdmin
+                            ? "Mulai percakapan dengan pembeli"
+                            : "Tanya stok, ukuran, atau kondisi barang"}
                       </span>
                     </span>
                   </button>
@@ -202,7 +218,7 @@ function ChatPage() {
       <div className="mx-auto max-w-2xl space-y-2.5 px-4 py-4">
         {messages.length === 0 && (
           <p className="py-8 text-center text-[12px] text-muted-foreground">
-            Belum ada pesan. Sapa penjualnya dulu yuk!
+            Belum ada pesan. {isAdmin ? "Sapa pembelinya dulu yuk!" : "Sapa admin koperasinya dulu yuk!"}
           </p>
         )}
         {messages.map((m) => (
