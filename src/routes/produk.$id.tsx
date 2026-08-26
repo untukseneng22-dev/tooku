@@ -91,7 +91,12 @@ function ProductDetail() {
             </span>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-bold">{product.seller}</p>
-              <p className="text-[11px] text-muted-foreground">Penjual terverifikasi koperasi</p>
+              <p className="truncate text-[11px] text-muted-foreground">
+                {schoolById(product.schoolId)
+                  ? `${schoolById(product.schoolId)!.level} · Kec. ${schoolById(product.schoolId)!.district}`
+                  : "Koperasi sekolah terverifikasi"}
+                {product.contributor ? ` · titipan ${product.contributor}` : ""}
+              </p>
             </div>
             <Link
               to="/chat"
