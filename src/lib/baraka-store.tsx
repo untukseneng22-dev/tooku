@@ -1,8 +1,22 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from "react";
 import { seedProducts, type Product } from "./baraka-data";
 
-export type Role = "buyer" | "admin";
-export type User = { id: string; name: string; email: string; password: string; role: Role; kelas?: string };
+export type Role = "buyer" | "admin" | "superadmin";
+export type User = {
+  id: string;
+  name: string;
+  username: string;
+  email: string;
+  password: string;
+  role: Role;
+  kelas?: string;
+};
+
+export const roleLabel: Record<Role, string> = {
+  buyer: "Pembeli",
+  admin: "Admin Koperasi",
+  superadmin: "Super Admin",
+};
 
 export type OrderItem = { productId: string; name: string; price: number; qty: number };
 export type OrderStatus = "Booking" | "Diproses" | "Siap Diambil" | "Selesai" | "Dibatalkan";
