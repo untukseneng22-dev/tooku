@@ -148,10 +148,10 @@ function ChatPage() {
 
         <div className="mx-auto max-w-2xl px-4 py-4">
           <div className="space-y-2.5">
-            {sellers.length === 0 ? (
+            {contacts.length === 0 ? (
               <p className="py-12 text-center text-sm text-muted-foreground">Penjual tidak ditemukan.</p>
             ) : (
-              sellers.map((s) => {
+              contacts.map((s: string) => {
                 const msgs = threads[s] ?? [];
                 const last = msgs[msgs.length - 1];
                 return (
