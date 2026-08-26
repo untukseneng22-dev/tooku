@@ -35,17 +35,64 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "dashboard" | "orders" | "products" | "new";
+type Tab = "dashboard" | "orders" | "products" | "new" | "accounts";
 
-const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
+const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard; superOnly?: boolean }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "orders", label: "Pesanan", icon: ClipboardList },
   { id: "products", label: "Produk", icon: Boxes },
   { id: "new", label: "Tambah Produk", icon: PlusCircle },
+  { id: "accounts", label: "Akun & Transaksi", icon: Users, superOnly: true },
 ];
 
+function AccountsAdmin() {
+  const { users, orders, deleteUser, user } = useBaraka();
+  return (
+    <div className="space-y-4">
+      <div className="rounded-2xl border border-border bg-card p-4">
+        <h2 className="text-sm font-bold">Semua Akun</h2>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          Super Admin mengelola seluruh akun dan transaksi BARAKA.
+        </p>
+        <div className="mt-3 space-y-2">
+          {users.map((u) => {
+            const tx = orders.filter((o) => o.userId === u.id);
+            const total = tx.reduce((s, o) => s + o.total, 0);
+            return (
+              <div key={u.id} className="flex items-center gap-3 rounded-xl border border-border p-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary text-[11px] font-bold text-primary-foreground">
+                  {u.name.slice(0, 2).toUpperCase()}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold">{u.name}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">
+                    @{u.username} · {roleLabel[u.role]}
+                    {u.kelas ? ` · ${u.kelas}` : ""}
+                  </p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {tx.length} transaksi · {rupiah(total)}
+                  </p>
+                </div>
+                {u.id !== user?.id && (
+                  <button
+                    onClick={() => deleteUser(u.id)}
+                    aria-label={`Hapus akun ${u.name}`}
+                    className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-destructive/10 text-destructive"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function AdminPage() {
-  const { user, isAdmin, logout } = useBaraka();
+  const { user, isAdmin, isSuperAdmin, logout } = useBaraka();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("dashboard");
 
