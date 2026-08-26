@@ -2,6 +2,7 @@ import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ShieldCheck, User as UserIcon, ArrowLeft } from "lucide-react";
 import { useBaraka, type Role } from "@/lib/baraka-store";
+import logoAsset from "@/assets/tooku-logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
   head: () => ({
