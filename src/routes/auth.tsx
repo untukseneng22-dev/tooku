@@ -55,8 +55,10 @@ function AuthPage() {
         <Link to="/" className="inline-flex items-center gap-1.5 text-xs opacity-80">
           <ArrowLeft className="h-4 w-4" /> Kembali
         </Link>
-        <h1 className="mt-4 text-xl font-extrabold tracking-tight">TOOKU</h1>
-        <p className="text-xs opacity-80">Marketplace Koperasi Sekolah</p>
+        <div className="mt-4 flex items-center gap-3">
+          <img src={logoAsset.url} alt="Logo TOOKU" className="h-12 w-12 rounded-2xl shadow-sm" />
+          <p className="text-xs opacity-80">Marketplace Koperasi Sekolah</p>
+        </div>
       </header>
 
       <div className="mx-auto -mt-6 max-w-md px-4 pb-16">
