@@ -90,7 +90,7 @@ function Home() {
 
   return (
     <div className="min-h-screen bg-background pb-24">
-      <header className="sticky top-0 z-40 bg-primary px-3 pb-3 pt-3 text-primary-foreground shadow-sm">
+      <header className="sticky top-0 z-40 bg-primary relative px-3 pb-3 pt-3 text-primary-foreground shadow-sm">
         <div className="mx-auto max-w-2xl">
           <div className="flex items-center gap-2">
             <div className="relative flex min-w-0 flex-1 items-center gap-2 rounded-lg bg-card px-2.5 py-2">
@@ -217,7 +217,7 @@ function Home() {
 
       <div className="mx-auto max-w-2xl space-y-6 px-4">
         {/* Banner impact */}
-        <div className="-mt-4 overflow-hidden rounded-3xl bg-gradient-to-br from-accent to-accent/70 p-4 text-accent-foreground shadow-sm">
+        <div className="mt-4 overflow-hidden rounded-3xl bg-gradient-to-br from-accent to-accent/70 p-4 text-accent-foreground shadow-sm">
           <p className="text-[11px] font-bold uppercase tracking-wide opacity-80">Promo Awal Semester</p>
           <p className="mt-1 text-base font-extrabold leading-snug">Hemat hingga 70% untuk seragam & buku layak pakai</p>
           <p className="mt-1.5 flex items-center gap-1 text-[11px]">
