@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, BadgeCheck, MapPin, Clock, Check, X, Store, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
-import { rupiah } from "@/lib/baraka-data";
+import { rupiah, productSpecs } from "@/lib/baraka-data";
 import { ProductThumb, CuratedBadge, ProductCard } from "@/components/baraka/ui";
 
 export const Route = createFileRoute("/produk/$id")({
@@ -100,6 +100,39 @@ function ProductDetail() {
             >
               <MessageCircle className="h-3.5 w-3.5" /> Chat
             </Link>
+          </div>
+        </section>
+
+        <section className="space-y-3 border-b border-border px-4 py-5">
+          <h3 className="text-sm font-bold">Spesifikasi Barang</h3>
+          <div className="overflow-hidden rounded-2xl border border-border">
+            {productSpecs(product).map(([k, v], i) => (
+              <div
+                key={k}
+                className={`flex gap-3 px-3 py-2.5 text-xs ${i % 2 === 0 ? "bg-card" : "bg-secondary/50"}`}
+              >
+                <span className="w-32 shrink-0 text-muted-foreground">{k}</span>
+                <span className="min-w-0 flex-1 font-semibold">{v}</span>
+              </div>
+            ))}
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center">
+            <div className="rounded-2xl border border-border p-2.5">
+              <p className="text-sm font-extrabold text-primary">{product.sold}</p>
+              <p className="text-[10px] text-muted-foreground">Terjual</p>
+            </div>
+            <div className="rounded-2xl border border-border p-2.5">
+              <p className="text-sm font-extrabold text-primary">{product.stock}</p>
+              <p className="text-[10px] text-muted-foreground">Stok</p>
+            </div>
+            <div className="rounded-2xl border border-border p-2.5">
+              <p className="text-sm font-extrabold text-primary">
+                {product.originalPrice
+                  ? `-${Math.round((1 - product.price / product.originalPrice) * 100)}%`
+                  : "Hemat"}
+              </p>
+              <p className="text-[10px] text-muted-foreground">Dari harga baru</p>
+            </div>
           </div>
         </section>
 
