@@ -1,6 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, LogIn } from "lucide-react";
-import { useBaraka } from "@/lib/baraka-store";
+import { useBaraka, roleLabel } from "@/lib/baraka-store";
 import { rupiah } from "@/lib/baraka-data";
 
 export const Route = createFileRoute("/profil")({
