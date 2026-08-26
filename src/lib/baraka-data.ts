@@ -22,6 +22,7 @@ export type Product = {
   seller: string;
   sold: number;
   photo?: string;
+  specs?: Record<string, string>;
 };
 
 export const seedProducts: Product[] = [
@@ -39,6 +40,17 @@ export const seedProducts: Product[] = [
     featured: true,
     seller: "Alumni 2024 — Kelas XII IPA 2",
     sold: 12,
+    specs: {
+      "Jenis": "Seragam harian putih",
+      "Ukuran": "M (lebar dada 50 cm)",
+      "Bahan": "Katun oxford",
+      "Warna": "Putih",
+      "Kelas Asal": "XII IPA 2",
+      "Tahun Pakai": "2023–2024",
+      "Kelengkapan": "Kemeja + 1 badge nama lepasan",
+      "Perawatan": "Dicuci & disetrika koperasi",
+      "Garansi Tukar": "1x24 jam setelah pengambilan",
+    },
   },
   {
     id: "p2",
@@ -54,6 +66,17 @@ export const seedProducts: Product[] = [
     featured: true,
     seller: "Rafi — XII IPS 1",
     sold: 23,
+    specs: {
+      "Jenis": "Buku pelajaran",
+      "Mata Pelajaran": "Matematika",
+      "Kelas": "XI",
+      "Kurikulum": "Merdeka",
+      "Penerbit": "Erlangga",
+      "Tahun Terbit": "2022",
+      "Jumlah Halaman": "248 halaman",
+      "Kelengkapan": "Isi lengkap, tanpa halaman lepas",
+      "Garansi Tukar": "1x24 jam setelah pengambilan",
+    },
   },
   {
     id: "p3",
@@ -69,6 +92,17 @@ export const seedProducts: Product[] = [
     featured: false,
     seller: "Alumni 2025",
     sold: 5,
+    specs: {
+      "Jenis": "Rok seragam lipit",
+      "Ukuran": "L (pinggang 72–78 cm)",
+      "Bahan": "Poliester wool",
+      "Warna": "Abu-abu",
+      "Panjang": "75 cm",
+      "Tahun Pakai": "2024–2025",
+      "Kelengkapan": "Rok + karet pinggang",
+      "Perawatan": "Dry clean koperasi",
+      "Garansi Tukar": "1x24 jam setelah pengambilan",
+    },
   },
   {
     id: "p4",
@@ -84,6 +118,16 @@ export const seedProducts: Product[] = [
     featured: true,
     seller: "Koperasi — Donasi Alumni",
     sold: 31,
+    specs: {
+      "Jenis": "Atribut sekolah",
+      "Isi Paket": "1 topi + 1 ikat pinggang",
+      "Ukuran Topi": "All size (tali setelan)",
+      "Bahan": "Drill & kulit sintetis",
+      "Warna": "Navy",
+      "Kelengkapan": "Logo bordir sekolah",
+      "Perawatan": "Disterilkan uap",
+      "Garansi Tukar": "1x24 jam setelah pengambilan",
+    },
   },
   {
     id: "p5",
@@ -98,6 +142,15 @@ export const seedProducts: Product[] = [
     featured: false,
     seller: "Nadia — XI IPA 3",
     sold: 18,
+    specs: {
+      "Jenis": "Alat tulis",
+      "Isi Paket": "1 kotak pensil + 4 penggaris geometri",
+      "Bahan": "Kanvas & plastik",
+      "Ukuran": "21 x 9 cm",
+      "Warna": "Biru navy",
+      "Kelengkapan": "Zipper berfungsi normal",
+      "Garansi Tukar": "1x24 jam setelah pengambilan",
+    },
   },
   {
     id: "p6",
@@ -113,6 +166,17 @@ export const seedProducts: Product[] = [
     featured: false,
     seller: "Bima — XI IPS 2",
     sold: 9,
+    specs: {
+      "Jenis": "Buku latihan (workbook)",
+      "Mata Pelajaran": "Bahasa Inggris",
+      "Kelas": "X",
+      "Kurikulum": "Merdeka",
+      "Penerbit": "Yudhistira",
+      "Tahun Terbit": "2021",
+      "Jumlah Halaman": "160 halaman",
+      "Kelengkapan": "Isi lengkap, sebagian terisi pensil",
+      "Garansi Tukar": "1x24 jam setelah pengambilan",
+    },
   },
   {
     id: "p7",
@@ -127,6 +191,16 @@ export const seedProducts: Product[] = [
     featured: true,
     seller: "Koperasi Sekolah",
     sold: 27,
+    specs: {
+      "Jenis": "Atribut sekolah",
+      "Model": "Dasi karet siap pakai",
+      "Ukuran": "All size",
+      "Bahan": "Poliester",
+      "Warna": "Navy",
+      "Kelengkapan": "Dasi + karet elastis",
+      "Perawatan": "Dicuci koperasi",
+      "Garansi Tukar": "1x24 jam setelah pengambilan",
+    },
   },
   {
     id: "p8",
@@ -142,8 +216,30 @@ export const seedProducts: Product[] = [
     featured: false,
     seller: "Alumni 2024",
     sold: 6,
+    specs: {
+      "Jenis": "Seragam batik sekolah",
+      "Ukuran": "S (lebar dada 46 cm)",
+      "Bahan": "Katun primis",
+      "Warna": "Batik cokelat navy",
+      "Tahun Pakai": "2023–2024",
+      "Kelengkapan": "Kemeja batik lengan pendek",
+      "Perawatan": "Dicuci & disetrika koperasi",
+      "Garansi Tukar": "1x24 jam setelah pengambilan",
+    },
   },
 ];
 
 export const rupiah = (n: number) =>
   "Rp" + n.toLocaleString("id-ID", { maximumFractionDigits: 0 });
+
+export const productSpecs = (p: Product): [string, string][] => {
+  const base: Record<string, string> = {
+    Kategori: p.category,
+    Kondisi: p.condition,
+    "Stok Tersedia": `${p.stock} unit`,
+    Penjual: p.seller,
+    Kurasi: p.curated ? "Lolos kurasi koperasi" : "Belum dikurasi",
+    "Lokasi Ambil": "Koperasi Sekolah — Gedung B lt. 1",
+  };
+  return Object.entries({ ...base, ...(p.specs ?? {}) });
+};
