@@ -61,8 +61,12 @@ function Home() {
       <header className="bg-primary px-4 pb-6 pt-5 text-primary-foreground">
         <div className="mx-auto max-w-2xl">
           <div className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3">
-            <div className="min-w-0">
-              <p className="truncate text-lg font-extrabold tracking-tight">TOOKU</p>
+            <div className="flex min-w-0 items-center gap-2.5">
+              <img
+                src={logoAsset.url}
+                alt="Logo TOOKU"
+                className="h-10 w-10 shrink-0 rounded-2xl shadow-sm"
+              />
               <p className="truncate text-[11px] opacity-80">Marketplace Koperasi Sekolah</p>
             </div>
             <Link
