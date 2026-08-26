@@ -342,13 +342,17 @@ export const rupiah = (n: number) =>
   "Rp" + n.toLocaleString("id-ID", { maximumFractionDigits: 0 });
 
 export const productSpecs = (p: Product): [string, string][] => {
+  const school = schoolById(p.schoolId);
   const base: Record<string, string> = {
     Kategori: p.category,
     Kondisi: p.condition,
     "Stok Tersedia": `${p.stock} unit`,
-    Penjual: p.seller,
+    "Penjual (Koperasi)": p.seller,
+    "Sekolah Asal": school ? `${school.name} (${school.level})` : "-",
+    Kecamatan: school?.district ?? "-",
+    ...(p.contributor ? { "Barang Titipan": p.contributor } : {}),
     Kurasi: p.curated ? "Lolos kurasi koperasi" : "Belum dikurasi",
-    "Lokasi Ambil": "Koperasi Sekolah — Gedung B lt. 1",
+    "Lokasi Ambil": school?.pickup ?? "Koperasi Sekolah",
   };
   return Object.entries({ ...base, ...(p.specs ?? {}) });
 };
