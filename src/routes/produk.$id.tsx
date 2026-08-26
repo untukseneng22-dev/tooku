@@ -2,7 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, BadgeCheck, MapPin, Clock, Check, X, Store, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
-import { rupiah, productSpecs } from "@/lib/baraka-data";
+import { rupiah, productSpecs, schoolById } from "@/lib/baraka-data";
 import { ProductThumb, CuratedBadge, ProductCard } from "@/components/baraka/ui";
 
 export const Route = createFileRoute("/produk/$id")({
