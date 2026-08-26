@@ -23,7 +23,7 @@ function AuthPage() {
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [role, setRole] = useState<Role>("buyer");
-  const [form, setForm] = useState({ name: "", kelas: "", email: "", password: "" });
+  const [form, setForm] = useState({ name: "", kelas: "", username: "", email: "", password: "" });
   const [error, setError] = useState("");
 
   const field = "w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm";
@@ -33,9 +33,10 @@ function AuthPage() {
     setError("");
     const res =
       mode === "login"
-        ? login(form.email, form.password)
+        ? login(form.username, form.password)
         : register({
             name: form.name.trim().slice(0, 60),
+            username: form.username.trim().slice(0, 24),
             email: form.email.trim().slice(0, 120),
             password: form.password,
             role,
@@ -45,7 +46,7 @@ function AuthPage() {
       setError(res.error ?? "Gagal masuk.");
       return;
     }
-    navigate({ to: res.role === "admin" ? "/admin" : "/" });
+    navigate({ to: res.role === "buyer" ? "/" : "/admin" });
   };
 
   return (
