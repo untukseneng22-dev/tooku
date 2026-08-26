@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, MessageCircle, Search, Send, Store } from "lucide-react";
 import { useBaraka } from "@/lib/baraka-store";
-import { seedProducts } from "@/lib/baraka-data";
 
 export const Route = createFileRoute("/chat")({
   validateSearch: (
@@ -65,7 +64,7 @@ function autoReply(name: string, asAdmin: boolean) {
 }
 
 function ChatPage() {
-  const { user, users, isAdmin } = useBaraka();
+  const { user, users, isAdmin, products } = useBaraka();
   const { penjual, produk } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [threads, setThreads] = useState<Threads>(seedThreads);
@@ -92,21 +91,22 @@ function ChatPage() {
     if (penjual) endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [penjual, threads]);
 
-  // Pembeli hanya boleh chat ke koperasi sekolah (penjual resmi);
-  // admin koperasi bisa chat ke semua akun pembeli.
+  // Pembeli bisa chat langsung ke admin koperasi & para penjual (seller) barang;
+  // admin koperasi melihat semua percakapan dari pembeli.
   const contacts = useMemo(() => {
+    const sellerNames = Array.from(new Set(products.map((p) => p.seller)));
     const list = isAdmin
       ? Array.from(
           new Set([
             ...users.filter((u) => u.role === "buyer").map((u) => u.name),
-            ...Object.keys(threads).filter((k) => k !== KOPERASI && !seedProducts.some((p) => p.seller === k)),
+            ...Object.keys(threads).filter((k) => k !== KOPERASI && !sellerNames.includes(k)),
           ]),
         )
-      : [KOPERASI];
+      : Array.from(new Set([KOPERASI, ...sellerNames, ...Object.keys(threads)]));
     return list.filter((s) => s.toLowerCase().includes(q.trim().toLowerCase()));
-  }, [isAdmin, users, threads, q]);
+  }, [isAdmin, users, threads, q, products]);
 
-  const active = penjual ? (isAdmin ? penjual : KOPERASI) : null;
+  const active = penjual ?? null;
   const messages = (active && threads[active]) || [];
 
   function send() {
@@ -134,15 +134,15 @@ function ChatPage() {
             <h1 className="text-lg font-extrabold tracking-tight">Chat</h1>
             <p className="text-[11px] opacity-80">
               {user ? `Hai ${user.name.split(" ")[0]}, ` : ""}
-              {isAdmin ? "balas pertanyaan para pembeli" : "chat resmi dengan koperasi sekolah"}
+              {isAdmin ? "balas pertanyaan para pembeli" : "tanya langsung ke penjual & admin koperasi"}
             </p>
-            {isAdmin && (
+            {(
               <div className="mt-4 flex items-center gap-2 rounded-2xl bg-card px-3 py-2.5">
                 <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
                 <input
                   value={q}
                   onChange={(e) => setQ(e.target.value)}
-                  placeholder="Cari pembeli…"
+                  placeholder={isAdmin ? "Cari pembeli…" : "Cari penjual atau koperasi…"}
                   className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 />
               </div>
@@ -153,7 +153,7 @@ function ChatPage() {
         <div className="mx-auto max-w-2xl px-4 py-4">
           <div className="space-y-2.5">
             {contacts.length === 0 ? (
-              <p className="py-12 text-center text-sm text-muted-foreground">{isAdmin ? "Pembeli tidak ditemukan." : "Belum ada kontak."}</p>
+              <p className="py-12 text-center text-sm text-muted-foreground">{isAdmin ? "Pembeli tidak ditemukan." : "Penjual tidak ditemukan."}</p>
             ) : (
               contacts.map((s: string) => {
                 const msgs = threads[s] ?? [];
