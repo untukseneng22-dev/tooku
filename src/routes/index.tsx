@@ -67,7 +67,7 @@ function Home() {
             </div>
             <Link
               to="/notifikasi"
-              search={{ tab: "chat" }}
+              search={{ }}
               aria-label="Chat"
               className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15"
             >
