@@ -57,7 +57,8 @@ const seedThreads: Threads = {
   ],
 };
 
-function sellerReply(name: string) {
+function autoReply(name: string, asAdmin: boolean) {
+  if (asAdmin) return `Terima kasih infonya! Saya (${name}) akan ambil barangnya di koperasi sesuai kode pengambilan 🙏`;
   return name === KOPERASI
     ? "Pesan kamu diterima admin koperasi, akan dibalas pada jam operasional (07.00–15.00)."
     : "Siap kak! Barangnya masih tersedia. Silakan booking lewat aplikasi, pengambilan di koperasi sekolah ya 🙏";
