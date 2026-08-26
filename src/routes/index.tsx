@@ -412,6 +412,8 @@ function Home() {
                   setMaxPrice(50000);
                   setMinCondition(0);
                   setSort("populer");
+                  setLevel("Semua");
+                  setSchoolId("Semua");
                 }}
                 className="w-full rounded-xl border border-border py-2 text-[11px] font-bold text-muted-foreground"
               >
