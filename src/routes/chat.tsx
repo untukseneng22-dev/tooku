@@ -173,7 +173,11 @@ function ChatPage() {
                         {last && <span className="shrink-0 text-[10px] text-muted-foreground">{last.time}</span>}
                       </span>
                       <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">
-                        {last ? last.text : "{isAdmin ? "Mulai percakapan dengan pembeli" : "Tanya stok, ukuran, atau kondisi barang"}"}
+                        {last
+                          ? last.text
+                          : isAdmin
+                            ? "Mulai percakapan dengan pembeli"
+                            : "Tanya stok, ukuran, atau kondisi barang"}
                       </span>
                     </span>
                   </button>
