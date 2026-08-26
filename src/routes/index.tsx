@@ -14,6 +14,8 @@ import { useRef, useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
 import { categories, type Category } from "@/lib/baraka-data";
 import { ProductCard } from "@/components/baraka/ui";
+import { PromoCarousel } from "@/components/baraka/promo-carousel";
+import { HScroll, ScrollDownHint } from "@/components/baraka/scroll-hint";
 
 export const Route = createFileRoute("/")({
   head: () => ({
