@@ -14,6 +14,7 @@ import { reportLovableError } from "../lib/lovable-error-reporting";
 import { BarakaProvider } from "@/lib/baraka-store";
 import { BottomNav } from "@/components/baraka/ui";
 import { BarakaErrorBoundary } from "@/components/baraka/baraka-error-boundary";
+import { SplashScreen } from "@/components/baraka/splash-screen";
 
 function NotFoundComponent() {
   return (
