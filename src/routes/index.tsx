@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Search, Zap, ShieldCheck, SlidersHorizontal, Bell } from "lucide-react";
+import { Search, Zap, ShieldCheck, SlidersHorizontal, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
 import { categories, type Category } from "@/lib/baraka-data";
@@ -67,10 +67,11 @@ function Home() {
             </div>
             <Link
               to="/notifikasi"
-              aria-label="Notifikasi"
+              search={{ tab: "chat" }}
+              aria-label="Chat"
               className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15"
             >
-              <Bell className="h-4 w-4" />
+              <MessageCircle className="h-4 w-4" />
             </Link>
           </div>
 
