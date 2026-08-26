@@ -6,13 +6,14 @@ import {
   SlidersHorizontal,
   MessageCircle,
   ShoppingCart,
+  Store,
   TrendingUp,
   Clock,
   X as XIcon,
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
-import { categories, type Category } from "@/lib/baraka-data";
+import { categories, schools, schoolById, type Category, type SchoolLevel } from "@/lib/baraka-data";
 import { ProductCard } from "@/components/baraka/ui";
 import { PromoCarousel } from "@/components/baraka/promo-carousel";
 import { HScroll, ScrollDownHint } from "@/components/baraka/scroll-hint";
@@ -45,6 +46,8 @@ function Home() {
   const [minCondition, setMinCondition] = useState(0);
   const [sort, setSort] = useState<"populer" | "termurah" | "termahal" | "kondisi">("populer");
   const [focused, setFocused] = useState(false);
+  const [level, setLevel] = useState<SchoolLevel | "Semua">("Semua");
+  const [schoolId, setSchoolId] = useState<string | "Semua">("Semua");
   const [recent, setRecent] = useState<string[]>(["seragam putih", "buku matematika"]);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -73,6 +76,8 @@ function Home() {
     .filter(
       (p) =>
         (cat === "Semua" || p.category === cat) &&
+        (schoolId === "Semua" || p.schoolId === schoolId) &&
+        (level === "Semua" || schoolById(p.schoolId)?.level === level) &&
         p.price <= maxPrice &&
         conditionPct(p.condition) >= minCondition &&
         (p.name.toLowerCase().includes(query.toLowerCase()) ||
@@ -87,7 +92,13 @@ function Home() {
             ? conditionPct(b.condition) - conditionPct(a.condition)
             : b.sold - a.sold,
     );
-  const activeFilters = (maxPrice < 50000 ? 1 : 0) + (minCondition > 0 ? 1 : 0) + (sort !== "populer" ? 1 : 0);
+  const activeFilters =
+    (maxPrice < 50000 ? 1 : 0) +
+    (minCondition > 0 ? 1 : 0) +
+    (sort !== "populer" ? 1 : 0) +
+    (level !== "Semua" ? 1 : 0) +
+    (schoolId !== "Semua" ? 1 : 0);
+  const visibleSchools = schools.filter((sc) => level === "Semua" || sc.level === level);
   const featured = products.filter((p) => p.featured).slice(0, 6);
 
   return (
@@ -241,6 +252,59 @@ function Home() {
               );
             })}
           </HScroll>
+        </section>
+
+        {/* Koperasi sekolah penjual (lintas sekolah se-Kab. Magetan) */}
+        <section>
+          <div className="mb-2 flex items-center gap-2">
+            <Store className="h-4 w-4 text-primary" />
+            <h2 className="text-sm font-bold">Koperasi Sekolah se-Magetan</h2>
+            <span className="ml-auto text-[10px] font-semibold text-muted-foreground">Geser →</span>
+          </div>
+          <div className="mb-2 flex flex-wrap gap-1.5">
+            {(["Semua", "SD", "SMP", "SMA", "SMK"] as const).map((lv) => (
+              <button
+                key={lv}
+                onClick={() => {
+                  setLevel(lv as SchoolLevel | "Semua");
+                  setSchoolId("Semua");
+                }}
+                className={`rounded-full border px-3 py-1 text-[11px] font-bold ${
+                  level === lv ? "border-primary bg-primary text-primary-foreground" : "border-border bg-card text-muted-foreground"
+                }`}
+              >
+                {lv}
+              </button>
+            ))}
+          </div>
+          <HScroll className="gap-2.5 pb-1">
+            {visibleSchools.map((sc) => {
+              const active = schoolId === sc.id;
+              return (
+                <button
+                  key={sc.id}
+                  onClick={() => setSchoolId(active ? "Semua" : sc.id)}
+                  className={`w-40 shrink-0 rounded-2xl border p-3 text-left ${
+                    active ? "border-primary bg-primary/5" : "border-border bg-card"
+                  }`}
+                >
+                  <span className="inline-flex rounded-full bg-accent/20 px-2 py-0.5 text-[9px] font-bold text-accent-foreground">
+                    {sc.level}
+                  </span>
+                  <p className="mt-1.5 line-clamp-2 text-[11px] font-bold leading-snug">{sc.name}</p>
+                  <p className="mt-0.5 truncate text-[10px] text-muted-foreground">Kec. {sc.district}</p>
+                </button>
+              );
+            })}
+          </HScroll>
+          {schoolId !== "Semua" && (
+            <p className="mt-2 text-[11px] text-muted-foreground">
+              Menampilkan barang dari {schoolById(schoolId)?.koperasi}.{" "}
+              <button onClick={() => setSchoolId("Semua")} className="font-bold text-primary">
+                Lihat semua sekolah
+              </button>
+            </p>
+          )}
         </section>
 
         {/* Unggulan */}
