@@ -158,6 +158,7 @@ type Store = {
 
 type BarakaContextRegistry = typeof globalThis & {
   __barakaStoreContext?: Context<Store | null>;
+  __barakaActiveProviderCount?: number;
 };
 
 // Keep one context identity across route chunk loading and Vite hot updates.
@@ -170,6 +171,20 @@ const KEY = "baraka-state-v3";
 
 export function BarakaProvider({ children }: { children: ReactNode }) {
   const parentStore = useContext(StoreContext);
+
+  if (parentStore) {
+    if (import.meta.env.DEV) {
+      console.error(
+        "[BARAKA] Duplicate BarakaProvider blocked. Keep exactly one provider at the application root.",
+      );
+    }
+    return children;
+  }
+
+  return <BarakaStoreProvider>{children}</BarakaStoreProvider>;
+}
+
+function BarakaStoreProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(seedProducts);
   const [cart, setCart] = useState<CartLine[]>([]);
   const [orders, setOrders] = useState<Order[]>(seedOrders);
@@ -178,6 +193,15 @@ export function BarakaProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
+    if (import.meta.env.DEV) {
+      contextRegistry.__barakaActiveProviderCount = (contextRegistry.__barakaActiveProviderCount ?? 0) + 1;
+      if (contextRegistry.__barakaActiveProviderCount > 1) {
+        console.error(
+          "[BARAKA] Multiple active BarakaProvider instances detected during hot reload.",
+        );
+      }
+    }
+
     try {
       const raw = localStorage.getItem(KEY);
       if (raw) {
@@ -192,6 +216,15 @@ export function BarakaProvider({ children }: { children: ReactNode }) {
       /* ignore */
     }
     setHydrated(true);
+
+    return () => {
+      if (import.meta.env.DEV) {
+        contextRegistry.__barakaActiveProviderCount = Math.max(
+          0,
+          (contextRegistry.__barakaActiveProviderCount ?? 1) - 1,
+        );
+      }
+    };
   }, []);
 
   useEffect(() => {
@@ -332,15 +365,6 @@ export function BarakaProvider({ children }: { children: ReactNode }) {
     }),
     [products, cart, orders, users, user, addToCart],
   );
-
-  if (parentStore) {
-    if (import.meta.env.DEV) {
-      console.error(
-        "[BARAKA] Duplicate BarakaProvider blocked. Keep exactly one provider at the application root.",
-      );
-    }
-    return children;
-  }
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
