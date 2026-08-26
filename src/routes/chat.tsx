@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, MessageCircle, Search, Send, Store } from "lucide-react";
 import { useBaraka } from "@/lib/baraka-store";
@@ -246,10 +246,6 @@ function ChatPage() {
           </button>
         </div>
       </div>
-
-      <Link to="/chat" className="sr-only">
-        Daftar chat
-      </Link>
     </div>
   );
 }
