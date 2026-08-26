@@ -366,6 +366,7 @@ function Home() {
           )}
         </section>
       </div>
+      <ScrollDownHint label="Masih ada di bawah" />
     </div>
   );
 }
