@@ -5,11 +5,18 @@
   "description": "Marketplace barang sekolah bekas layak pakai yang dikurasi koperasi sekolah se-Magetan.",
   "start_url": "/",
   "display": "standalone",
-  "display_override": ["standalone", "fullscreen"],
+  "display_override": [
+    "standalone",
+    "fullscreen"
+  ],
   "orientation": "portrait",
   "background_color": "#ffffff",
   "theme_color": "#1e40af",
-  "categories": ["shopping", "education", "lifestyle"],
+  "categories": [
+    "shopping",
+    "education",
+    "lifestyle"
+  ],
   "lang": "id",
   "dir": "ltr",
   "scope": "/",
@@ -29,6 +36,12 @@
     {
       "src": "/maskable-icon-192x192.png",
       "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "/maskable-icon-512x512.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }
