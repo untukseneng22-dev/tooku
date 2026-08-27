@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ChevronRight, Clock, MapPin, Store } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, ChevronRight, Clock, MapPin, Search, Store } from "lucide-react";
 import { ratingSummary, schools } from "@/lib/tooku-data";
 import { useTooku } from "@/lib/tooku-store";
 import { Stars } from "@/components/tooku/ui";
