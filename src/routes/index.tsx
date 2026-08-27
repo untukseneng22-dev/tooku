@@ -133,21 +133,6 @@ function Home() {
                   <XIcon className="h-4 w-4" />
                 </button>
               )}
-              <button
-                onClick={() => {
-                  setShowFilter(true);
-                  setFocused(false);
-                }}
-                aria-label="Filter pencarian"
-                className="relative flex shrink-0 items-center gap-1 border-l border-border pl-2 text-primary"
-              >
-                <SlidersHorizontal className="h-4 w-4" />
-                {activeFilters > 0 && (
-                  <span className="absolute -right-1.5 -top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
-                    {activeFilters}
-                  </span>
-                )}
-              </button>
             </div>
 
             <Link
