@@ -83,6 +83,8 @@ function ProfilePage() {
             </div>
           </div>
 
+          <InstallAppCard />
+
           <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
             <Link to="/pusat" className="flex items-center gap-3 bg-secondary/50 p-4 text-sm font-semibold">
               <LayoutDashboard className="h-4 w-4 text-primary" /> Konsol Admin Pusat
@@ -152,6 +154,8 @@ function ProfilePage() {
             untuk beasiswa siswa.
           </p>
         </div>
+
+        <InstallAppCard />
 
         <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
           <Link to="/pesanan" className="flex items-center gap-3 p-4 text-sm">
