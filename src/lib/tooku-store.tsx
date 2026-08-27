@@ -18,6 +18,7 @@ import {
 } from "./tooku-data";
 
 export type Role = "buyer" | "admin" | "superadmin";
+export type AccountStatus = "aktif" | "menunggu" | "ditolak";
 export type User = {
   id: string;
   name: string;
@@ -26,6 +27,9 @@ export type User = {
   password: string;
   role: Role;
   kelas?: string;
+  status: AccountStatus;
+  registeredAt: number;
+  note?: string;
 };
 
 export const roleLabel: Record<Role, string> = {
@@ -68,6 +72,8 @@ const seedUsers: User[] = [
     password: "123456",
     role: "buyer",
     kelas: "X IPA 1",
+    status: "aktif",
+    registeredAt: Date.now() - 1000 * 60 * 60 * 24 * 30,
   },
   {
     id: "u2",
@@ -77,6 +83,8 @@ const seedUsers: User[] = [
     password: "magetanngangeni",
     role: "buyer",
     kelas: "XI IPS 2",
+    status: "aktif",
+    registeredAt: Date.now() - 1000 * 60 * 60 * 24 * 20,
   },
   {
     id: "u3",
@@ -85,6 +93,8 @@ const seedUsers: User[] = [
     email: "smaspgrimaospati@koperasi.id",
     password: "magetanngangeni",
     role: "admin",
+    status: "aktif",
+    registeredAt: Date.now() - 1000 * 60 * 60 * 24 * 25,
   },
   {
     id: "u4",
@@ -93,6 +103,29 @@ const seedUsers: User[] = [
     email: "pusat@tooku.id",
     password: "tookupusat2026",
     role: "superadmin",
+    status: "aktif",
+    registeredAt: Date.now() - 1000 * 60 * 60 * 24 * 60,
+  },
+  {
+    id: "u5",
+    name: "Koperasi SMKN 1 Magetan",
+    username: "smkn1magetan",
+    email: "smkn1magetan@koperasi.id",
+    password: "magetan2026",
+    role: "admin",
+    status: "menunggu",
+    registeredAt: Date.now() - 1000 * 60 * 60 * 5,
+  },
+  {
+    id: "u6",
+    name: "Dwi Lestari",
+    username: "dwilestari",
+    email: "dwi@sekolah.id",
+    password: "dwi12345",
+    role: "buyer",
+    kelas: "IX B",
+    status: "menunggu",
+    registeredAt: Date.now() - 1000 * 60 * 60 * 2,
   },
 ];
 
@@ -148,8 +181,13 @@ type Store = {
   isAdmin: boolean;
   isSuperAdmin: boolean;
   login: (identifier: string, password: string) => { ok: boolean; error?: string; role?: Role };
-  register: (input: Omit<User, "id">) => { ok: boolean; error?: string; role?: Role };
+  register: (
+    input: Omit<User, "id" | "status" | "registeredAt">,
+  ) => { ok: boolean; error?: string; role?: Role; pending?: boolean };
   deleteUser: (id: string) => void;
+  pendingUsers: User[];
+  approveUser: (id: string) => void;
+  rejectUser: (id: string, note?: string) => void;
   logout: () => void;
   addToCart: (id: string, qty?: number) => void;
   removeFromCart: (id: string) => void;
@@ -227,7 +265,14 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         if (p.reviews) setReviews(p.reviews);
         if (p.cart) setCart(p.cart);
         if (p.orders) setOrders(p.orders);
-        if (p.users) setUsers(p.users);
+        if (p.users)
+          setUsers(
+            (p.users as User[]).map((u) => ({
+              ...u,
+              status: u.status ?? "aktif",
+              registeredAt: u.registeredAt ?? Date.now(),
+            })),
+          );
         if (p.userId !== undefined) setUserId(p.userId);
       }
     } catch {
@@ -287,6 +332,10 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         const found = users.find((u) => u.username.toLowerCase() === key || u.email.toLowerCase() === key);
         if (!found) return { ok: false, error: "Akun tidak ditemukan." };
         if (found.password !== password) return { ok: false, error: "Password salah." };
+        if (found.status === "menunggu")
+          return { ok: false, error: "Akun masih menunggu persetujuan Admin Pusat TOOKU." };
+        if (found.status === "ditolak")
+          return { ok: false, error: "Pendaftaran akun ini ditolak Admin Pusat. Hubungi call center TOOKU." };
         setUserId(found.id);
         return { ok: true, role: found.role };
       },
@@ -298,10 +347,27 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           return { ok: false, error: "Username sudah dipakai." };
         if (users.some((u) => u.email.toLowerCase() === input.email.trim().toLowerCase()))
           return { ok: false, error: "Email sudah terdaftar." };
-        const newUser: User = { ...input, id: "u" + Date.now(), username: uname, email: input.email.trim() };
+        const newUser: User = {
+          ...input,
+          id: "u" + Date.now(),
+          username: uname,
+          email: input.email.trim(),
+          status: "menunggu",
+          registeredAt: Date.now(),
+        };
         setUsers((us) => [...us, newUser]);
-        setUserId(newUser.id);
-        return { ok: true, role: newUser.role };
+        return { ok: true, role: newUser.role, pending: true };
+      },
+      pendingUsers: users.filter((u) => u.status === "menunggu"),
+      approveUser: (id) => {
+        if (user?.role !== "superadmin") return;
+        setUsers((us) => us.map((u) => (u.id === id ? { ...u, status: "aktif" } : u)));
+      },
+      rejectUser: (id, note) => {
+        if (user?.role !== "superadmin") return;
+        setUsers((us) =>
+          us.map((u) => (u.id === id ? { ...u, status: "ditolak", ...(note ? { note } : {}) } : u)),
+        );
       },
       deleteUser: (id) => {
         if (user?.role !== "superadmin" || id === user.id) return;
