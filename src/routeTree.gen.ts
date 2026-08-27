@@ -17,6 +17,7 @@ import { Route as KeranjangRouteImport } from './routes/keranjang'
 import { Route as NotifikasiRouteImport } from './routes/notifikasi'
 import { Route as PesananRouteImport } from './routes/pesanan'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as PusatRouteImport } from './routes/pusat'
 import { Route as KoperasiIndexRouteImport } from './routes/koperasi.index'
 import { Route as KoperasiIdRouteImport } from './routes/koperasi.$id'
 import { Route as ProdukIdRouteImport } from './routes/produk.$id'
@@ -61,6 +62,11 @@ const ProfilRoute = ProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const PusatRoute = PusatRouteImport.update({
+  id: '/pusat',
+  path: '/pusat',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const KoperasiIndexRoute = KoperasiIndexRouteImport.update({
   id: '/koperasi/',
   path: '/koperasi/',
@@ -86,6 +92,7 @@ export interface FileRoutesByFullPath {
   '/notifikasi': typeof NotifikasiRoute
   '/pesanan': typeof PesananRoute
   '/profil': typeof ProfilRoute
+  '/pusat': typeof PusatRoute
   '/koperasi/$id': typeof KoperasiIdRoute
   '/produk/$id': typeof ProdukIdRoute
   '/koperasi/': typeof KoperasiIndexRoute
@@ -99,6 +106,7 @@ export interface FileRoutesByTo {
   '/notifikasi': typeof NotifikasiRoute
   '/pesanan': typeof PesananRoute
   '/profil': typeof ProfilRoute
+  '/pusat': typeof PusatRoute
   '/koperasi/$id': typeof KoperasiIdRoute
   '/produk/$id': typeof ProdukIdRoute
   '/koperasi': typeof KoperasiIndexRoute
@@ -113,6 +121,7 @@ export interface FileRoutesById {
   '/notifikasi': typeof NotifikasiRoute
   '/pesanan': typeof PesananRoute
   '/profil': typeof ProfilRoute
+  '/pusat': typeof PusatRoute
   '/koperasi/$id': typeof KoperasiIdRoute
   '/produk/$id': typeof ProdukIdRoute
   '/koperasi/': typeof KoperasiIndexRoute
@@ -128,6 +137,7 @@ export interface FileRouteTypes {
     | '/notifikasi'
     | '/pesanan'
     | '/profil'
+    | '/pusat'
     | '/koperasi/$id'
     | '/produk/$id'
     | '/koperasi/'
@@ -141,6 +151,7 @@ export interface FileRouteTypes {
     | '/notifikasi'
     | '/pesanan'
     | '/profil'
+    | '/pusat'
     | '/koperasi/$id'
     | '/produk/$id'
     | '/koperasi'
@@ -154,6 +165,7 @@ export interface FileRouteTypes {
     | '/notifikasi'
     | '/pesanan'
     | '/profil'
+    | '/pusat'
     | '/koperasi/$id'
     | '/produk/$id'
     | '/koperasi/'
@@ -168,6 +180,7 @@ export interface RootRouteChildren {
   NotifikasiRoute: typeof NotifikasiRoute
   PesananRoute: typeof PesananRoute
   ProfilRoute: typeof ProfilRoute
+  PusatRoute: typeof PusatRoute
   KoperasiIdRoute: typeof KoperasiIdRoute
   ProdukIdRoute: typeof ProdukIdRoute
   KoperasiIndexRoute: typeof KoperasiIndexRoute
@@ -231,6 +244,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/pusat': {
+      id: '/pusat'
+      path: '/pusat'
+      fullPath: '/pusat'
+      preLoaderRoute: typeof PusatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/koperasi/': {
       id: '/koperasi/'
       path: '/koperasi'
@@ -264,6 +284,7 @@ const rootRouteChildren: RootRouteChildren = {
   NotifikasiRoute: NotifikasiRoute,
   PesananRoute: PesananRoute,
   ProfilRoute: ProfilRoute,
+  PusatRoute: PusatRoute,
   KoperasiIdRoute: KoperasiIdRoute,
   ProdukIdRoute: ProdukIdRoute,
   KoperasiIndexRoute: KoperasiIndexRoute,

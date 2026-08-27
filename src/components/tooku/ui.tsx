@@ -117,8 +117,10 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { cart } = useTooku();
-  if (pathname.startsWith("/admin") || pathname.startsWith("/auth")) return null;
+  const { cart, isSuperAdmin } = useTooku();
+  // Admin Pusat memakai konsol sendiri, bukan navigasi pembeli.
+  if (isSuperAdmin) return null;
+  if (pathname.startsWith("/admin") || pathname.startsWith("/pusat") || pathname.startsWith("/auth")) return null;
 
   const cartCount = cart.reduce((s, l) => s + l.qty, 0);
 
