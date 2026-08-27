@@ -1,5 +1,6 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, ChevronRight, Clock, MapPin, Store } from "lucide-react";
+import { useState } from "react";
+import { ArrowLeft, ChevronRight, Clock, MapPin, Search, Store } from "lucide-react";
 import { ratingSummary, schools } from "@/lib/tooku-data";
 import { useTooku } from "@/lib/tooku-store";
 import { Stars } from "@/components/tooku/ui";
@@ -28,6 +29,17 @@ export const Route = createFileRoute("/koperasi/")({
 function KoperasiList() {
   const navigate = useNavigate();
   const { reviews } = useTooku();
+  const [q, setQ] = useState("");
+  const [level, setLevel] = useState<string>("Semua");
+  const [district, setDistrict] = useState<string>("Semua");
+  const levels = ["Semua", ...Array.from(new Set(schools.map((s) => s.level)))];
+  const districts = ["Semua", ...Array.from(new Set(schools.map((s) => s.district))).sort()];
+  const list = schools.filter(
+    (s) =>
+      (level === "Semua" || s.level === level) &&
+      (district === "Semua" || s.district === district) &&
+      [s.koperasi, s.name, s.district].join(" ").toLowerCase().includes(q.trim().toLowerCase()),
+  );
   return (
     <div className="min-h-screen bg-background pb-28">
       <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-card/95 px-4 py-3 backdrop-blur">
@@ -39,10 +51,44 @@ function KoperasiList() {
 
       <div className="mx-auto max-w-2xl space-y-3 px-4 py-4">
         <p className="text-xs text-muted-foreground">
-          Semua barang di TOOKU dijual dan diverifikasi oleh koperasi sekolah. Pilih koperasi untuk melihat lokasi
-          pengambilan dan jam layanan.
+          Semua barang di TOOKU dijual dan diverifikasi oleh koperasi sekolah. Daftar ini bertambah seiring sekolah baru
+          bergabung, jadi gunakan pencarian dan filter wilayah/jenjang agar tetap ringkas.
         </p>
-        {schools.map((s) => {
+
+        <div className="flex items-center gap-2 rounded-xl border border-border bg-card px-2.5 py-2">
+          <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Cari koperasi / nama sekolah…"
+            className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
+        </div>
+        <div className="flex gap-2 overflow-x-auto no-scrollbar">
+          {levels.map((l) => (
+            <button
+              key={l}
+              onClick={() => setLevel(l)}
+              className={`shrink-0 rounded-full border px-3 py-1.5 text-[11px] font-semibold ${level === l ? "border-primary bg-primary text-primary-foreground" : "border-border text-muted-foreground"}`}
+            >
+              {l}
+            </button>
+          ))}
+        </div>
+        <select
+          value={district}
+          onChange={(e) => setDistrict(e.target.value)}
+          className="w-full rounded-xl border border-border bg-card px-3 py-2 text-xs font-semibold"
+        >
+          {districts.map((d) => (
+            <option key={d} value={d}>
+              {d === "Semua" ? "Semua kecamatan" : `Kec. ${d}`}
+            </option>
+          ))}
+        </select>
+        <p className="text-[11px] text-muted-foreground">{list.length} koperasi ditemukan</p>
+
+        {list.map((s) => {
           const r = ratingSummary(reviews, s.id);
           return (
           <Link

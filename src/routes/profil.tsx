@@ -161,10 +161,10 @@ function ProfilePage() {
             <Store className="h-4 w-4 text-primary" /> Daftar Koperasi Sekolah
             <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
           </Link>
-          <div className="flex items-center gap-3 p-4 text-sm">
+          <Link to="/standar-kurasi" className="flex items-center gap-3 p-4 text-sm">
             <ShieldCheck className="h-4 w-4 text-primary" /> Standar Kurasi Koperasi
             <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
-          </div>
+          </Link>
           {isAdmin && (
             <Link to="/admin" className="flex items-center gap-3 bg-secondary/50 p-4 text-sm font-semibold">
               <LayoutDashboard className="h-4 w-4 text-primary" /> Dashboard Admin Koperasi
