@@ -21,7 +21,8 @@ export const Route = createFileRoute("/pesanan")({
 });
 
 function Timeline({ order }: { order: Order }) {
-  const currentIndex = statusFlow.indexOf(order.status);
+  const flow = flowFor(order);
+  const currentIndex = flow.indexOf(order.status);
   if (order.status === "Dibatalkan") {
     return (
       <p className="flex items-center gap-2 rounded-xl bg-destructive/10 p-3 text-xs font-semibold text-destructive">
@@ -31,7 +32,7 @@ function Timeline({ order }: { order: Order }) {
   }
   return (
     <ol className="space-y-0">
-      {statusFlow.map((s, i) => {
+      {flow.map((s, i) => {
         const reached = i <= currentIndex;
         const at = order.timeline.find((t) => t.status === s)?.at;
         return (
@@ -44,10 +45,11 @@ function Timeline({ order }: { order: Order }) {
               >
                 {reached ? <Check className="h-3.5 w-3.5" /> : <span className="text-[10px]">{i + 1}</span>}
               </span>
-              {i < statusFlow.length - 1 && (
+              {i < flow.length - 1 && (
                 <span className={`h-6 w-0.5 ${i < currentIndex ? "bg-primary" : "bg-border"}`} />
               )}
             </div>
+
             <div className="pb-1">
               <p className={`text-xs font-semibold ${reached ? "text-foreground" : "text-muted-foreground"}`}>{s}</p>
               {at && (
