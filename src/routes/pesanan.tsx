@@ -67,7 +67,9 @@ function Timeline({ order }: { order: Order }) {
 
 function OrderCard({ order }: { order: Order }) {
   const { expired, label, percent } = useCountdown(order.deadline);
-  const active = order.status !== "Selesai" && order.status !== "Dibatalkan";
+  const active = !isFinalStatus(order.status);
+  const delivery = order.fulfillment === "delivery";
+
 
   return (
     <div className="space-y-3 rounded-2xl border border-border bg-card p-4">
