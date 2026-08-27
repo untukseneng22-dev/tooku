@@ -16,6 +16,17 @@ import {
   type KoperasiReview,
   type Product,
 } from "./tooku-data";
+import {
+  defaultShippingConfig,
+  seedShippingConfigs,
+
+  shippingQuote,
+  type Courier,
+  type QuoteLine,
+  type ShipZone,
+  type ShippingConfig,
+} from "./tooku-shipping";
+
 
 export type Role = "buyer" | "admin" | "superadmin";
 export type AccountStatus = "aktif" | "menunggu" | "ditolak";
@@ -38,12 +49,53 @@ export const roleLabel: Record<Role, string> = {
   superadmin: "Super Admin",
 };
 
-export type OrderItem = { productId: string; name: string; price: number; qty: number };
-export type OrderStatus = "Booking" | "Diproses" | "Siap Diambil" | "Selesai" | "Dibatalkan";
-export type PaymentMethod = "online" | "koperasi";
+export type OrderItem = { productId: string; name: string; price: number; qty: number; schoolId?: string };
+export type OrderStatus =
+  | "Booking"
+  | "Diproses"
+  | "Siap Diambil"
+  | "Dikirim"
+  | "Diterima"
+  | "Selesai"
+  | "Dibatalkan";
+/** Cara pembeli menerima barang: ambil sendiri di koperasi, atau dikirim ekspedisi. */
+export type Fulfillment = "pickup" | "delivery";
+export type PaymentMethod = "online" | "koperasi" | "cod";
 export type PaymentStatus = "Belum Dibayar" | "Menunggu Konfirmasi" | "Lunas";
 
-export const statusFlow: OrderStatus[] = ["Booking", "Diproses", "Siap Diambil", "Selesai"];
+export const pickupFlow: OrderStatus[] = ["Booking", "Diproses", "Siap Diambil", "Selesai"];
+export const deliveryFlow: OrderStatus[] = ["Booking", "Diproses", "Dikirim", "Diterima"];
+/** Alias lama (alur ambil di koperasi). */
+export const statusFlow = pickupFlow;
+export const allStatuses: OrderStatus[] = [
+  "Booking",
+  "Diproses",
+  "Siap Diambil",
+  "Dikirim",
+  "Diterima",
+  "Selesai",
+  "Dibatalkan",
+];
+export const flowFor = (o: { fulfillment?: Fulfillment }): OrderStatus[] =>
+  o.fulfillment === "delivery" ? deliveryFlow : pickupFlow;
+export const isFinalStatus = (s: OrderStatus) =>
+  s === "Selesai" || s === "Diterima" || s === "Dibatalkan";
+
+export type ShippingInfo = {
+  recipient: string;
+  phone: string;
+  address: string;
+  district: string;
+  city: string;
+  province: string;
+  note?: string;
+  courier: Courier;
+  zone: ShipZone;
+  /** Rincian ongkir per koperasi pengirim. */
+  lines: QuoteLine[];
+  extraFee: number;
+  tracking?: string;
+};
 
 export type Order = {
   id: string;
@@ -51,15 +103,21 @@ export type Order = {
   userId: string;
   buyer: string;
   items: OrderItem[];
+  subtotal: number;
+  serviceFee: number;
+  shippingTotal: number;
   total: number;
   createdAt: number;
   deadline: number;
   status: OrderStatus;
+  fulfillment: Fulfillment;
+  shipping?: ShippingInfo;
   paymentMethod: PaymentMethod;
   paymentChannel?: string;
   paymentStatus: PaymentStatus;
   timeline: { status: OrderStatus; at: number }[];
 };
+
 
 type CartLine = { productId: string; qty: number };
 
@@ -135,11 +193,17 @@ const seedOrders: Order[] = [
     code: "TKU-4821",
     userId: "u1",
     buyer: "Siti Aisyah — X IPA 1",
-    items: [{ productId: "p2", name: "Buku Matematika Kelas XI Kurikulum Merdeka", price: 18000, qty: 1 }],
+    items: [
+      { productId: "p2", name: "Buku Matematika Kelas XI Kurikulum Merdeka", price: 18000, qty: 1, schoolId: "s1" },
+    ],
+    subtotal: 18000,
+    serviceFee: 0,
+    shippingTotal: 0,
     total: 18000,
     createdAt: Date.now() - 1000 * 60 * 60 * 6,
     deadline: Date.now() + 1000 * 60 * 60 * 18,
     status: "Siap Diambil",
+    fulfillment: "pickup",
     paymentMethod: "koperasi",
     paymentStatus: "Belum Dibayar",
     timeline: [
@@ -153,11 +217,15 @@ const seedOrders: Order[] = [
     code: "TKU-3390",
     userId: "u1",
     buyer: "Siti Aisyah — X IPA 1",
-    items: [{ productId: "p7", name: "Dasi Sekolah Warna Navy", price: 7000, qty: 2 }],
+    items: [{ productId: "p7", name: "Dasi Sekolah Warna Navy", price: 7000, qty: 2, schoolId: "s2" }],
+    subtotal: 14000,
+    serviceFee: 0,
+    shippingTotal: 0,
     total: 14000,
     createdAt: Date.now() - 1000 * 60 * 60 * 40,
     deadline: Date.now() - 1000 * 60 * 60 * 16,
     status: "Selesai",
+    fulfillment: "pickup",
     paymentMethod: "koperasi",
     paymentStatus: "Lunas",
     timeline: [
@@ -167,9 +235,64 @@ const seedOrders: Order[] = [
       { status: "Selesai", at: Date.now() - 1000 * 60 * 60 * 20 },
     ],
   },
+  {
+    id: "o3",
+    code: "TKU-5107",
+    userId: "u2",
+    buyer: "Budi Santoso — XI IPS 2",
+    items: [
+      { productId: "p1", name: "Seragam Putih Abu Lengan Panjang", price: 45000, qty: 1, schoolId: "s3" },
+    ],
+    subtotal: 45000,
+    serviceFee: 2500,
+    shippingTotal: 10000,
+    total: 57500,
+    createdAt: Date.now() - 1000 * 60 * 60 * 20,
+    deadline: Date.now() + 1000 * 60 * 60 * 28,
+    status: "Dikirim",
+    fulfillment: "delivery",
+    shipping: {
+      recipient: "Budi Santoso",
+      phone: "0812-3456-7890",
+      address: "Jl. Diponegoro No. 12, RT 02 RW 03",
+      district: "Barat",
+      city: "Kabupaten Magetan",
+      province: "Jawa Timur",
+      courier: "J&T Express",
+      zone: "kabupaten",
+      lines: [{ schoolId: "s3", koperasi: "Koperasi SMKN 1 Magetan", zone: "kabupaten", fee: 10000 }],
+      extraFee: 0,
+      tracking: "JT8829174455",
+    },
+    paymentMethod: "online",
+    paymentChannel: "QRIS",
+    paymentStatus: "Lunas",
+    timeline: [
+      { status: "Booking", at: Date.now() - 1000 * 60 * 60 * 20 },
+      { status: "Diproses", at: Date.now() - 1000 * 60 * 60 * 18 },
+      { status: "Dikirim", at: Date.now() - 1000 * 60 * 60 * 6 },
+    ],
+  },
 ];
 
-type CheckoutInput = { paymentMethod: PaymentMethod; paymentChannel?: string };
+type ShippingInput = {
+  recipient: string;
+  phone: string;
+  address: string;
+  district: string;
+  city: string;
+  province: string;
+  note?: string;
+  courier: Courier;
+};
+
+type CheckoutInput = {
+  paymentMethod: PaymentMethod;
+  paymentChannel?: string;
+  fulfillment: Fulfillment;
+  shipping?: ShippingInput;
+};
+
 
 type Store = {
   products: Product[];
@@ -198,8 +321,13 @@ type Store = {
   clearCart: () => void;
   checkout: (input: CheckoutInput) => Order | null;
   setOrderStatus: (id: string, status: OrderStatus) => void;
+  setTracking: (id: string, courier: Courier, tracking: string) => void;
   cancelOrder: (id: string) => void;
   markPaid: (id: string) => void;
+  /** Pengaturan pengiriman & pembayaran per koperasi sekolah. */
+  shippingConfigs: Record<string, ShippingConfig>;
+  updateShippingConfig: (schoolId: string, patch: Partial<ShippingConfig>) => void;
+
   addProduct: (p: Omit<Product, "id" | "sold">) => void;
   updateProduct: (id: string, patch: Partial<Omit<Product, "id" | "sold">>) => void;
   reviews: KoperasiReview[];
@@ -227,6 +355,23 @@ const normalizeProducts = (list: Product[]): Product[] =>
     return { ...p, schoolId, seller: SCHOOLS_SELLER[schoolId] ?? p.seller };
   });
 
+/** Lengkapi pesanan lama (sebelum ada fitur pengiriman) agar tetap valid. */
+const normalizeOrders = (list: Order[]): Order[] =>
+  list.map((o) => {
+    const subtotal = o.subtotal ?? o.items.reduce((s, i) => s + i.price * i.qty, 0);
+    const shippingTotal = o.shippingTotal ?? 0;
+    const serviceFee = o.serviceFee ?? Math.max(0, (o.total ?? subtotal) - subtotal - shippingTotal);
+    return {
+      ...o,
+      fulfillment: o.fulfillment ?? (o.shipping ? "delivery" : "pickup"),
+      subtotal,
+      shippingTotal,
+      serviceFee,
+      total: o.total ?? subtotal + shippingTotal + serviceFee,
+    };
+  });
+
+
 export function TookuProvider({ children }: { children: ReactNode }) {
   const parentStore = useContext(StoreContext);
 
@@ -249,6 +394,10 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   const [orders, setOrders] = useState<Order[]>(seedOrders);
   const [users, setUsers] = useState<User[]>(seedUsers);
   const [userId, setUserId] = useState<string | null>(null);
+  const [shippingConfigs, setShippingConfigs] = useState<Record<string, ShippingConfig>>(() =>
+    seedShippingConfigs(),
+  );
+
   const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
@@ -268,7 +417,10 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         if (p.products) setProducts(normalizeProducts(p.products));
         if (p.reviews) setReviews(p.reviews);
         if (p.cart) setCart(p.cart);
-        if (p.orders) setOrders(p.orders);
+        if (p.orders) setOrders(normalizeOrders(p.orders));
+        if (p.shippingConfigs)
+          setShippingConfigs((prev) => ({ ...prev, ...(p.shippingConfigs as Record<string, ShippingConfig>) }));
+
         if (p.users)
           setUsers(
             (p.users as User[]).map((u) => ({
@@ -297,11 +449,15 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
     try {
-      localStorage.setItem(KEY, JSON.stringify({ products, cart, orders, users, userId, reviews }));
+      localStorage.setItem(
+        KEY,
+        JSON.stringify({ products, cart, orders, users, userId, reviews, shippingConfigs }),
+      );
     } catch {
       /* ignore */
     }
-  }, [hydrated, products, cart, orders, users, userId, reviews]);
+  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs]);
+
 
   const addToCart = useCallback((id: string, qty = 1) => {
     setCart((c) =>
@@ -385,26 +541,55 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           qty <= 0 ? c.filter((l) => l.productId !== id) : c.map((l) => (l.productId === id ? { ...l, qty } : l)),
         ),
       clearCart: () => setCart([]),
-      checkout: ({ paymentMethod, paymentChannel }) => {
+      checkout: ({ paymentMethod, paymentChannel, fulfillment, shipping }) => {
         if (!user || cart.length === 0) return null;
         const items: OrderItem[] = cart.flatMap((l) => {
           const p = products.find((x) => x.id === l.productId);
           if (!p) return [];
-          return [{ productId: p.id, name: p.name, price: p.price, qty: Math.min(l.qty, p.stock) }];
+          return [
+            { productId: p.id, name: p.name, price: p.price, qty: Math.min(l.qty, p.stock), schoolId: p.schoolId },
+          ];
         });
         if (items.length === 0) return null;
+        if (fulfillment === "delivery" && !shipping) return null;
+
         const now = Date.now();
+        const subtotal = items.reduce((s, i) => s + i.price * i.qty, 0);
+        const serviceFee = paymentMethod === "online" ? 2500 : 0;
+
+        let shippingInfo: ShippingInfo | undefined;
+        let shippingTotal = 0;
+        if (fulfillment === "delivery" && shipping) {
+          const quote = shippingQuote(
+            shippingConfigs,
+            items.map((i) => i.schoolId!).filter(Boolean),
+            { district: shipping.district, city: shipping.city, province: shipping.province },
+          );
+          shippingTotal = quote.total;
+          shippingInfo = {
+            ...shipping,
+            zone: quote.lines[0]?.zone ?? "kabupaten",
+            lines: quote.lines,
+            extraFee: quote.extraFee,
+          };
+        }
+
         const order: Order = {
           id: "o" + now,
           code: "TKU-" + Math.floor(1000 + Math.random() * 8999),
           userId: user.id,
           buyer: user.kelas ? `${user.name} — ${user.kelas}` : user.name,
           items,
-          total:
-            items.reduce((s, i) => s + i.price * i.qty, 0) + (paymentMethod === "online" ? 2500 : 0),
+          subtotal,
+          serviceFee,
+          shippingTotal,
+          total: subtotal + serviceFee + shippingTotal,
           createdAt: now,
-          deadline: now + 1000 * 60 * 60 * 24,
+          // Ambil sendiri: 1x24 jam. Kirim: koperasi punya 2x24 jam untuk serahkan ke kurir.
+          deadline: now + 1000 * 60 * 60 * (fulfillment === "delivery" ? 48 : 24),
           status: "Booking",
+          fulfillment,
+          ...(shippingInfo ? { shipping: shippingInfo } : {}),
           paymentMethod,
           ...(paymentChannel ? { paymentChannel } : {}),
           paymentStatus: paymentMethod === "online" ? "Menunggu Konfirmasi" : "Belum Dibayar",
@@ -430,15 +615,29 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
                   timeline: o.timeline.some((t) => t.status === status)
                     ? o.timeline
                     : [...o.timeline, { status, at: Date.now() }],
-                  paymentStatus: status === "Selesai" ? "Lunas" : o.paymentStatus,
-                  
+                  paymentStatus:
+                    status === "Selesai" || status === "Diterima" ? "Lunas" : o.paymentStatus,
                 }
               : o,
           ) as Order[],
         ),
+      setTracking: (id, courier, tracking) =>
+        setOrders((os) =>
+          os.map((o) =>
+            o.id === id && o.shipping
+              ? { ...o, shipping: { ...o.shipping, courier, tracking: tracking.trim() } }
+              : o,
+          ),
+        ),
+      shippingConfigs,
+      updateShippingConfig: (schoolId, patch) =>
+        setShippingConfigs((cs) => ({
+          ...cs,
+          [schoolId]: { ...(cs[schoolId] ?? defaultShippingConfig), ...patch },
+        })),
       cancelOrder: (id) => {
         const target = orders.find((o) => o.id === id);
-        if (target && target.status !== "Selesai" && target.status !== "Dibatalkan") restoreStock(target.items);
+        if (target && !isFinalStatus(target.status)) restoreStock(target.items);
         setOrders((os) =>
           os.map((o) =>
             o.id === id
@@ -448,6 +647,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         );
       },
       markPaid: (id) => setOrders((os) => os.map((o) => (o.id === id ? { ...o, paymentStatus: "Lunas" } : o))),
+
       addProduct: (p) =>
         setProducts((ps) => [
           { ...p, schoolId: resolveSchoolId(p.schoolId, p.seller), id: "p" + Date.now(), sold: 0 },
