@@ -580,6 +580,45 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
         </div>
       </div>
 
+      <div className="space-y-2 rounded-xl border border-border bg-secondary/40 p-3">
+        <div>
+          <p className="text-xs font-bold">Detail Spesifikasi — {form.category}</p>
+          <p className="text-[11px] text-muted-foreground">
+            Isi sedetail mungkin (ukuran, bahan, kelas, dll). Kosongkan yang tidak relevan; hanya yang terisi yang
+            tampil di halaman produk.
+          </p>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {template.map((t) => (
+            <div key={t.key} className="space-y-1">
+              <label className="text-[11px] font-semibold text-muted-foreground">{t.key}</label>
+              <input
+                className={field}
+                placeholder={t.placeholder}
+                value={specs[t.key] ?? ""}
+                onChange={(e) => setSpecs((s) => ({ ...s, [t.key]: e.target.value }))}
+              />
+            </div>
+          ))}
+        </div>
+        {extraSpecs.length > 0 && (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {extraSpecs.map((k) => (
+              <div key={k} className="space-y-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">{k}</label>
+                <input
+                  className={field}
+                  value={specs[k] ?? ""}
+                  onChange={(e) => setSpecs((s) => ({ ...s, [k]: e.target.value }))}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+
+
       <div className="space-y-1.5">
         <label className="text-xs font-semibold" htmlFor="pl">
           Kelebihan (satu per baris)
