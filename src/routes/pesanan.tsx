@@ -1,7 +1,9 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Ticket, MapPin, Check, Clock, Wallet, Store, XCircle } from "lucide-react";
-import { useTooku, useCountdown, statusFlow, type Order } from "@/lib/tooku-store";
-import { rupiah } from "@/lib/tooku-data";
+import { Ticket, MapPin, Check, Clock, Wallet, Store, XCircle, Truck, Copy } from "lucide-react";
+import { useTooku, useCountdown, flowFor, isFinalStatus, type Order } from "@/lib/tooku-store";
+import { rupiah, schoolById } from "@/lib/tooku-data";
+import { zoneEta, zoneLabel } from "@/lib/tooku-shipping";
+
 
 export const Route = createFileRoute("/pesanan")({
   head: () => ({
