@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, LogIn, Store } from "lucide-react";
 import { useTooku, roleLabel } from "@/lib/tooku-store";
 import { rupiah } from "@/lib/tooku-data";
+import { InstallAppCard } from "@/components/tooku/install-prompt";
 
 export const Route = createFileRoute("/profil")({
   head: () => ({
@@ -34,7 +35,7 @@ function ProfilePage() {
           <h1 className="text-lg font-bold">Profil</h1>
           <p className="text-xs opacity-80">Masuk untuk memesan dan memantau pesanan</p>
         </header>
-        <div className="mx-auto -mt-5 max-w-2xl px-4">
+        <div className="mx-auto -mt-5 max-w-2xl space-y-4 px-4">
           <div className="rounded-2xl border border-border bg-card p-5 text-center">
             <LogIn className="mx-auto h-8 w-8 text-primary" />
             <p className="mt-3 text-sm text-muted-foreground">Belum masuk ke akun TOOKU.</p>
@@ -45,6 +46,7 @@ function ProfilePage() {
               Masuk / Daftar
             </Link>
           </div>
+          <InstallAppCard />
         </div>
       </div>
     );
@@ -81,6 +83,8 @@ function ProfilePage() {
               <p className="text-[10px] text-muted-foreground">Menunggu</p>
             </div>
           </div>
+
+          <InstallAppCard />
 
           <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
             <Link to="/pusat" className="flex items-center gap-3 bg-secondary/50 p-4 text-sm font-semibold">
@@ -151,6 +155,8 @@ function ProfilePage() {
             untuk beasiswa siswa.
           </p>
         </div>
+
+        <InstallAppCard />
 
         <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
           <Link to="/pesanan" className="flex items-center gap-3 p-4 text-sm">
