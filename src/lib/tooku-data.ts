@@ -136,7 +136,11 @@ const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
  * Menentukan koperasi milik sebuah akun admin. Karena penjual hanya koperasi,
  * produk yang diunggah otomatis melekat ke koperasi akun tersebut.
  */
-export const schoolIdForAccount = (opts: { schoolId?: string; username?: string; name?: string }): string => {
+export const schoolIdForAccount = (opts: {
+  schoolId?: string | undefined;
+  username?: string | undefined;
+  name?: string | undefined;
+}): string => {
   if (opts.schoolId && schoolById(opts.schoolId)) return opts.schoolId;
   const keys = [opts.username, opts.name].filter(Boolean).map((v) => slug(v!));
   for (const k of keys) {
