@@ -17,6 +17,7 @@ import { Route as KeranjangRouteImport } from './routes/keranjang'
 import { Route as NotifikasiRouteImport } from './routes/notifikasi'
 import { Route as PesananRouteImport } from './routes/pesanan'
 import { Route as ProfilRouteImport } from './routes/profil'
+import { Route as KoperasiIndexRouteImport } from './routes/koperasi.index'
 import { Route as ProdukIdRouteImport } from './routes/produk.$id'
 
 const IndexRoute = IndexRouteImport.update({
@@ -59,6 +60,11 @@ const ProfilRoute = ProfilRouteImport.update({
   path: '/profil',
   getParentRoute: () => rootRouteImport,
 } as any)
+const KoperasiIndexRoute = KoperasiIndexRouteImport.update({
+  id: '/koperasi/',
+  path: '/koperasi/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ProdukIdRoute = ProdukIdRouteImport.update({
   id: '/produk/$id',
   path: '/produk/$id',
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/pesanan': typeof PesananRoute
   '/profil': typeof ProfilRoute
   '/produk/$id': typeof ProdukIdRoute
+  '/koperasi/': typeof KoperasiIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -86,6 +93,7 @@ export interface FileRoutesByTo {
   '/pesanan': typeof PesananRoute
   '/profil': typeof ProfilRoute
   '/produk/$id': typeof ProdukIdRoute
+  '/koperasi': typeof KoperasiIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -98,6 +106,7 @@ export interface FileRoutesById {
   '/pesanan': typeof PesananRoute
   '/profil': typeof ProfilRoute
   '/produk/$id': typeof ProdukIdRoute
+  '/koperasi/': typeof KoperasiIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -111,6 +120,7 @@ export interface FileRouteTypes {
     | '/pesanan'
     | '/profil'
     | '/produk/$id'
+    | '/koperasi/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -122,6 +132,7 @@ export interface FileRouteTypes {
     | '/pesanan'
     | '/profil'
     | '/produk/$id'
+    | '/koperasi'
   id:
     | '__root__'
     | '/'
@@ -133,6 +144,7 @@ export interface FileRouteTypes {
     | '/pesanan'
     | '/profil'
     | '/produk/$id'
+    | '/koperasi/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -145,6 +157,7 @@ export interface RootRouteChildren {
   PesananRoute: typeof PesananRoute
   ProfilRoute: typeof ProfilRoute
   ProdukIdRoute: typeof ProdukIdRoute
+  KoperasiIndexRoute: typeof KoperasiIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -205,6 +218,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ProfilRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/koperasi/': {
+      id: '/koperasi/'
+      path: '/koperasi'
+      fullPath: '/koperasi/'
+      preLoaderRoute: typeof KoperasiIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/produk/$id': {
       id: '/produk/$id'
       path: '/produk/$id'
@@ -225,6 +245,7 @@ const rootRouteChildren: RootRouteChildren = {
   PesananRoute: PesananRoute,
   ProfilRoute: ProfilRoute,
   ProdukIdRoute: ProdukIdRoute,
+  KoperasiIndexRoute: KoperasiIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
