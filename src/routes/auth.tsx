@@ -26,12 +26,14 @@ function AuthPage() {
   const [role, setRole] = useState<Role>("buyer");
   const [form, setForm] = useState({ name: "", kelas: "", username: "", email: "", password: "" });
   const [error, setError] = useState("");
+  const [info, setInfo] = useState("");
 
   const field = "w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm";
 
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
+    setInfo("");
     const res =
       mode === "login"
         ? login(form.username, form.password)
@@ -47,7 +49,14 @@ function AuthPage() {
       setError(res.error ?? "Gagal masuk.");
       return;
     }
-    navigate({ to: res.role === "buyer" ? "/" : "/admin" });
+    if (res.pending) {
+      setMode("login");
+      setInfo(
+        "Pendaftaran terkirim! Akun aktif setelah disetujui Admin Pusat TOOKU. Silakan cek kembali nanti.",
+      );
+      return;
+    }
+    navigate({ to: res.role === "buyer" ? "/" : res.role === "superadmin" ? "/pusat" : "/admin" });
   };
 
   return (
@@ -183,6 +192,9 @@ function AuthPage() {
             </div>
 
             {error && <p className="text-xs font-semibold text-destructive">{error}</p>}
+            {info && (
+              <p className="rounded-xl bg-primary/10 p-3 text-[11px] font-semibold text-primary">{info}</p>
+            )}
 
             <button type="submit" className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground">
               {mode === "login" ? "Masuk" : "Daftar & Masuk"}
@@ -193,7 +205,10 @@ function AuthPage() {
             <p className="font-semibold text-foreground">Akun tersedia (username / sandi)</p>
             <p>Pembeli: budisantoso / magetanngangeni</p>
             <p>Admin Koperasi: smaspgrimaospati / magetanngangeni</p>
-            <p>Super Admin: superadmin / tookupusat2026</p>
+            <p>Admin Pusat: superadmin / tookupusat2026</p>
+            <p className="pt-1 text-[10px]">
+              Pendaftaran akun baru menunggu persetujuan Admin Pusat sebelum bisa masuk.
+            </p>
           </div>
         </div>
       </div>
