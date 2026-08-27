@@ -18,7 +18,14 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { useTooku, useCountdown, statusFlow, type Order, type OrderStatus } from "@/lib/tooku-store";
-import { categories, rupiah, schools, type Category } from "@/lib/tooku-data";
+import {
+  categories,
+  rupiah,
+  schools,
+  schoolIdForAccount,
+  specTemplates,
+  type Category,
+} from "@/lib/tooku-data";
 import { ProductThumb } from "@/components/tooku/ui";
 
 export const Route = createFileRoute("/admin")({
