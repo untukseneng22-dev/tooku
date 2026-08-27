@@ -395,13 +395,28 @@ function NewProduct({ onDone }: { onDone: () => void }) {
     schoolId: schools[0]!.id,
   });
 
-  const onPhoto = (e: ChangeEvent<HTMLInputElement>) => {
+  const [photoInfo, setPhotoInfo] = useState<string | null>(null);
+  const [compressing, setCompressing] = useState(false);
+
+  const onPhoto = async (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setForm((f) => ({ ...f, photo: String(reader.result) }));
-    reader.readAsDataURL(file);
+    setCompressing(true);
+    setPhotoInfo(null);
+    try {
+      const { compressImage } = await import("@/lib/image-compress");
+      const res = await compressImage(file);
+      setForm((f) => ({ ...f, photo: res.dataUrl }));
+      setPhotoInfo(
+        `Terkompresi ${res.originalKb} KB → ${res.compressedKb} KB · ${res.width}×${res.height}px`,
+      );
+    } catch {
+      setPhotoInfo("Gagal memproses gambar, coba foto lain.");
+    } finally {
+      setCompressing(false);
+    }
   };
+
 
   const field = "w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm";
 
@@ -457,9 +472,17 @@ function NewProduct({ onDone }: { onDone: () => void }) {
               <span className="text-xl">📷</span>
             )}
           </div>
-          <input type="file" accept="image/*" onChange={onPhoto} className="text-xs" />
+          <div className="min-w-0 space-y-1">
+            <input type="file" accept="image/*" onChange={onPhoto} className="text-xs" />
+            <p className="text-[11px] text-muted-foreground">
+              {compressing
+                ? "Mengompres gambar…"
+                : (photoInfo ?? "Foto otomatis dikompres (maks ±160 KB, 1000px) agar aplikasi tetap ringan.")}
+            </p>
+          </div>
         </div>
       </div>
+
 
       <div className="space-y-1.5">
         <label className="text-xs font-semibold" htmlFor="nm">
