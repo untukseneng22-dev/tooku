@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, BadgeCheck, MapPin, Clock, Check, X, Store, MessageCircle } from "lucide-react";
 import { useState } from "react";
-import { useBaraka } from "@/lib/baraka-store";
-import { rupiah, productSpecs, schoolById, ratingSummary } from "@/lib/baraka-data";
-import { ProductThumb, CuratedBadge, ProductCard, KoperasiBadge, Stars } from "@/components/baraka/ui";
+import { useTooku } from "@/lib/tooku-store";
+import { rupiah, productSpecs, schoolById, ratingSummary } from "@/lib/tooku-data";
+import { ProductThumb, CuratedBadge, ProductCard, KoperasiBadge, Stars } from "@/components/tooku/ui";
 
 export const Route = createFileRoute("/produk/$id")({
   head: () => ({
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/produk/$id")({
 
 function ProductDetail() {
   const { id } = Route.useParams();
-  const { products, addToCart, reviews } = useBaraka();
+  const { products, addToCart, reviews } = useTooku();
   const navigate = useNavigate();
   const product = products.find((p) => p.id === id);
   const [active, setActive] = useState(0);

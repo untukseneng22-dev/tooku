@@ -1,8 +1,8 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, MessageCircle, Search, Send, Store } from "lucide-react";
-import { schools } from "@/lib/baraka-data";
-import { useBaraka } from "@/lib/baraka-store";
+import { schools } from "@/lib/tooku-data";
+import { useTooku } from "@/lib/tooku-store";
 
 export const Route = createFileRoute("/chat")({
   validateSearch: (
@@ -35,7 +35,8 @@ type ChatMsg = { id: string; from: "me" | "them"; text: string; time: string };
 type Threads = Record<string, ChatMsg[]>;
 
 const KOPERASI = "Admin Koperasi Sekolah";
-const CHAT_KEY = "baraka.chats.v2";
+const CALLCENTER = "Call Center TOOKU";
+const CHAT_KEY = "tooku.chats.v1";
 
 const seedThreads: Threads = {
   [KOPERASI]: [
@@ -58,6 +59,8 @@ const seedThreads: Threads = {
 };
 
 function autoReply(name: string, asAdmin: boolean) {
+  if (name === CALLCENTER)
+    return "Call Center TOOKU (Admin Pusat) menerima laporanmu. Kami bantu koordinasikan dengan koperasi sekolah terkait ya 🙏";
   if (asAdmin) return `Terima kasih infonya! Saya (${name}) akan ambil barangnya di koperasi sesuai kode pengambilan 🙏`;
   return name === KOPERASI
     ? "Pesan kamu diterima admin koperasi, akan dibalas pada jam operasional (07.00–15.00)."
@@ -65,7 +68,7 @@ function autoReply(name: string, asAdmin: boolean) {
 }
 
 function ChatPage() {
-  const { user, users, isAdmin, products } = useBaraka();
+  const { user, users, isAdmin, isSuperAdmin, products } = useTooku();
   const { penjual, produk } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [threads, setThreads] = useState<Threads>(seedThreads);
@@ -97,6 +100,16 @@ function ChatPage() {
   const contacts = useMemo(() => {
     // Penjual di TOOKU hanya koperasi sekolah (lintas sekolah se-Kab. Magetan).
     const sellerNames = Array.from(new Set([...schools.map((sc) => sc.koperasi), ...products.map((p) => p.seller)]));
+    if (isSuperAdmin) {
+      // Admin Pusat = call center: melayani pembeli dan koperasi sekolah.
+      const all = Array.from(
+        new Set([
+          ...users.filter((u) => u.id !== user?.id && u.status === "aktif").map((u) => u.name),
+          ...Object.keys(threads).filter((k) => k !== CALLCENTER),
+        ]),
+      );
+      return all.filter((s2) => s2.toLowerCase().includes(q.trim().toLowerCase()));
+    }
     const list = isAdmin
       ? Array.from(
           new Set([
@@ -104,9 +117,9 @@ function ChatPage() {
             ...Object.keys(threads).filter((k) => k !== KOPERASI && !sellerNames.includes(k)),
           ]),
         )
-      : Array.from(new Set([KOPERASI, ...sellerNames, ...Object.keys(threads)]));
+      : Array.from(new Set([CALLCENTER, KOPERASI, ...sellerNames, ...Object.keys(threads)]));
     return list.filter((s) => s.toLowerCase().includes(q.trim().toLowerCase()));
-  }, [isAdmin, users, threads, q, products]);
+  }, [isAdmin, isSuperAdmin, users, user, threads, q, products]);
 
   const active = penjual ?? null;
   const messages = (active && threads[active]) || [];
@@ -130,20 +143,33 @@ function ChatPage() {
 
   if (!active) {
     return (
-      <div className="min-h-screen bg-background pb-28">
+      <div className={`min-h-screen bg-background ${isSuperAdmin ? "pb-10" : "pb-28"}`}>
         <header className="bg-primary px-4 pb-4 pt-5 text-primary-foreground">
           <div className="mx-auto max-w-2xl">
-            <h1 className="text-lg font-extrabold tracking-tight">Chat</h1>
+            <h1 className="text-lg font-extrabold tracking-tight">
+              {isSuperAdmin ? "Call Center TOOKU" : "Chat"}
+            </h1>
+            {isSuperAdmin && (
+              <Link to="/pusat" className="mt-1 inline-flex items-center gap-1 text-[11px] font-semibold underline">
+                <ArrowLeft className="h-3.5 w-3.5" /> Kembali ke Konsol Pusat
+              </Link>
+            )}
             <p className="text-[11px] opacity-80">
               {user ? `Hai ${user.name.split(" ")[0]}, ` : ""}
-              {isAdmin ? "balas pertanyaan para pembeli" : "tanya langsung ke penjual & admin koperasi"}
+              {isSuperAdmin
+                ? "call center pusat: layani pembeli & koperasi sekolah"
+                : isAdmin
+                  ? "balas pertanyaan para pembeli"
+                  : "tanya ke koperasi sekolah atau call center TOOKU"}
             </p>
             <div className="mt-4 flex items-center gap-2 rounded-2xl bg-card px-3 py-2.5">
               <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
               <input
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
-                placeholder={isAdmin ? "Cari pembeli…" : "Cari penjual atau koperasi…"}
+                placeholder={
+                  isSuperAdmin ? "Cari pembeli atau koperasi…" : isAdmin ? "Cari pembeli…" : "Cari koperasi sekolah…"
+                }
                 className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
               />
             </div>
@@ -195,7 +221,7 @@ function ChatPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background pb-36">
+    <div className={`min-h-screen bg-background ${isSuperAdmin ? "pb-24" : "pb-36"}`}>
       <header className="sticky top-0 z-40 flex items-center gap-3 border-b border-border bg-primary px-3 py-3 text-primary-foreground">
         <button
           onClick={() => navigate({ search: {} })}
@@ -245,7 +271,7 @@ function ChatPage() {
         <div ref={endRef} />
       </div>
 
-      <div className="fixed inset-x-0 bottom-[68px] z-40 border-t border-border bg-card p-3">
+      <div className={`fixed inset-x-0 z-40 ${isSuperAdmin ? "bottom-0" : "bottom-[68px]"} border-t border-border bg-card p-3`}>
         <div className="mx-auto flex max-w-2xl items-center gap-2">
           <input
             value={draft}

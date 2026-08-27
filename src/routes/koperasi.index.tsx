@@ -1,8 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ChevronRight, Clock, MapPin, Store } from "lucide-react";
-import { ratingSummary, schools } from "@/lib/baraka-data";
-import { useBaraka } from "@/lib/baraka-store";
-import { Stars } from "@/components/baraka/ui";
+import { ratingSummary, schools } from "@/lib/tooku-data";
+import { useTooku } from "@/lib/tooku-store";
+import { Stars } from "@/components/tooku/ui";
 
 export const Route = createFileRoute("/koperasi/")({
   head: () => ({
@@ -27,7 +27,7 @@ export const Route = createFileRoute("/koperasi/")({
 
 function KoperasiList() {
   const navigate = useNavigate();
-  const { reviews } = useBaraka();
+  const { reviews } = useTooku();
   return (
     <div className="min-h-screen bg-background pb-28">
       <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-card/95 px-4 py-3 backdrop-blur">

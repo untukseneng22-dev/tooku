@@ -6,7 +6,7 @@ import { reportLovableError } from "@/lib/lovable-error-reporting";
 type Props = { children: ReactNode };
 type State = { error: Error | null };
 
-export class BarakaErrorBoundary extends Component<Props, State> {
+export class TookuErrorBoundary extends Component<Props, State> {
   override state: State = { error: null };
 
   static getDerivedStateFromError(error: Error): State {
@@ -15,7 +15,7 @@ export class BarakaErrorBoundary extends Component<Props, State> {
 
   override componentDidCatch(error: Error, info: ErrorInfo) {
     reportLovableError(error, {
-      boundary: "baraka_context_error_boundary",
+      boundary: "tooku_context_error_boundary",
       componentStack: info.componentStack,
     });
   }
@@ -28,7 +28,7 @@ export class BarakaErrorBoundary extends Component<Props, State> {
     const { error } = this.state;
     if (!error) return this.props.children;
 
-    const isProviderError = error.message.includes("useBaraka") && error.message.includes("BarakaProvider");
+    const isProviderError = error.message.includes("useTooku") && error.message.includes("TookuProvider");
 
     return (
       <main className="grid min-h-screen place-items-center bg-background px-5 py-10" role="alert">
