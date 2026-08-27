@@ -62,6 +62,13 @@ function Home() {
         )
         .slice(0, 6)
     : [];
+  const koperasiHits = query.trim()
+    ? schools
+        .filter((s) =>
+          [s.koperasi, s.name, s.district, s.level].join(" ").toLowerCase().includes(query.toLowerCase()),
+        )
+        .slice(0, 4)
+    : [];
 
   const submitSearch = (q: string) => {
     const t = q.trim();
