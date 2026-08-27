@@ -1,8 +1,22 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, ClipboardList, User, ShoppingBag, BadgeCheck, Bell, Store } from "lucide-react";
+import { Home, ClipboardList, User, ShoppingBag, BadgeCheck, Bell, Store, Star } from "lucide-react";
 import { useBaraka } from "@/lib/baraka-store";
 import type { Product } from "@/lib/baraka-data";
 import { rupiah, schoolById } from "@/lib/baraka-data";
+
+export function Stars({ value, size = 14 }: { value: number; size?: number }) {
+  return (
+    <span className="inline-flex items-center gap-0.5" aria-label={`Rating ${value.toFixed(1)} dari 5`}>
+      {[1, 2, 3, 4, 5].map((i) => (
+        <Star
+          key={i}
+          style={{ width: size, height: size }}
+          className={i <= Math.round(value) ? "fill-accent text-accent" : "text-muted-foreground/40"}
+        />
+      ))}
+    </span>
+  );
+}
 
 const catEmoji: Record<string, string> = {
   Seragam: "👕",

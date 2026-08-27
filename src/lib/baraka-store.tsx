@@ -8,7 +8,14 @@ import {
   type Context,
   type ReactNode,
 } from "react";
-import { seedProducts, type Product } from "./baraka-data";
+import {
+  seedProducts,
+  seedReviews,
+  resolveSchoolId,
+  SCHOOLS_SELLER,
+  type KoperasiReview,
+  type Product,
+} from "./baraka-data";
 
 export type Role = "buyer" | "admin" | "superadmin";
 export type User = {
@@ -153,6 +160,8 @@ type Store = {
   cancelOrder: (id: string) => void;
   markPaid: (id: string) => void;
   addProduct: (p: Omit<Product, "id" | "sold">) => void;
+  reviews: KoperasiReview[];
+  addReview: (input: { schoolId: string; rating: number; comment: string }) => { ok: boolean; error?: string };
   deleteProduct: (id: string) => void;
 };
 
@@ -168,6 +177,13 @@ const contextRegistry = globalThis as BarakaContextRegistry;
 const StoreContext = contextRegistry.__barakaStoreContext ?? createContext<Store | null>(null);
 contextRegistry.__barakaStoreContext = StoreContext;
 const KEY = "baraka-state-v3";
+
+/** Pastikan setiap produk tertaut ke koperasi sekolah yang benar-benar ada. */
+const normalizeProducts = (list: Product[]): Product[] =>
+  list.map((p) => {
+    const schoolId = resolveSchoolId(p.schoolId, p.seller);
+    return { ...p, schoolId, seller: SCHOOLS_SELLER[schoolId] ?? p.seller };
+  });
 
 export function BarakaProvider({ children }: { children: ReactNode }) {
   const parentStore = useContext(StoreContext);
@@ -185,7 +201,8 @@ export function BarakaProvider({ children }: { children: ReactNode }) {
 }
 
 function BarakaStoreProvider({ children }: { children: ReactNode }) {
-  const [products, setProducts] = useState<Product[]>(seedProducts);
+  const [products, setProducts] = useState<Product[]>(() => normalizeProducts(seedProducts));
+  const [reviews, setReviews] = useState<KoperasiReview[]>(seedReviews);
   const [cart, setCart] = useState<CartLine[]>([]);
   const [orders, setOrders] = useState<Order[]>(seedOrders);
   const [users, setUsers] = useState<User[]>(seedUsers);
@@ -206,7 +223,8 @@ function BarakaStoreProvider({ children }: { children: ReactNode }) {
       const raw = localStorage.getItem(KEY);
       if (raw) {
         const p = JSON.parse(raw);
-        if (p.products) setProducts(p.products);
+        if (p.products) setProducts(normalizeProducts(p.products));
+        if (p.reviews) setReviews(p.reviews);
         if (p.cart) setCart(p.cart);
         if (p.orders) setOrders(p.orders);
         if (p.users) setUsers(p.users);
@@ -230,11 +248,11 @@ function BarakaStoreProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (!hydrated) return;
     try {
-      localStorage.setItem(KEY, JSON.stringify({ products, cart, orders, users, userId }));
+      localStorage.setItem(KEY, JSON.stringify({ products, cart, orders, users, userId, reviews }));
     } catch {
       /* ignore */
     }
-  }, [hydrated, products, cart, orders, users, userId]);
+  }, [hydrated, products, cart, orders, users, userId, reviews]);
 
   const addToCart = useCallback((id: string, qty = 1) => {
     setCart((c) =>
@@ -360,10 +378,32 @@ function BarakaStoreProvider({ children }: { children: ReactNode }) {
         );
       },
       markPaid: (id) => setOrders((os) => os.map((o) => (o.id === id ? { ...o, paymentStatus: "Lunas" } : o))),
-      addProduct: (p) => setProducts((ps) => [{ ...p, id: "p" + Date.now(), sold: 0 }, ...ps]),
+      addProduct: (p) =>
+        setProducts((ps) => [
+          { ...p, schoolId: resolveSchoolId(p.schoolId, p.seller), id: "p" + Date.now(), sold: 0 },
+          ...ps,
+        ]),
       deleteProduct: (id) => setProducts((ps) => ps.filter((p) => p.id !== id)),
+      reviews,
+      addReview: ({ schoolId, rating, comment }) => {
+        if (!user) return { ok: false, error: "Masuk dulu untuk memberi ulasan." };
+        if (rating < 1 || rating > 5) return { ok: false, error: "Pilih rating 1–5 bintang." };
+        if (comment.trim().length < 5) return { ok: false, error: "Tulis ulasan minimal 5 karakter." };
+        setReviews((rs) => [
+          {
+            id: "r" + Date.now(),
+            schoolId: resolveSchoolId(schoolId),
+            author: user.name,
+            rating,
+            comment: comment.trim(),
+            date: new Date().toISOString().slice(0, 10),
+          },
+          ...rs,
+        ]);
+        return { ok: true };
+      },
     }),
-    [products, cart, orders, users, user, addToCart],
+    [products, cart, orders, users, user, addToCart, reviews],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

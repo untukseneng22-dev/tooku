@@ -2,8 +2,8 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, BadgeCheck, MapPin, Clock, Check, X, Store, MessageCircle } from "lucide-react";
 import { useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
-import { rupiah, productSpecs, schoolById } from "@/lib/baraka-data";
-import { ProductThumb, CuratedBadge, ProductCard, KoperasiBadge } from "@/components/baraka/ui";
+import { rupiah, productSpecs, schoolById, ratingSummary } from "@/lib/baraka-data";
+import { ProductThumb, CuratedBadge, ProductCard, KoperasiBadge, Stars } from "@/components/baraka/ui";
 
 export const Route = createFileRoute("/produk/$id")({
   head: () => ({
@@ -26,7 +26,7 @@ export const Route = createFileRoute("/produk/$id")({
 
 function ProductDetail() {
   const { id } = Route.useParams();
-  const { products, addToCart } = useBaraka();
+  const { products, addToCart, reviews } = useBaraka();
   const navigate = useNavigate();
   const product = products.find((p) => p.id === id);
   const [active, setActive] = useState(0);
@@ -42,6 +42,7 @@ function ProductDetail() {
     );
   }
 
+  const rating = product ? ratingSummary(reviews, product.schoolId) : null;
   const related = products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
 
   return (
@@ -106,6 +107,12 @@ function ProductDetail() {
                   : "Koperasi sekolah terverifikasi"}
                 {product.contributor ? ` · titipan ${product.contributor}` : ""}
               </p>
+              {rating && (
+                <p className="mt-0.5 flex items-center gap-1 text-[11px] font-semibold">
+                  <Stars value={rating.avg} size={11} /> {rating.avgLabel}
+                  <span className="font-normal text-muted-foreground">({rating.count} ulasan)</span>
+                </p>
+              )}
             </div>
             <Link
               to="/chat"
