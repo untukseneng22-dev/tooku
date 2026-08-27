@@ -37,6 +37,30 @@ export function CuratedBadge({ small = false }: { small?: boolean }) {
   );
 }
 
+/** Badge "Koperasi Asal" — menunjukkan koperasi sekolah yang memverifikasi & menangani pesanan. */
+export function KoperasiBadge({ schoolId, small = false }: { schoolId?: string; small?: boolean }) {
+  const school = schoolId ? schoolById(schoolId) : undefined;
+  if (!school) return null;
+  const inner = (
+    <>
+      <Store className={small ? "h-3 w-3 shrink-0" : "h-3.5 w-3.5 shrink-0"} />
+      <span className="truncate">
+        {small ? school.koperasi : `Koperasi Asal · ${school.koperasi}`}
+      </span>
+    </>
+  );
+  const cls = `inline-flex max-w-full items-center gap-1 rounded-full border border-primary/25 bg-primary/10 font-semibold text-primary ${
+    small ? "px-2 py-0.5 text-[10px]" : "px-2.5 py-1 text-xs"
+  }`;
+  if (small) return <span className={cls}>{inner}</span>;
+  return (
+    <Link to="/koperasi/$id" params={{ id: school.id }} className={cls}>
+      {inner}
+    </Link>
+  );
+}
+
+
 export function ProductCard({ product }: { product: Product }) {
   return (
     <Link
