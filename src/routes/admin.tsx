@@ -15,6 +15,8 @@ import {
   LogOut,
   ShieldCheck,
   BanknoteIcon,
+  Pencil,
+  ShoppingBag,
 } from "lucide-react";
 import { useTooku, useCountdown, statusFlow, type Order, type OrderStatus } from "@/lib/tooku-store";
 import { categories, rupiah, schools, type Category } from "@/lib/tooku-data";
@@ -48,6 +50,7 @@ function AdminPage() {
   const { user, isAdmin, isSuperAdmin, logout } = useTooku();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("dashboard");
+  const [editId, setEditId] = useState<string | null>(null);
 
   // Admin Pusat punya konsol tersendiri.
   if (isSuperAdmin) {
@@ -106,6 +109,13 @@ function AdminPage() {
               {user?.name} · @{user?.username}
             </p>
           </div>
+          <div className="flex shrink-0 items-center gap-2">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold"
+          >
+            <ShoppingBag className="h-3.5 w-3.5" /> Belanja
+          </Link>
           <button
             onClick={() => {
               logout();
@@ -115,6 +125,7 @@ function AdminPage() {
           >
             <LogOut className="h-3.5 w-3.5" /> Keluar
           </button>
+          </div>
         </div>
       </header>
 
@@ -124,12 +135,15 @@ function AdminPage() {
             .map((t) => (
               <button
                 key={t.id}
-                onClick={() => setTab(t.id)}
+                onClick={() => {
+                  if (t.id !== "new") setEditId(null);
+                  setTab(t.id);
+                }}
                 className={`flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold ${
                   tab === t.id ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"
                 }`}
               >
-                <t.icon className="h-4 w-4" /> {t.label}
+                <t.icon className="h-4 w-4" /> {t.id === "new" && editId ? "Edit Produk" : t.label}
               </button>
             ))}
         </nav>
@@ -137,8 +151,23 @@ function AdminPage() {
         <main className="min-w-0 flex-1">
           {tab === "dashboard" && <Dashboard />}
           {tab === "orders" && <OrdersAdmin />}
-          {tab === "products" && <ProductsAdmin />}
-          {tab === "new" && <NewProduct onDone={() => setTab("products")} />}
+          {tab === "products" && (
+            <ProductsAdmin
+              onEdit={(id) => {
+                setEditId(id);
+                setTab("new");
+              }}
+            />
+          )}
+          {tab === "new" && (
+            <NewProduct
+              editId={editId}
+              onDone={() => {
+                setEditId(null);
+                setTab("products");
+              }}
+            />
+          )}
         </main>
       </div>
     </div>
@@ -321,7 +350,7 @@ function OrdersAdmin() {
   );
 }
 
-function ProductsAdmin() {
+function ProductsAdmin({ onEdit }: { onEdit: (id: string) => void }) {
   const { products, deleteProduct } = useTooku();
   return (
     <div className="grid gap-3 lg:grid-cols-2">
@@ -337,32 +366,56 @@ function ProductsAdmin() {
             </p>
             <p className="text-sm font-bold text-primary">{rupiah(p.price)}</p>
           </div>
-          <button
-            onClick={() => deleteProduct(p.id)}
-            aria-label="Hapus produk"
-            className="self-start text-muted-foreground"
-          >
-            <Trash2 className="h-4 w-4" />
-          </button>
+          <div className="flex shrink-0 flex-col items-center gap-2 self-start">
+            <button
+              onClick={() => onEdit(p.id)}
+              aria-label={`Edit ${p.name}`}
+              className="rounded-lg bg-secondary p-1.5 text-primary"
+            >
+              <Pencil className="h-4 w-4" />
+            </button>
+            <button
+              onClick={() => deleteProduct(p.id)}
+              aria-label={`Hapus ${p.name}`}
+              className="rounded-lg bg-secondary p-1.5 text-muted-foreground"
+            >
+              <Trash2 className="h-4 w-4" />
+            </button>
+          </div>
         </div>
       ))}
     </div>
   );
 }
 
-function NewProduct({ onDone }: { onDone: () => void }) {
-  const { addProduct } = useTooku();
-  const [form, setForm] = useState({
-    name: "",
-    category: "Seragam" as Category,
-    price: "",
-    stock: "1",
-    condition: "Baik (85%)",
-    plus: "",
-    minus: "",
-    photo: "",
-    schoolId: schools[0]!.id,
-  });
+function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => void }) {
+  const { addProduct, updateProduct, products } = useTooku();
+  const editing = editId ? products.find((p) => p.id === editId) : undefined;
+  const [form, setForm] = useState(() =>
+    editing
+      ? {
+          name: editing.name,
+          category: editing.category,
+          price: String(editing.price),
+          stock: String(editing.stock),
+          condition: editing.condition,
+          plus: editing.plus.join("\n"),
+          minus: editing.minus.join("\n"),
+          photo: editing.photo ?? "",
+          schoolId: editing.schoolId ?? schools[0]!.id,
+        }
+      : {
+          name: "",
+          category: "Seragam" as Category,
+          price: "",
+          stock: "1",
+          condition: "Baik (85%)",
+          plus: "",
+          minus: "",
+          photo: "",
+          schoolId: schools[0]!.id,
+        },
+  );
 
   const [photoInfo, setPhotoInfo] = useState<string | null>(null);
   const [compressing, setCompressing] = useState(false);
@@ -393,7 +446,7 @@ function NewProduct({ onDone }: { onDone: () => void }) {
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        addProduct({
+        const payload = {
           name: form.name.trim().slice(0, 120),
           category: form.category,
           price: Math.max(0, Number(form.price) || 0),
@@ -406,12 +459,20 @@ function NewProduct({ onDone }: { onDone: () => void }) {
           seller: schools.find((sc) => sc.id === form.schoolId)!.koperasi,
           schoolId: form.schoolId,
           ...(form.photo ? { photo: form.photo } : {}),
-        });
+        };
+        if (editing) updateProduct(editing.id, payload);
+        else addProduct(payload);
         onDone();
       }}
       className="space-y-4 rounded-2xl border border-border bg-card p-4 lg:max-w-2xl"
     >
-      <h2 className="text-sm font-bold">Tambah Produk Terkurasi</h2>
+      <h2 className="text-sm font-bold">{editing ? "Edit Produk" : "Tambah Produk Terkurasi"}</h2>
+      {editing && (
+        <p className="rounded-xl bg-secondary px-3 py-2 text-[11px] text-muted-foreground">
+          Kamu sedang memperbaiki data produk <span className="font-semibold">{editing.name}</span>. Perubahan langsung
+          tampil di katalog pembeli.
+        </p>
+      )}
 
       <div className="space-y-1.5">
         <label className="text-xs font-semibold">Koperasi Sekolah Penjual</label>
@@ -556,7 +617,7 @@ function NewProduct({ onDone }: { onDone: () => void }) {
       </div>
 
       <button type="submit" className="w-full rounded-xl bg-primary py-3 text-sm font-bold text-primary-foreground">
-        Simpan & Tandai Lolos Kurasi
+        {editing ? "Simpan Perubahan" : "Simpan & Tandai Lolos Kurasi"}
       </button>
     </form>
   );
