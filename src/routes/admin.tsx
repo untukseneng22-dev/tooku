@@ -108,21 +108,12 @@ function AdminPage() {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold"
-          >
-            <ShoppingBag className="h-3.5 w-3.5" /> Belanja
-          </Link>
-          <button
-            onClick={() => {
-              logout();
-              navigate({ to: "/auth" });
-            }}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold"
-          >
-            <LogOut className="h-3.5 w-3.5" /> Keluar
-          </button>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold"
+            >
+              <ShoppingBag className="h-3.5 w-3.5" /> Belanja
+            </Link>
           </div>
         </div>
       </header>
