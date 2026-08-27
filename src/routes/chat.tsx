@@ -113,8 +113,11 @@ function ChatPage() {
     const list = isAdmin
       ? Array.from(
           new Set([
+            CALLCENTER,
             ...users.filter((u) => u.role === "buyer").map((u) => u.name),
-            ...Object.keys(threads).filter((k) => k !== KOPERASI && !sellerNames.includes(k)),
+            // Admin koperasi juga bisa jadi pembeli: chat koperasi sekolah lain.
+            ...sellerNames.filter((n) => n !== user?.name),
+            ...Object.keys(threads).filter((k) => k !== KOPERASI),
           ]),
         )
       : Array.from(new Set([CALLCENTER, KOPERASI, ...sellerNames, ...Object.keys(threads)]));
