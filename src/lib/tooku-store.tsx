@@ -201,6 +201,7 @@ type Store = {
   cancelOrder: (id: string) => void;
   markPaid: (id: string) => void;
   addProduct: (p: Omit<Product, "id" | "sold">) => void;
+  updateProduct: (id: string, patch: Partial<Omit<Product, "id" | "sold">>) => void;
   reviews: KoperasiReview[];
   addReview: (input: { schoolId: string; rating: number; comment: string }) => { ok: boolean; error?: string };
   deleteProduct: (id: string) => void;
@@ -452,6 +453,14 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           { ...p, schoolId: resolveSchoolId(p.schoolId, p.seller), id: "p" + Date.now(), sold: 0 },
           ...ps,
         ]),
+      updateProduct: (id, patch) =>
+        setProducts((ps) =>
+          ps.map((p) =>
+            p.id === id
+              ? { ...p, ...patch, schoolId: resolveSchoolId(patch.schoolId ?? p.schoolId, patch.seller ?? p.seller) }
+              : p,
+          ),
+        ),
       deleteProduct: (id) => setProducts((ps) => ps.filter((p) => p.id !== id)),
       reviews,
       addReview: ({ schoolId, rating, comment }) => {
