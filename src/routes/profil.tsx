@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, LogIn } from "lucide-react";
+import { ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, LogIn, Store } from "lucide-react";
 import { useBaraka, roleLabel } from "@/lib/baraka-store";
 import { rupiah } from "@/lib/baraka-data";
 
@@ -95,6 +95,10 @@ function ProfilePage() {
         <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
           <Link to="/pesanan" className="flex items-center gap-3 p-4 text-sm">
             <Wallet className="h-4 w-4 text-primary" /> Riwayat & Status Pesanan
+            <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
+          </Link>
+          <Link to="/koperasi" className="flex items-center gap-3 p-4 text-sm">
+            <Store className="h-4 w-4 text-primary" /> Daftar Koperasi Sekolah
             <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
           </Link>
           <div className="flex items-center gap-3 p-4 text-sm">

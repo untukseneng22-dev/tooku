@@ -17,6 +17,8 @@ export type School = {
   koperasi: string;
   district: string;
   pickup: string;
+  hours: string;
+  phone: string;
 };
 
 /**
@@ -32,6 +34,8 @@ export const schools: School[] = [
     koperasi: "Koperasi SMA PGRI 1 Maospati",
     district: "Maospati",
     pickup: "Koperasi Sekolah — Gedung B lt. 1",
+    hours: "Senin–Jumat 07.00–15.00 · Sabtu 07.00–11.00",
+    phone: "0851-1000-1234",
   },
   {
     id: "s2",
@@ -40,6 +44,8 @@ export const schools: School[] = [
     koperasi: "Koperasi SMAN 1 Magetan",
     district: "Magetan",
     pickup: "Koperasi Siswa — samping perpustakaan",
+    hours: "Senin–Jumat 07.00–15.30",
+    phone: "0851-2000-1234",
   },
   {
     id: "s3",
@@ -48,6 +54,8 @@ export const schools: School[] = [
     koperasi: "Koperasi SMKN 1 Magetan",
     district: "Magetan",
     pickup: "Business Center SMKN 1 — lobi depan",
+    hours: "Senin–Jumat 07.00–16.00 · Sabtu 08.00–12.00",
+    phone: "0851-3000-1234",
   },
   {
     id: "s4",
@@ -56,6 +64,8 @@ export const schools: School[] = [
     koperasi: "Koperasi SMKN 2 Magetan",
     district: "Magetan",
     pickup: "Koperasi Sekolah — dekat ruang praktik",
+    hours: "Senin–Jumat 07.00–15.00",
+    phone: "0851-4000-1234",
   },
   {
     id: "s5",
@@ -64,6 +74,8 @@ export const schools: School[] = [
     koperasi: "Koperasi SMPN 1 Magetan",
     district: "Magetan",
     pickup: "Koperasi Siswa — lantai 1 gedung utama",
+    hours: "Senin–Jumat 07.00–14.00",
+    phone: "0851-5000-1234",
   },
   {
     id: "s6",
@@ -72,6 +84,8 @@ export const schools: School[] = [
     koperasi: "Koperasi SMPN 1 Barat",
     district: "Barat",
     pickup: "Koperasi Sekolah — depan ruang guru",
+    hours: "Senin–Jumat 07.00–14.00 · Sabtu 07.00–10.00",
+    phone: "0851-6000-1234",
   },
   {
     id: "s7",
@@ -80,6 +94,8 @@ export const schools: School[] = [
     koperasi: "Koperasi SDN Kraton 1 Maospati",
     district: "Maospati",
     pickup: "Koperasi Sekolah — ruang UKS sebelah",
+    hours: "Senin–Jumat 07.00–12.00",
+    phone: "0851-7000-1234",
   },
   {
     id: "s8",
@@ -88,6 +104,8 @@ export const schools: School[] = [
     koperasi: "Koperasi SDN Sukowidi",
     district: "Kawedanan",
     pickup: "Koperasi Sekolah — aula kecil",
+    hours: "Senin–Jumat 07.00–12.00",
+    phone: "0851-8000-1234",
   },
 ];
 
