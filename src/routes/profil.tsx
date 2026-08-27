@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, LogIn, Store } from "lucide-react";
 import { useTooku, roleLabel } from "@/lib/tooku-store";
 import { rupiah } from "@/lib/tooku-data";
+import { InstallAppCard } from "@/components/tooku/install-prompt";
 
 export const Route = createFileRoute("/profil")({
   head: () => ({
