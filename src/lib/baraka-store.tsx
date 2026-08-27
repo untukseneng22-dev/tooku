@@ -378,10 +378,32 @@ function BarakaStoreProvider({ children }: { children: ReactNode }) {
         );
       },
       markPaid: (id) => setOrders((os) => os.map((o) => (o.id === id ? { ...o, paymentStatus: "Lunas" } : o))),
-      addProduct: (p) => setProducts((ps) => [{ ...p, id: "p" + Date.now(), sold: 0 }, ...ps]),
+      addProduct: (p) =>
+        setProducts((ps) => [
+          { ...p, schoolId: resolveSchoolId(p.schoolId, p.seller), id: "p" + Date.now(), sold: 0 },
+          ...ps,
+        ]),
       deleteProduct: (id) => setProducts((ps) => ps.filter((p) => p.id !== id)),
+      reviews,
+      addReview: ({ schoolId, rating, comment }) => {
+        if (!user) return { ok: false, error: "Masuk dulu untuk memberi ulasan." };
+        if (rating < 1 || rating > 5) return { ok: false, error: "Pilih rating 1–5 bintang." };
+        if (comment.trim().length < 5) return { ok: false, error: "Tulis ulasan minimal 5 karakter." };
+        setReviews((rs) => [
+          {
+            id: "r" + Date.now(),
+            schoolId: resolveSchoolId(schoolId),
+            author: user.name,
+            rating,
+            comment: comment.trim(),
+            date: new Date().toISOString().slice(0, 10),
+          },
+          ...rs,
+        ]);
+        return { ok: true };
+      },
     }),
-    [products, cart, orders, users, user, addToCart],
+    [products, cart, orders, users, user, addToCart, reviews],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
