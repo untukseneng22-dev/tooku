@@ -18,7 +18,14 @@ import {
   ShoppingBag,
 } from "lucide-react";
 import { useTooku, useCountdown, statusFlow, type Order, type OrderStatus } from "@/lib/tooku-store";
-import { categories, rupiah, schools, type Category } from "@/lib/tooku-data";
+import {
+  categories,
+  rupiah,
+  schools,
+  schoolIdForAccount,
+  specTemplates,
+  type Category,
+} from "@/lib/tooku-data";
 import { ProductThumb } from "@/components/tooku/ui";
 
 export const Route = createFileRoute("/admin")({
@@ -378,8 +385,11 @@ function ProductsAdmin({ onEdit }: { onEdit: (id: string) => void }) {
 }
 
 function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => void }) {
-  const { addProduct, updateProduct, products } = useTooku();
+  const { addProduct, updateProduct, products, user } = useTooku();
   const editing = editId ? products.find((p) => p.id === editId) : undefined;
+  const mySchoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
+  const schoolId = editing?.schoolId ?? mySchoolId;
+  const mySchool = schools.find((s) => s.id === schoolId)!;
   const [form, setForm] = useState(() =>
     editing
       ? {
@@ -391,7 +401,6 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
           plus: editing.plus.join("\n"),
           minus: editing.minus.join("\n"),
           photo: editing.photo ?? "",
-          schoolId: editing.schoolId ?? schools[0]!.id,
         }
       : {
           name: "",
@@ -402,9 +411,9 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
           plus: "",
           minus: "",
           photo: "",
-          schoolId: schools[0]!.id,
         },
   );
+  const [specs, setSpecs] = useState<Record<string, string>>(() => ({ ...(editing?.specs ?? {}) }));
 
   const [photoInfo, setPhotoInfo] = useState<string | null>(null);
   const [compressing, setCompressing] = useState(false);
@@ -430,11 +439,18 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
 
 
   const field = "w-full rounded-xl border border-input bg-background px-3 py-2.5 text-sm";
+  const template = specTemplates[form.category];
+  const extraSpecs = Object.keys(specs).filter((k) => !template.some((t) => t.key === k));
 
   return (
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        const cleanSpecs = Object.fromEntries(
+          Object.entries(specs)
+            .map(([k, v]) => [k, v.trim()])
+            .filter(([, v]) => v),
+        ) as Record<string, string>;
         const payload = {
           name: form.name.trim().slice(0, 120),
           category: form.category,
@@ -445,8 +461,9 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
           minus: form.minus.split("\n").filter(Boolean).slice(0, 6),
           curated: true,
           featured: false,
-          seller: schools.find((sc) => sc.id === form.schoolId)!.koperasi,
-          schoolId: form.schoolId,
+          seller: mySchool.koperasi,
+          schoolId: mySchool.id,
+          specs: cleanSpecs,
           ...(form.photo ? { photo: form.photo } : {}),
         };
         if (editing) updateProduct(editing.id, payload);
@@ -462,24 +479,10 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
           tampil di katalog pembeli.
         </p>
       )}
+      <p className="rounded-xl bg-primary/5 px-3 py-2 text-[11px] text-muted-foreground">
+        Produk otomatis terdaftar sebagai barang <span className="font-semibold">{mySchool.koperasi}</span>.
+      </p>
 
-      <div className="space-y-1.5">
-        <label className="text-xs font-semibold">Koperasi Sekolah Penjual</label>
-        <select
-          value={form.schoolId}
-          onChange={(e) => setForm((f) => ({ ...f, schoolId: e.target.value }))}
-          className={field}
-        >
-          {schools.map((sc) => (
-            <option key={sc.id} value={sc.id}>
-              {sc.koperasi} · {sc.level} {sc.district}
-            </option>
-          ))}
-        </select>
-        <p className="text-[11px] text-muted-foreground">
-          Barang alumni/siswa tetap dijual lewat koperasi sekolahnya.
-        </p>
-      </div>
 
       <div className="space-y-1.5">
         <label className="text-xs font-semibold">Foto Barang</label>
@@ -576,6 +579,45 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
           />
         </div>
       </div>
+
+      <div className="space-y-2 rounded-xl border border-border bg-secondary/40 p-3">
+        <div>
+          <p className="text-xs font-bold">Detail Spesifikasi — {form.category}</p>
+          <p className="text-[11px] text-muted-foreground">
+            Isi sedetail mungkin (ukuran, bahan, kelas, dll). Kosongkan yang tidak relevan; hanya yang terisi yang
+            tampil di halaman produk.
+          </p>
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {template.map((t) => (
+            <div key={t.key} className="space-y-1">
+              <label className="text-[11px] font-semibold text-muted-foreground">{t.key}</label>
+              <input
+                className={field}
+                placeholder={t.placeholder}
+                value={specs[t.key] ?? ""}
+                onChange={(e) => setSpecs((s) => ({ ...s, [t.key]: e.target.value }))}
+              />
+            </div>
+          ))}
+        </div>
+        {extraSpecs.length > 0 && (
+          <div className="grid gap-2 sm:grid-cols-2">
+            {extraSpecs.map((k) => (
+              <div key={k} className="space-y-1">
+                <label className="text-[11px] font-semibold text-muted-foreground">{k}</label>
+                <input
+                  className={field}
+                  value={specs[k] ?? ""}
+                  onChange={(e) => setSpecs((s) => ({ ...s, [k]: e.target.value }))}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+
 
       <div className="space-y-1.5">
         <label className="text-xs font-semibold" htmlFor="pl">
