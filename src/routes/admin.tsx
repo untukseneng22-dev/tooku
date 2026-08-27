@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type ChangeEvent } from "react";
 import {
   ArrowLeft,
@@ -12,7 +12,6 @@ import {
   Package,
   Wallet,
   Clock,
-  LogOut,
   ShieldCheck,
   BanknoteIcon,
   Pencil,
@@ -47,8 +46,7 @@ const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
 ];
 
 function AdminPage() {
-  const { user, isAdmin, isSuperAdmin, logout } = useTooku();
-  const navigate = useNavigate();
+  const { user, isAdmin, isSuperAdmin } = useTooku();
   const [tab, setTab] = useState<Tab>("dashboard");
   const [editId, setEditId] = useState<string | null>(null);
 
@@ -110,21 +108,12 @@ function AdminPage() {
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-          <Link
-            to="/"
-            className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold"
-          >
-            <ShoppingBag className="h-3.5 w-3.5" /> Belanja
-          </Link>
-          <button
-            onClick={() => {
-              logout();
-              navigate({ to: "/auth" });
-            }}
-            className="inline-flex shrink-0 items-center gap-1.5 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold"
-          >
-            <LogOut className="h-3.5 w-3.5" /> Keluar
-          </button>
+            <Link
+              to="/"
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold"
+            >
+              <ShoppingBag className="h-3.5 w-3.5" /> Belanja
+            </Link>
           </div>
         </div>
       </header>
