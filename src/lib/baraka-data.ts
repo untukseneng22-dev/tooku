@@ -116,6 +116,50 @@ export const SCHOOLS_SELLER: Record<string, string> = Object.fromEntries(
   schools.map((s) => [s.id, s.koperasi]),
 );
 
+/**
+ * Menentukan schoolId yang valid untuk sebuah produk. Dipakai untuk menormalkan
+ * data lama (tersimpan sebelum model koperasi lintas sekolah) agar tautan profil
+ * koperasi tidak pernah mengarah ke id yang tidak ada.
+ */
+export const resolveSchoolId = (schoolId?: string, seller?: string): string => {
+  if (schoolId && schoolById(schoolId)) return schoolId;
+  if (seller) {
+    const byKoperasi = schools.find((s) => s.koperasi === seller || s.name === seller);
+    if (byKoperasi) return byKoperasi.id;
+  }
+  return schools[0]!.id;
+};
+
+/** Ulasan pembeli terhadap pelayanan koperasi sekolah. */
+export type KoperasiReview = {
+  id: string;
+  schoolId: string;
+  author: string;
+  rating: number;
+  comment: string;
+  date: string;
+};
+
+export const seedReviews: KoperasiReview[] = [
+  { id: "r1", schoolId: "s1", author: "Budi Santoso", rating: 5, comment: "Barang sesuai deskripsi, petugas koperasi ramah dan pengambilan cepat.", date: "2026-08-12" },
+  { id: "r2", schoolId: "s1", author: "Nadia P.", rating: 4, comment: "Seragam bersih dan rapi, hanya saja jam layanan Sabtu agak singkat.", date: "2026-08-18" },
+  { id: "r3", schoolId: "s2", author: "Rizky A.", rating: 5, comment: "Kurasi jujur, minus barang benar-benar ditulis apa adanya.", date: "2026-08-09" },
+  { id: "r4", schoolId: "s2", author: "Sinta W.", rating: 4, comment: "Pelayanan baik, antrean pengambilan tertib.", date: "2026-08-20" },
+  { id: "r5", schoolId: "s3", author: "Dimas F.", rating: 5, comment: "Business Center-nya profesional, ada nota pengambilan.", date: "2026-08-15" },
+  { id: "r6", schoolId: "s4", author: "Ayu L.", rating: 4, comment: "Harga hemat, respons chat cukup cepat.", date: "2026-08-11" },
+  { id: "r7", schoolId: "s5", author: "Fajar N.", rating: 5, comment: "Buku paket masih bagus, dibungkus rapi.", date: "2026-08-07" },
+  { id: "r8", schoolId: "s6", author: "Hana R.", rating: 4, comment: "Petugas membantu mencari ukuran yang pas.", date: "2026-08-19" },
+  { id: "r9", schoolId: "s7", author: "Wali Murid Kelas 4", rating: 5, comment: "Cocok untuk anak SD, atribut lengkap dan murah.", date: "2026-08-05" },
+  { id: "r10", schoolId: "s8", author: "Tri M.", rating: 4, comment: "Jam layanan hanya sampai siang, tapi pelayanan memuaskan.", date: "2026-08-21" },
+];
+
+export const ratingSummary = (reviews: KoperasiReview[], schoolId: string) => {
+  const list = reviews.filter((r) => r.schoolId === schoolId);
+  const avg = list.length ? list.reduce((s, r) => s + r.rating, 0) / list.length : 0;
+  return { list, count: list.length, avg, avgLabel: list.length ? avg.toFixed(1) : "Baru" };
+};
+
+
 export type Product = {
   id: string;
   name: string;
