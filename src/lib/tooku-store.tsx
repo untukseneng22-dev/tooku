@@ -180,7 +180,10 @@ type Store = {
   user: User | null;
   isAdmin: boolean;
   isSuperAdmin: boolean;
-  login: (identifier: string, password: string) => { ok: boolean; error?: string; role?: Role };
+  login: (
+    identifier: string,
+    password: string,
+  ) => { ok: boolean; error?: string; role?: Role; pending?: boolean };
   register: (
     input: Omit<User, "id" | "status" | "registeredAt">,
   ) => { ok: boolean; error?: string; role?: Role; pending?: boolean };
