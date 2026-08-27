@@ -1,6 +1,8 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, ChevronRight, Clock, MapPin, Store } from "lucide-react";
-import { schools } from "@/lib/baraka-data";
+import { ratingSummary, schools } from "@/lib/baraka-data";
+import { useBaraka } from "@/lib/baraka-store";
+import { Stars } from "@/components/baraka/ui";
 
 export const Route = createFileRoute("/koperasi/")({
   head: () => ({
@@ -25,6 +27,7 @@ export const Route = createFileRoute("/koperasi/")({
 
 function KoperasiList() {
   const navigate = useNavigate();
+  const { reviews } = useBaraka();
   return (
     <div className="min-h-screen bg-background pb-28">
       <header className="sticky top-0 z-30 flex items-center gap-3 border-b border-border bg-card/95 px-4 py-3 backdrop-blur">
@@ -39,7 +42,9 @@ function KoperasiList() {
           Semua barang di TOOKU dijual dan diverifikasi oleh koperasi sekolah. Pilih koperasi untuk melihat lokasi
           pengambilan dan jam layanan.
         </p>
-        {schools.map((s) => (
+        {schools.map((s) => {
+          const r = ratingSummary(reviews, s.id);
+          return (
           <Link
             key={s.id}
             to="/koperasi/$id"
@@ -60,10 +65,16 @@ function KoperasiList() {
               <p className="flex items-center gap-1 truncate text-[11px] text-muted-foreground">
                 <Clock className="h-3 w-3 shrink-0" /> {s.hours}
               </p>
+              <p className="mt-1 flex items-center gap-1 text-[11px] font-semibold text-foreground">
+                <Stars value={r.avg} size={12} />
+                {r.avgLabel}
+                <span className="font-normal text-muted-foreground">({r.count} ulasan)</span>
+              </p>
             </div>
             <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
           </Link>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
