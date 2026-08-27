@@ -112,9 +112,24 @@ function OrderCard({ order }: { order: Order }) {
             <>
               <Wallet className="h-3 w-3" /> Online · {order.paymentChannel}
             </>
+          ) : order.paymentMethod === "cod" ? (
+            <>
+              <Truck className="h-3 w-3" /> COD saat paket diterima
+            </>
           ) : (
             <>
               <Store className="h-3 w-3" /> Bayar di Koperasi
+            </>
+          )}
+        </span>
+        <span className="inline-flex items-center gap-1 rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary">
+          {delivery ? (
+            <>
+              <Truck className="h-3 w-3" /> Dikirim ekspedisi
+            </>
+          ) : (
+            <>
+              <Store className="h-3 w-3" /> Ambil di koperasi
             </>
           )}
         </span>
@@ -131,7 +146,8 @@ function OrderCard({ order }: { order: Order }) {
         <div className="space-y-1.5 rounded-xl bg-secondary/60 p-3">
           <div className="flex items-center justify-between text-xs">
             <span className="inline-flex items-center gap-1 text-muted-foreground">
-              <Clock className="h-3.5 w-3.5" /> Batas ambil (1x24 jam)
+              <Clock className="h-3.5 w-3.5" />{" "}
+              {delivery ? "Batas proses koperasi (2x24 jam)" : "Batas ambil (1x24 jam)"}
             </span>
             <span className="font-bold tabular-nums text-primary">{expired ? "Waktu habis" : label}</span>
           </div>
@@ -141,10 +157,64 @@ function OrderCard({ order }: { order: Order }) {
         </div>
       )}
 
-      <p className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
-        <MapPin className="h-3.5 w-3.5 shrink-0" /> Koperasi Sekolah — Gedung B lantai 1
-      </p>
+      {delivery && order.shipping ? (
+        <div className="space-y-1.5 rounded-xl border border-border p-3 text-[11px]">
+          <p className="flex items-center gap-1.5 font-bold">
+            <Truck className="h-3.5 w-3.5 shrink-0 text-primary" /> Pengiriman {order.shipping.courier}
+          </p>
+          <p className="text-muted-foreground">
+            {order.shipping.recipient} · {order.shipping.phone}
+          </p>
+          <p className="text-muted-foreground">
+            {order.shipping.address}, Kec. {order.shipping.district}, {order.shipping.city},{" "}
+            {order.shipping.province}
+          </p>
+          <p className="text-muted-foreground">
+            Zona {zoneLabel[order.shipping.zone]} · estimasi tiba {zoneEta[order.shipping.zone]} · ongkir{" "}
+            {rupiah(order.shippingTotal)}
+          </p>
+          {order.shipping.note && <p className="text-muted-foreground">Catatan: {order.shipping.note}</p>}
+          {order.shipping.tracking ? (
+            <button
+              onClick={() => navigator.clipboard?.writeText(order.shipping!.tracking!)}
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-2.5 py-1 font-bold text-primary"
+            >
+              <Copy className="h-3 w-3" /> Resi {order.shipping.tracking}
+            </button>
+          ) : (
+            <p className="text-muted-foreground">Nomor resi akan muncul setelah koperasi menyerahkan paket ke kurir.</p>
+          )}
+        </div>
+      ) : (
+        <p className="flex items-start gap-1.5 text-[11px] text-muted-foreground">
+          <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+          {(() => {
+            const s = schoolById(order.items[0]?.schoolId ?? "");
+            return s ? `${s.koperasi} — ${s.pickupAddress ?? s.address ?? "lokasi koperasi"}` : "Koperasi Sekolah";
+          })()}
+        </p>
+      )}
+
+      <div className="space-y-0.5 text-[11px] text-muted-foreground">
+        <div className="flex justify-between">
+          <span>Subtotal</span>
+          <span>{rupiah(order.subtotal)}</span>
+        </div>
+        {order.shippingTotal > 0 && (
+          <div className="flex justify-between">
+            <span>Ongkir</span>
+            <span>{rupiah(order.shippingTotal)}</span>
+          </div>
+        )}
+        {order.serviceFee > 0 && (
+          <div className="flex justify-between">
+            <span>Biaya layanan</span>
+            <span>{rupiah(order.serviceFee)}</span>
+          </div>
+        )}
+      </div>
       <p className="text-sm font-bold text-primary">Total {rupiah(order.total)}</p>
+
     </div>
   );
 }
