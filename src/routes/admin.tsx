@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState, type ChangeEvent } from "react";
 import {
   ArrowLeft,
@@ -12,7 +12,6 @@ import {
   Package,
   Wallet,
   Clock,
-  LogOut,
   ShieldCheck,
   BanknoteIcon,
   Pencil,
