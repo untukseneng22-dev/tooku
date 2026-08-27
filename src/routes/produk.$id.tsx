@@ -3,7 +3,7 @@ import { ArrowLeft, BadgeCheck, MapPin, Clock, Check, X, Store, MessageCircle } 
 import { useState } from "react";
 import { useBaraka } from "@/lib/baraka-store";
 import { rupiah, productSpecs, schoolById } from "@/lib/baraka-data";
-import { ProductThumb, CuratedBadge, ProductCard } from "@/components/baraka/ui";
+import { ProductThumb, CuratedBadge, ProductCard, KoperasiBadge } from "@/components/baraka/ui";
 
 export const Route = createFileRoute("/produk/$id")({
   head: () => ({
@@ -72,7 +72,10 @@ function ProductDetail() {
         </div>
 
         <section className="space-y-3 border-b border-border px-4 pb-5">
-          {product.curated && <CuratedBadge />}
+          <div className="flex flex-wrap items-center gap-2">
+            <KoperasiBadge schoolId={product.schoolId} />
+            {product.curated && <CuratedBadge />}
+          </div>
           <h2 className="text-lg font-bold leading-snug">{product.name}</h2>
           <div className="flex items-end gap-2">
             <p className="text-2xl font-extrabold text-primary">{rupiah(product.price)}</p>
@@ -90,7 +93,13 @@ function ProductDetail() {
               <Store className="h-5 w-5" />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-bold">{product.seller}</p>
+              <Link
+                to="/koperasi/$id"
+                params={{ id: product.schoolId }}
+                className="block truncate text-xs font-bold text-primary"
+              >
+                {product.seller}
+              </Link>
               <p className="truncate text-[11px] text-muted-foreground">
                 {schoolById(product.schoolId)
                   ? `${schoolById(product.schoolId)!.level} · Kec. ${schoolById(product.schoolId)!.district}`
