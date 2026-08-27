@@ -15,7 +15,7 @@ import {
   SCHOOLS_SELLER,
   type KoperasiReview,
   type Product,
-} from "./baraka-data";
+} from "./tooku-data";
 
 export type Role = "buyer" | "admin" | "superadmin";
 export type User = {
@@ -90,8 +90,8 @@ const seedUsers: User[] = [
     id: "u4",
     name: "Pengelola Pusat TOOKU",
     username: "superadmin",
-    email: "superadmin@baraka.id",
-    password: "barakapusat2026",
+    email: "pusat@tooku.id",
+    password: "tookupusat2026",
     role: "superadmin",
   },
 ];
@@ -99,7 +99,7 @@ const seedUsers: User[] = [
 const seedOrders: Order[] = [
   {
     id: "o1",
-    code: "BRK-4821",
+    code: "TKU-4821",
     userId: "u1",
     buyer: "Siti Aisyah — X IPA 1",
     items: [{ productId: "p2", name: "Buku Matematika Kelas XI Kurikulum Merdeka", price: 18000, qty: 1 }],
@@ -117,7 +117,7 @@ const seedOrders: Order[] = [
   },
   {
     id: "o2",
-    code: "BRK-3390",
+    code: "TKU-3390",
     userId: "u1",
     buyer: "Siti Aisyah — X IPA 1",
     items: [{ productId: "p7", name: "Dasi Sekolah Warna Navy", price: 7000, qty: 2 }],
@@ -165,18 +165,18 @@ type Store = {
   deleteProduct: (id: string) => void;
 };
 
-type BarakaContextRegistry = typeof globalThis & {
-  __barakaStoreContext?: Context<Store | null>;
-  __barakaActiveProviderCount?: number;
+type TookuContextRegistry = typeof globalThis & {
+  __tookuStoreContext?: Context<Store | null>;
+  __tookuActiveProviderCount?: number;
 };
 
 // Keep one context identity across route chunk loading and Vite hot updates.
 // Without this, a stale route chunk can briefly read a different context
 // instance from the one mounted by the root provider.
-const contextRegistry = globalThis as BarakaContextRegistry;
-const StoreContext = contextRegistry.__barakaStoreContext ?? createContext<Store | null>(null);
-contextRegistry.__barakaStoreContext = StoreContext;
-const KEY = "baraka-state-v3";
+const contextRegistry = globalThis as TookuContextRegistry;
+const StoreContext = contextRegistry.__tookuStoreContext ?? createContext<Store | null>(null);
+contextRegistry.__tookuStoreContext = StoreContext;
+const KEY = "tooku-state-v1";
 
 /** Pastikan setiap produk tertaut ke koperasi sekolah yang benar-benar ada. */
 const normalizeProducts = (list: Product[]): Product[] =>
@@ -185,22 +185,22 @@ const normalizeProducts = (list: Product[]): Product[] =>
     return { ...p, schoolId, seller: SCHOOLS_SELLER[schoolId] ?? p.seller };
   });
 
-export function BarakaProvider({ children }: { children: ReactNode }) {
+export function TookuProvider({ children }: { children: ReactNode }) {
   const parentStore = useContext(StoreContext);
 
   if (parentStore) {
     if (import.meta.env.DEV) {
       console.error(
-        "[TOOKU] Duplicate BarakaProvider blocked. Keep exactly one provider at the application root.",
+        "[TOOKU] Duplicate TookuProvider blocked. Keep exactly one provider at the application root.",
       );
     }
     return children;
   }
 
-  return <BarakaStoreProvider>{children}</BarakaStoreProvider>;
+  return <TookuStoreProvider>{children}</TookuStoreProvider>;
 }
 
-function BarakaStoreProvider({ children }: { children: ReactNode }) {
+function TookuStoreProvider({ children }: { children: ReactNode }) {
   const [products, setProducts] = useState<Product[]>(() => normalizeProducts(seedProducts));
   const [reviews, setReviews] = useState<KoperasiReview[]>(seedReviews);
   const [cart, setCart] = useState<CartLine[]>([]);
@@ -211,10 +211,10 @@ function BarakaStoreProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (import.meta.env.DEV) {
-      contextRegistry.__barakaActiveProviderCount = (contextRegistry.__barakaActiveProviderCount ?? 0) + 1;
-      if (contextRegistry.__barakaActiveProviderCount > 1) {
+      contextRegistry.__tookuActiveProviderCount = (contextRegistry.__tookuActiveProviderCount ?? 0) + 1;
+      if (contextRegistry.__tookuActiveProviderCount > 1) {
         console.error(
-          "[TOOKU] Multiple active BarakaProvider instances detected during hot reload.",
+          "[TOOKU] Multiple active TookuProvider instances detected during hot reload.",
         );
       }
     }
@@ -237,9 +237,9 @@ function BarakaStoreProvider({ children }: { children: ReactNode }) {
 
     return () => {
       if (import.meta.env.DEV) {
-        contextRegistry.__barakaActiveProviderCount = Math.max(
+        contextRegistry.__tookuActiveProviderCount = Math.max(
           0,
-          (contextRegistry.__barakaActiveProviderCount ?? 1) - 1,
+          (contextRegistry.__tookuActiveProviderCount ?? 1) - 1,
         );
       }
     };
@@ -326,7 +326,7 @@ function BarakaStoreProvider({ children }: { children: ReactNode }) {
         const now = Date.now();
         const order: Order = {
           id: "o" + now,
-          code: "BRK-" + Math.floor(1000 + Math.random() * 8999),
+          code: "TKU-" + Math.floor(1000 + Math.random() * 8999),
           userId: user.id,
           buyer: user.kelas ? `${user.name} — ${user.kelas}` : user.name,
           items,
@@ -409,9 +409,9 @@ function BarakaStoreProvider({ children }: { children: ReactNode }) {
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
 }
 
-export function useBaraka() {
+export function useTooku() {
   const ctx = useContext(StoreContext);
-  if (!ctx) throw new Error("useBaraka must be used inside BarakaProvider");
+  if (!ctx) throw new Error("useTooku must be used inside TookuProvider");
   return ctx;
 }
 

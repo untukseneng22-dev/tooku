@@ -11,10 +11,10 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
-import { BarakaProvider } from "@/lib/baraka-store";
-import { BottomNav } from "@/components/baraka/ui";
-import { BarakaErrorBoundary } from "@/components/baraka/baraka-error-boundary";
-import { SplashScreen } from "@/components/baraka/splash-screen";
+import { TookuProvider } from "@/lib/tooku-store";
+import { BottomNav } from "@/components/tooku/ui";
+import { TookuErrorBoundary } from "@/components/tooku/tooku-error-boundary";
+import { SplashScreen } from "@/components/tooku/splash-screen";
 
 function NotFoundComponent() {
   return (
@@ -134,14 +134,14 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <BarakaErrorBoundary>
-        <BarakaProvider>
+      <TookuErrorBoundary>
+        <TookuProvider>
           <SplashScreen />
           {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
           <Outlet />
           <BottomNav />
-        </BarakaProvider>
-      </BarakaErrorBoundary>
+        </TookuProvider>
+      </TookuErrorBoundary>
     </QueryClientProvider>
   );
 }

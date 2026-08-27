@@ -1,46 +1,46 @@
 import { render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
-import { BarakaProvider, useBaraka } from "./baraka-store";
+import { TookuProvider, useTooku } from "./tooku-store";
 
 function StoreConsumer() {
-  const { products } = useBaraka();
+  const { products } = useTooku();
   return <p>Produk tersedia: {products.length}</p>;
 }
 
-describe("useBaraka", () => {
-  it("menolak penggunaan di luar BarakaProvider", () => {
+describe("useTooku", () => {
+  it("menolak penggunaan di luar TookuProvider", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     expect(() => render(<StoreConsumer />)).toThrow(
-      "useBaraka must be used inside BarakaProvider",
+      "useTooku must be used inside TookuProvider",
     );
 
     consoleError.mockRestore();
   });
 
-  it("menyediakan store saat dibungkus BarakaProvider", () => {
+  it("menyediakan store saat dibungkus TookuProvider", () => {
     render(
-      <BarakaProvider>
+      <TookuProvider>
         <StoreConsumer />
-      </BarakaProvider>,
+      </TookuProvider>,
     );
 
     expect(screen.getByText(/Produk tersedia: [1-9]/)).toBeInTheDocument();
   });
 
-  it("memblokir BarakaProvider ganda saat development", () => {
+  it("memblokir TookuProvider ganda saat development", () => {
     const consoleError = vi.spyOn(console, "error").mockImplementation(() => undefined);
 
     render(
-      <BarakaProvider>
-        <BarakaProvider>
+      <TookuProvider>
+        <TookuProvider>
           <StoreConsumer />
-        </BarakaProvider>
-      </BarakaProvider>,
+        </TookuProvider>
+      </TookuProvider>,
     );
 
     expect(screen.getByText(/Produk tersedia: [1-9]/)).toBeInTheDocument();
-    expect(consoleError).toHaveBeenCalledWith(expect.stringContaining("Duplicate BarakaProvider blocked"));
+    expect(consoleError).toHaveBeenCalledWith(expect.stringContaining("Duplicate TookuProvider blocked"));
     consoleError.mockRestore();
   });
 });

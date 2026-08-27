@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, BadgeCheck, Clock, MapPin, MessageCircle, Phone, Star, Store } from "lucide-react";
-import { ratingSummary, schoolById } from "@/lib/baraka-data";
-import { useBaraka } from "@/lib/baraka-store";
-import { ProductCard, Stars } from "@/components/baraka/ui";
+import { ratingSummary, schoolById } from "@/lib/tooku-data";
+import { useTooku } from "@/lib/tooku-store";
+import { ProductCard, Stars } from "@/components/tooku/ui";
 
 export const Route = createFileRoute("/koperasi/$id")({
   head: () => ({
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/koperasi/$id")({
 function KoperasiProfile() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { products, reviews, addReview, user } = useBaraka();
+  const { products, reviews, addReview, user } = useTooku();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [msg, setMsg] = useState<string | null>(null);

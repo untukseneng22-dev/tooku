@@ -1,9 +1,9 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { ArrowLeft, Minus, Plus, Trash2, Ticket, QrCode, Building2, Wallet, Store, Info } from "lucide-react";
 import { useState } from "react";
-import { useBaraka, type Order, type PaymentMethod } from "@/lib/baraka-store";
-import { rupiah } from "@/lib/baraka-data";
-import { ProductThumb } from "@/components/baraka/ui";
+import { useTooku, type Order, type PaymentMethod } from "@/lib/tooku-store";
+import { rupiah } from "@/lib/tooku-data";
+import { ProductThumb } from "@/components/tooku/ui";
 
 export const Route = createFileRoute("/keranjang")({
   head: () => ({
@@ -28,7 +28,7 @@ const onlineChannels = [
 ];
 
 function CartPage() {
-  const { cart, products, setQty, removeFromCart, checkout, user } = useBaraka();
+  const { cart, products, setQty, removeFromCart, checkout, user } = useTooku();
   const navigate = useNavigate();
   const [method, setMethod] = useState<PaymentMethod>("koperasi");
   const [channel, setChannel] = useState("QRIS");

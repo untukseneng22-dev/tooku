@@ -17,9 +17,9 @@ import {
   BanknoteIcon,
   Users,
 } from "lucide-react";
-import { useBaraka, useCountdown, statusFlow, roleLabel, type Order, type OrderStatus } from "@/lib/baraka-store";
-import { categories, rupiah, schools, type Category } from "@/lib/baraka-data";
-import { ProductThumb } from "@/components/baraka/ui";
+import { useTooku, useCountdown, statusFlow, roleLabel, type Order, type OrderStatus } from "@/lib/tooku-store";
+import { categories, rupiah, schools, type Category } from "@/lib/tooku-data";
+import { ProductThumb } from "@/components/tooku/ui";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -47,7 +47,7 @@ const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard; superOnly?: 
 ];
 
 function AccountsAdmin() {
-  const { users, orders, deleteUser, user } = useBaraka();
+  const { users, orders, deleteUser, user } = useTooku();
   return (
     <div className="space-y-4">
       <div className="rounded-2xl border border-border bg-card p-4">
@@ -93,7 +93,7 @@ function AccountsAdmin() {
 }
 
 function AdminPage() {
-  const { user, isAdmin, isSuperAdmin, logout } = useBaraka();
+  const { user, isAdmin, isSuperAdmin, logout } = useTooku();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("dashboard");
 
@@ -177,7 +177,7 @@ function AdminPage() {
 }
 
 function Dashboard() {
-  const { orders, products } = useBaraka();
+  const { orders, products } = useTooku();
   const active = orders.filter((o) => o.status !== "Selesai" && o.status !== "Dibatalkan");
   const done = orders.filter((o) => o.status === "Selesai");
   const revenue = done.reduce((s, o) => s + o.total, 0);
@@ -238,7 +238,7 @@ function Dashboard() {
 }
 
 function AdminOrderRow({ order }: { order: Order }) {
-  const { setOrderStatus, cancelOrder, markPaid } = useBaraka();
+  const { setOrderStatus, cancelOrder, markPaid } = useTooku();
   const { label, expired } = useCountdown(order.deadline);
   const activeFlow = order.status !== "Selesai" && order.status !== "Dibatalkan";
   const nextStatus: OrderStatus | undefined = statusFlow[statusFlow.indexOf(order.status) + 1];
@@ -322,7 +322,7 @@ function AdminOrderRow({ order }: { order: Order }) {
 }
 
 function OrdersAdmin() {
-  const { orders } = useBaraka();
+  const { orders } = useTooku();
   const [filter, setFilter] = useState<"Semua" | OrderStatus>("Semua");
   const list = orders.filter((o) => filter === "Semua" || o.status === filter);
 
@@ -353,7 +353,7 @@ function OrdersAdmin() {
 }
 
 function ProductsAdmin() {
-  const { products, deleteProduct } = useBaraka();
+  const { products, deleteProduct } = useTooku();
   return (
     <div className="grid gap-3 lg:grid-cols-2">
       {products.map((p) => (
@@ -382,7 +382,7 @@ function ProductsAdmin() {
 }
 
 function NewProduct({ onDone }: { onDone: () => void }) {
-  const { addProduct } = useBaraka();
+  const { addProduct } = useTooku();
   const [form, setForm] = useState({
     name: "",
     category: "Seragam" as Category,

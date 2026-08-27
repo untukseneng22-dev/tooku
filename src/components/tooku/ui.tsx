@@ -1,8 +1,8 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, ClipboardList, User, ShoppingBag, BadgeCheck, Bell, Store, Star } from "lucide-react";
-import { useBaraka } from "@/lib/baraka-store";
-import type { Product } from "@/lib/baraka-data";
-import { rupiah, schoolById } from "@/lib/baraka-data";
+import { useTooku } from "@/lib/tooku-store";
+import type { Product } from "@/lib/tooku-data";
+import { rupiah, schoolById } from "@/lib/tooku-data";
 
 export function Stars({ value, size = 14 }: { value: number; size?: number }) {
   return (
@@ -117,7 +117,7 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { cart } = useBaraka();
+  const { cart } = useTooku();
   if (pathname.startsWith("/admin") || pathname.startsWith("/auth")) return null;
 
   const cartCount = cart.reduce((s, l) => s + l.qty, 0);

@@ -12,11 +12,11 @@ import {
   X as XIcon,
 } from "lucide-react";
 import { useRef, useState } from "react";
-import { useBaraka } from "@/lib/baraka-store";
-import { categories, schools, schoolById, type Category, type SchoolLevel } from "@/lib/baraka-data";
-import { ProductCard } from "@/components/baraka/ui";
-import { PromoCarousel } from "@/components/baraka/promo-carousel";
-import { HScroll, ScrollDownHint } from "@/components/baraka/scroll-hint";
+import { useTooku } from "@/lib/tooku-store";
+import { categories, schools, schoolById, type Category, type SchoolLevel } from "@/lib/tooku-data";
+import { ProductCard } from "@/components/tooku/ui";
+import { PromoCarousel } from "@/components/tooku/promo-carousel";
+import { HScroll, ScrollDownHint } from "@/components/tooku/scroll-hint";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -38,7 +38,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { products, cart } = useBaraka();
+  const { products, cart } = useTooku();
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Category | "Semua">("Semua");
   const [showFilter, setShowFilter] = useState(false);

@@ -1,7 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { useEffect, useMemo, useState } from "react";
 import { Bell, MessageCircle, ShieldCheck, Package, Tag, Clock } from "lucide-react";
-import { useBaraka } from "@/lib/baraka-store";
+import { useTooku } from "@/lib/tooku-store";
 
 export const Route = createFileRoute("/notifikasi")({
   head: () => ({
@@ -39,7 +39,7 @@ const seedNotifs: Notif[] = [
     id: "n1",
     kind: "pesanan",
     title: "Pesanan siap diambil",
-    body: "Kode BRK-8241 siap diambil di Koperasi Sekolah. Jangan lupa batas 1x24 jam.",
+    body: "Kode TKU-8241 siap diambil di Koperasi Sekolah. Jangan lupa batas 1x24 jam.",
     time: "5 mnt lalu",
     read: false,
   },
@@ -69,7 +69,7 @@ const seedNotifs: Notif[] = [
   },
 ];
 
-const NOTIF_KEY = "baraka.notifs.v1";
+const NOTIF_KEY = "tooku.notifs.v1";
 
 const kindMeta: Record<NotifKind, { label: string; icon: typeof Bell }> = {
   pesanan: { label: "Pesanan", icon: Package },
@@ -78,7 +78,7 @@ const kindMeta: Record<NotifKind, { label: string; icon: typeof Bell }> = {
 };
 
 function NotifikasiPage() {
-  const { user } = useBaraka();
+  const { user } = useTooku();
   const [notifs, setNotifs] = useState<Notif[]>(seedNotifs);
   const [filter, setFilter] = useState<"semua" | NotifKind | "belum">("semua");
   const [hydrated, setHydrated] = useState(false);

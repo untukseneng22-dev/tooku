@@ -1,7 +1,7 @@
 import { createFileRoute, useNavigate, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { ShieldCheck, User as UserIcon, ArrowLeft } from "lucide-react";
-import { useBaraka, type Role } from "@/lib/baraka-store";
+import { useTooku, type Role } from "@/lib/tooku-store";
 import logoAsset from "@/assets/tooku-logo.png.asset.json";
 
 export const Route = createFileRoute("/auth")({
@@ -20,7 +20,7 @@ export const Route = createFileRoute("/auth")({
 });
 
 function AuthPage() {
-  const { login, register } = useBaraka();
+  const { login, register } = useTooku();
   const navigate = useNavigate();
   const [mode, setMode] = useState<"login" | "register">("login");
   const [role, setRole] = useState<Role>("buyer");
@@ -193,7 +193,7 @@ function AuthPage() {
             <p className="font-semibold text-foreground">Akun tersedia (username / sandi)</p>
             <p>Pembeli: budisantoso / magetanngangeni</p>
             <p>Admin Koperasi: smaspgrimaospati / magetanngangeni</p>
-            <p>Super Admin: superadmin / barakapusat2026</p>
+            <p>Super Admin: superadmin / tookupusat2026</p>
           </div>
         </div>
       </div>

@@ -1,8 +1,8 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, MessageCircle, Search, Send, Store } from "lucide-react";
-import { schools } from "@/lib/baraka-data";
-import { useBaraka } from "@/lib/baraka-store";
+import { schools } from "@/lib/tooku-data";
+import { useTooku } from "@/lib/tooku-store";
 
 export const Route = createFileRoute("/chat")({
   validateSearch: (
@@ -35,7 +35,7 @@ type ChatMsg = { id: string; from: "me" | "them"; text: string; time: string };
 type Threads = Record<string, ChatMsg[]>;
 
 const KOPERASI = "Admin Koperasi Sekolah";
-const CHAT_KEY = "baraka.chats.v2";
+const CHAT_KEY = "tooku.chats.v1";
 
 const seedThreads: Threads = {
   [KOPERASI]: [
@@ -65,7 +65,7 @@ function autoReply(name: string, asAdmin: boolean) {
 }
 
 function ChatPage() {
-  const { user, users, isAdmin, products } = useBaraka();
+  const { user, users, isAdmin, products } = useTooku();
   const { penjual, produk } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [threads, setThreads] = useState<Threads>(seedThreads);
