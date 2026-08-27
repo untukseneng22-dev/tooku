@@ -68,17 +68,7 @@ export function InstallAppCard() {
   const { canInstall, isInstalled, install, dismiss } = usePwaInstall();
 
   if (isInstalled) {
-    return (
-      <div className="flex items-center gap-3 rounded-2xl border border-primary/20 bg-primary/5 p-4">
-        <div className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-primary/10">
-          <Check className="h-5 w-5 text-primary" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-foreground">Aplikasi terpasang</p>
-          <p className="text-xs text-muted-foreground">TOOKU sudah siap dipakai dari layar utama.</p>
-        </div>
-      </div>
-    );
+    return null;
   }
 
   if (!canInstall) {
