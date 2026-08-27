@@ -130,6 +130,61 @@ export const resolveSchoolId = (schoolId?: string, seller?: string): string => {
   return schools[0]!.id;
 };
 
+const slug = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, "");
+
+/**
+ * Menentukan koperasi milik sebuah akun admin. Karena penjual hanya koperasi,
+ * produk yang diunggah otomatis melekat ke koperasi akun tersebut.
+ */
+export const schoolIdForAccount = (opts: { schoolId?: string; username?: string; name?: string }): string => {
+  if (opts.schoolId && schoolById(opts.schoolId)) return opts.schoolId;
+  const keys = [opts.username, opts.name].filter(Boolean).map((v) => slug(v!));
+  for (const k of keys) {
+    const hit = schools.find((s) => {
+      const a = slug(s.name);
+      const b = slug(s.koperasi);
+      return k === a || k === b || k.includes(a) || a.includes(k) || b.includes(k) || k.includes(b);
+    });
+    if (hit) return hit.id;
+  }
+  return schools[0]!.id;
+};
+
+/** Field spesifikasi yang wajib/disarankan diisi admin per kategori barang. */
+export const specTemplates: Record<Category, { key: string; placeholder: string }[]> = {
+  Seragam: [
+    { key: "Ukuran", placeholder: "M / L / No. 16" },
+    { key: "Jenis Kelamin", placeholder: "Putra / Putri / Unisex" },
+    { key: "Bahan", placeholder: "Katun drill" },
+    { key: "Model Lengan", placeholder: "Lengan panjang" },
+    { key: "Warna", placeholder: "Putih" },
+    { key: "Lingkar Dada", placeholder: "48 cm" },
+    { key: "Panjang Badan", placeholder: "68 cm" },
+  ],
+  Buku: [
+    { key: "Mata Pelajaran", placeholder: "Matematika" },
+    { key: "Kelas", placeholder: "Kelas XI" },
+    { key: "Penerbit", placeholder: "Erlangga" },
+    { key: "Kurikulum / Tahun", placeholder: "Kurikulum Merdeka 2022" },
+    { key: "Jumlah Halaman", placeholder: "248 halaman" },
+    { key: "Kelengkapan", placeholder: "Tanpa coretan, cover utuh" },
+  ],
+  Atribut: [
+    { key: "Jenis Atribut", placeholder: "Topi / Dasi / Badge" },
+    { key: "Ukuran", placeholder: "All size" },
+    { key: "Bahan", placeholder: "Kain drill" },
+    { key: "Warna", placeholder: "Navy" },
+    { key: "Kelengkapan", placeholder: "Logo bordir lengkap" },
+  ],
+  "Alat Tulis": [
+    { key: "Jenis", placeholder: "Kotak pensil / Penggaris set" },
+    { key: "Merek", placeholder: "Joyko" },
+    { key: "Warna", placeholder: "Biru" },
+    { key: "Isi / Kelengkapan", placeholder: "1 set 4 pcs" },
+    { key: "Ukuran", placeholder: "20 × 8 cm" },
+  ],
+};
+
 /** Ulasan pembeli terhadap pelayanan koperasi sekolah. */
 export type KoperasiReview = {
   id: string;
