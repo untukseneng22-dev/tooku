@@ -82,10 +82,8 @@ export function ProductCard({ product }: { product: Product }) {
         {product.originalPrice && (
           <p className="text-[10px] text-muted-foreground line-through">{rupiah(product.originalPrice)}</p>
         )}
-        <p className="flex items-center gap-1 truncate text-[10px] font-semibold text-primary/80">
-          <Store className="h-3 w-3 shrink-0" />
-          {schoolById(product.schoolId)?.name ?? product.seller}
-        </p>
+        <KoperasiBadge schoolId={product.schoolId} small />
+
         <div className="flex items-center justify-between text-[10px] text-muted-foreground">
           <span className="truncate">{product.condition}</span>
           <span className="shrink-0">{product.sold} terjual</span>
