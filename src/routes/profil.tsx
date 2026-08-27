@@ -35,7 +35,7 @@ function ProfilePage() {
           <h1 className="text-lg font-bold">Profil</h1>
           <p className="text-xs opacity-80">Masuk untuk memesan dan memantau pesanan</p>
         </header>
-        <div className="mx-auto -mt-5 max-w-2xl px-4">
+        <div className="mx-auto -mt-5 max-w-2xl space-y-4 px-4">
           <div className="rounded-2xl border border-border bg-card p-5 text-center">
             <LogIn className="mx-auto h-8 w-8 text-primary" />
             <p className="mt-3 text-sm text-muted-foreground">Belum masuk ke akun TOOKU.</p>
@@ -46,6 +46,7 @@ function ProfilePage() {
               Masuk / Daftar
             </Link>
           </div>
+          <InstallAppCard />
         </div>
       </div>
     );
