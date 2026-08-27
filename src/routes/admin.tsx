@@ -46,8 +46,7 @@ const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
 ];
 
 function AdminPage() {
-  const { user, isAdmin, isSuperAdmin, logout } = useTooku();
-  const navigate = useNavigate();
+  const { user, isAdmin, isSuperAdmin } = useTooku();
   const [tab, setTab] = useState<Tab>("dashboard");
   const [editId, setEditId] = useState<string | null>(null);
 
