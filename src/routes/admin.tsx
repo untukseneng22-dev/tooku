@@ -282,7 +282,14 @@ function AdminOrderRow({ order }: { order: Order }) {
 
       <div className="mt-2 flex flex-wrap items-center gap-2 text-[11px]">
         <span className="rounded-full bg-secondary px-2 py-0.5 font-medium">
-          {order.paymentMethod === "online" ? `Online · ${order.paymentChannel ?? "-"}` : "Bayar di Koperasi"}
+          {order.paymentMethod === "online"
+            ? `Online · ${order.paymentChannel ?? "-"}`
+            : order.paymentMethod === "cod"
+              ? "COD (bayar ke kurir)"
+              : "Bayar di Koperasi"}
+        </span>
+        <span className="rounded-full bg-primary/10 px-2 py-0.5 font-semibold text-primary">
+          {delivery ? `Kirim · ${order.shipping?.courier ?? "-"}` : "Ambil di koperasi"}
         </span>
         <span
           className={`rounded-full px-2 py-0.5 font-semibold ${
@@ -293,10 +300,44 @@ function AdminOrderRow({ order }: { order: Order }) {
         </span>
       </div>
 
+      {delivery && order.shipping && (
+        <div className="mt-2 space-y-1 rounded-xl border border-border p-3 text-[11px]">
+          <p className="font-bold">Alamat Kirim</p>
+          <p className="text-muted-foreground">
+            {order.shipping.recipient} · {order.shipping.phone}
+          </p>
+          <p className="text-muted-foreground">
+            {order.shipping.address}, Kec. {order.shipping.district}, {order.shipping.city}, {order.shipping.province}
+          </p>
+          <p className="text-muted-foreground">
+            Zona {zoneLabel[order.shipping.zone]} · ongkir {rupiah(order.shippingTotal)}
+          </p>
+          {order.shipping.note && <p className="text-muted-foreground">Catatan: {order.shipping.note}</p>}
+          {activeFlow && (
+            <div className="flex gap-2 pt-1">
+              <input
+                value={resi}
+                onChange={(e) => setResi(e.target.value)}
+                placeholder="Nomor resi kurir"
+                className="min-w-0 flex-1 rounded-lg border border-border bg-background px-2.5 py-2 text-[11px]"
+              />
+              <button
+                onClick={() => setTracking(order.id, order.shipping!.courier, resi)}
+                disabled={!resi.trim()}
+                className="rounded-lg bg-primary px-3 py-2 text-[11px] font-bold text-primary-foreground disabled:opacity-40"
+              >
+                Simpan Resi
+              </button>
+            </div>
+          )}
+        </div>
+      )}
+
       <p className="mt-2 text-sm font-bold text-primary">{rupiah(order.total)}</p>
       {activeFlow && (
         <p className="mt-1 text-[11px] text-muted-foreground">
-          Batas pengambilan: <span className="font-semibold tabular-nums">{expired ? "habis" : label}</span>
+          {delivery ? "Batas proses & serah ke kurir" : "Batas pengambilan"}:{" "}
+          <span className="font-semibold tabular-nums">{expired ? "habis" : label}</span>
         </p>
       )}
 
@@ -305,11 +346,13 @@ function AdminOrderRow({ order }: { order: Order }) {
           {nextStatus && (
             <button
               onClick={() => setOrderStatus(order.id, nextStatus)}
-              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2.5 text-xs font-bold text-primary-foreground"
+              disabled={delivery && nextStatus === "Dikirim" && !resi.trim()}
+              className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-primary px-3 py-2.5 text-xs font-bold text-primary-foreground disabled:opacity-40"
             >
               <CheckCircle2 className="h-4 w-4" /> Tandai {nextStatus}
             </button>
           )}
+
           {order.paymentStatus !== "Lunas" && (
             <button
               onClick={() => markPaid(order.id)}
