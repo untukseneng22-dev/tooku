@@ -720,3 +720,101 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
     </form>
   );
 }
+
+/** Pengaturan pengiriman & metode pembayaran milik koperasi ini. */
+function ShippingAdmin() {
+  const { user, shippingConfigs, updateShippingConfig } = useTooku();
+  const schoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
+  const school = schools.find((s) => s.id === schoolId)!;
+  const cfg = shippingConfigs[schoolId];
+  if (!cfg) return <p className="text-sm text-muted-foreground">Konfigurasi koperasi belum tersedia.</p>;
+
+  const togglePay = (p: PayOption) =>
+    updateShippingConfig(schoolId, {
+      payments: cfg.payments.includes(p) ? cfg.payments.filter((x) => x !== p) : [...cfg.payments, p],
+    });
+  const toggleCourier = (c: (typeof couriers)[number]) =>
+    updateShippingConfig(schoolId, {
+      couriers: cfg.couriers.includes(c) ? cfg.couriers.filter((x) => x !== c) : [...cfg.couriers, c],
+    });
+
+  return (
+    <div className="space-y-4">
+      <section className="rounded-2xl border border-border bg-card p-4">
+        <h2 className="text-sm font-bold">Layanan Pengiriman — {school.koperasi}</h2>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Pembeli dari sekolah/kecamatan lain bisa memilih dikirim via ekspedisi. Bila dimatikan, pembeli hanya dapat
+          mengambil sendiri di koperasi ({school.pickup}, {school.hours}).
+        </p>
+        <label className="mt-3 flex items-center gap-3 rounded-xl border border-border p-3 text-xs font-semibold">
+          <input
+            type="checkbox"
+            checked={cfg.enabled}
+            onChange={(e) => updateShippingConfig(schoolId, { enabled: e.target.checked })}
+            className="h-4 w-4"
+          />
+          Aktifkan pengiriman via ekspedisi
+        </label>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-4">
+        <h2 className="text-sm font-bold">Tarif Ongkir per Zona</h2>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {zones.map((z) => (
+            <label key={z} className="block text-[11px] font-semibold text-muted-foreground">
+              {zoneLabel[z]}
+              <input
+                type="number"
+                min={0}
+                step={500}
+                value={cfg.rates[z]}
+                onChange={(e) =>
+                  updateShippingConfig(schoolId, {
+                    rates: { ...cfg.rates, [z]: Math.max(0, Number(e.target.value) || 0) },
+                  })
+                }
+                className="mt-1 w-full rounded-xl border border-border bg-background p-2.5 text-xs font-normal text-foreground"
+              />
+            </label>
+          ))}
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          Ongkir zona “satu kecamatan” bisa diisi 0 bila koperasi mengantar sendiri.
+        </p>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-4">
+        <h2 className="text-sm font-bold">Kurir yang Dilayani</h2>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {couriers.map((c) => (
+            <button
+              key={c}
+              onClick={() => toggleCourier(c)}
+              className={`rounded-full px-3 py-1.5 text-[11px] font-semibold ${
+                cfg.couriers.includes(c) ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              {c}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-4">
+        <h2 className="text-sm font-bold">Metode Pembayaran yang Diterima</h2>
+        <div className="mt-3 space-y-2">
+          {(["online", "koperasi", "cod"] as PayOption[]).map((p) => (
+            <label key={p} className="flex items-center gap-3 rounded-xl border border-border p-3 text-xs font-semibold">
+              <input type="checkbox" checked={cfg.payments.includes(p)} onChange={() => togglePay(p)} className="h-4 w-4" />
+              {payOptionLabel[p]}
+            </label>
+          ))}
+        </div>
+        <p className="mt-2 text-[11px] text-muted-foreground">
+          COD hanya berlaku untuk pesanan yang dikirim kurir. Bila COD dimatikan, pembeli luar sekolah wajib bayar
+          online lebih dulu.
+        </p>
+      </section>
+    </div>
+  );
+}
