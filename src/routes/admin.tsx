@@ -232,10 +232,14 @@ function Dashboard() {
 }
 
 function AdminOrderRow({ order }: { order: Order }) {
-  const { setOrderStatus, cancelOrder, markPaid } = useTooku();
+  const { setOrderStatus, cancelOrder, markPaid, setTracking } = useTooku();
   const { label, expired } = useCountdown(order.deadline);
-  const activeFlow = order.status !== "Selesai" && order.status !== "Dibatalkan";
-  const nextStatus: OrderStatus | undefined = statusFlow[statusFlow.indexOf(order.status) + 1];
+  const activeFlow = !isFinalStatus(order.status);
+  const flow = flowFor(order);
+  const nextStatus: OrderStatus | undefined = flow[flow.indexOf(order.status) + 1];
+  const delivery = order.fulfillment === "delivery";
+  const [resi, setResi] = useState(order.shipping?.tracking ?? "");
+
 
   return (
     <div className="rounded-2xl border border-border bg-card p-4">
