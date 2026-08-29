@@ -381,7 +381,9 @@ function OrdersAdmin() {
   return (
     <div className="space-y-3">
       <div className="flex gap-2 overflow-x-auto">
-        {(["Semua", ...statusFlow, "Dibatalkan"] as const).map((f) => (
+        {(["Semua", ...statusFlow, ...deliveryFlow.filter((s) => !statusFlow.includes(s)), "Dibatalkan"] as const).map(
+          (f) => (
+
           <button
             key={f}
             onClick={() => setFilter(f as "Semua" | OrderStatus)}
