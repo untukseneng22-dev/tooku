@@ -54,14 +54,16 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "dashboard" | "orders" | "products" | "new";
+type Tab = "dashboard" | "orders" | "products" | "new" | "shipping";
 
 const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "orders", label: "Pesanan", icon: ClipboardList },
   { id: "products", label: "Produk", icon: Boxes },
   { id: "new", label: "Tambah Produk", icon: PlusCircle },
+  { id: "shipping", label: "Pengiriman & Bayar", icon: Truck },
 ];
+
 
 function AdminPage() {
   const { user, isAdmin, isSuperAdmin } = useTooku();
