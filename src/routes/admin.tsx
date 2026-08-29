@@ -381,9 +381,9 @@ function OrdersAdmin() {
   return (
     <div className="space-y-3">
       <div className="flex gap-2 overflow-x-auto">
-        {(["Semua", ...statusFlow, ...deliveryFlow.filter((s) => !statusFlow.includes(s)), "Dibatalkan"] as const).map(
-          (f) => (
-
+        {(
+          ["Semua", ...statusFlow, ...deliveryFlow.filter((s) => !statusFlow.includes(s)), "Dibatalkan"] as const
+        ).map((f) => (
           <button
             key={f}
             onClick={() => setFilter(f as "Semua" | OrderStatus)}
@@ -394,6 +394,7 @@ function OrdersAdmin() {
             {f}
           </button>
         ))}
+
       </div>
       <div className="grid gap-3 lg:grid-cols-2">
         {list.length === 0 ? (
