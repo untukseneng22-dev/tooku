@@ -179,6 +179,8 @@ function AdminPage() {
               }}
             />
           )}
+          {tab === "shipping" && <ShippingAdmin />}
+
         </main>
       </div>
     </div>
