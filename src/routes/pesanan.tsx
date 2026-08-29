@@ -190,7 +190,7 @@ function OrderCard({ order }: { order: Order }) {
           <MapPin className="mt-0.5 h-3.5 w-3.5 shrink-0" />
           {(() => {
             const s = schoolById(order.items[0]?.schoolId ?? "");
-            return s ? `${s.koperasi} — ${s.pickupAddress ?? s.address ?? "lokasi koperasi"}` : "Koperasi Sekolah";
+            return s ? `${s.koperasi} — ${s.pickup} · ${s.hours}` : "Koperasi Sekolah";
           })()}
         </p>
       )}
