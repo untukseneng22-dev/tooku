@@ -26,6 +26,7 @@ import {
   type ShipZone,
   type ShippingConfig,
 } from "./tooku-shipping";
+import { applyLifecycle, bundleSuggestionPrice, type LifecycleStage } from "./tooku-lifecycle";
 
 
 export type Role = "buyer" | "admin" | "superadmin";
@@ -333,6 +334,13 @@ type Store = {
   reviews: KoperasiReview[];
   addReview: (input: { schoolId: string; rating: number; comment: string }) => { ok: boolean; error?: string };
   deleteProduct: (id: string) => void;
+  /** ==== Siklus Hidup Barang (mitigasi penumpukan stok) ==== */
+  /** Tandai barang sebagai donasi tersalurkan atau bahan daur ulang. */
+  setLifecycle: (id: string, stage: "aktif" | "donasi" | "upcycle", note?: string) => void;
+  /** Perpanjang masa tayang (reset hitungan hari & harga dasar). */
+  relistProduct: (id: string) => void;
+  /** Gabung barang lambat terjual dengan barang utama menjadi paket bundling. */
+  createBundle: (input: { name: string; productIds: string[]; price?: number }) => { ok: boolean; error?: string };
 };
 
 type TookuContextRegistry = typeof globalThis & {
@@ -350,10 +358,12 @@ const KEY = "tooku-state-v1";
 
 /** Pastikan setiap produk tertaut ke koperasi sekolah yang benar-benar ada. */
 const normalizeProducts = (list: Product[]): Product[] =>
-  list.map((p) => {
-    const schoolId = resolveSchoolId(p.schoolId, p.seller);
-    return { ...p, schoolId, seller: SCHOOLS_SELLER[schoolId] ?? p.seller };
-  });
+  applyLifecycle(
+    list.map((p) => {
+      const schoolId = resolveSchoolId(p.schoolId, p.seller);
+      return { ...p, schoolId, seller: SCHOOLS_SELLER[schoolId] ?? p.seller };
+    }),
+  );
 
 /** Lengkapi pesanan lama (sebelum ada fitur pengiriman) agar tetap valid. */
 const normalizeOrders = (list: Order[]): Order[] =>
@@ -458,6 +468,14 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
     }
   }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs]);
 
+
+  // Evaluasi ulang fase siklus hidup (diskon otomatis / donasi) tiap jam.
+  useEffect(() => {
+    const tick = () => setProducts((ps) => applyLifecycle(ps));
+    tick();
+    const t = setInterval(tick, 1000 * 60 * 60);
+    return () => clearInterval(t);
+  }, [hydrated]);
 
   const addToCart = useCallback((id: string, qty = 1) => {
     setCart((c) =>
@@ -650,7 +668,16 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
 
       addProduct: (p) =>
         setProducts((ps) => [
-          { ...p, schoolId: resolveSchoolId(p.schoolId, p.seller), id: "p" + Date.now(), sold: 0 },
+          {
+            ...p,
+            schoolId: resolveSchoolId(p.schoolId, p.seller),
+            id: "p" + Date.now(),
+            sold: 0,
+            listedAt: Date.now(),
+            basePrice: p.price,
+            lifecycle: "aktif",
+            lifecycleStage: "aktif",
+          },
           ...ps,
         ]),
       updateProduct: (id, patch) =>
@@ -662,6 +689,65 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           ),
         ),
       deleteProduct: (id) => setProducts((ps) => ps.filter((p) => p.id !== id)),
+      setLifecycle: (id, stage, note) =>
+        setProducts((ps) =>
+          applyLifecycle(
+            ps.map((p) =>
+              p.id === id
+                ? {
+                    ...p,
+                    lifecycle: stage,
+                    ...(note ? { lifecycleNote: note } : {}),
+                    ...(stage === "aktif" ? { listedAt: Date.now() } : {}),
+                  }
+                : p,
+            ),
+          ),
+        ),
+      relistProduct: (id) =>
+        setProducts((ps) =>
+          applyLifecycle(
+            ps.map((p) =>
+              p.id === id
+                ? { ...p, lifecycle: "aktif", listedAt: Date.now(), basePrice: p.basePrice ?? p.price }
+                : p,
+            ),
+          ),
+        ),
+      createBundle: ({ name, productIds, price }) => {
+        if (productIds.length < 2) return { ok: false, error: "Pilih minimal 2 barang untuk dipaketkan." };
+        const items = products.filter((p) => productIds.includes(p.id));
+        if (items.length !== productIds.length) return { ok: false, error: "Ada barang yang tidak ditemukan." };
+        const schoolIds = new Set(items.map((i) => i.schoolId));
+        if (schoolIds.size > 1) return { ok: false, error: "Paket hanya boleh berisi barang dari satu koperasi." };
+        const main = items[0]!;
+        const bundlePrice = price && price > 0 ? price : bundleSuggestionPrice(items);
+        const stock = Math.max(1, Math.min(...items.map((i) => i.stock)));
+        const bundle: Product = {
+          id: "p" + Date.now(),
+          name: name.trim() || `Paket Hemat ${main.category}`,
+          category: main.category,
+          price: bundlePrice,
+          basePrice: bundlePrice,
+          originalPrice: items.reduce((s, i) => s + (i.basePrice ?? i.price), 0),
+          stock,
+          condition: main.condition,
+          plus: ["Paket bundling koperasi — lebih hemat", ...items.map((i) => `Termasuk: ${i.name}`)],
+          minus: items.flatMap((i) => i.minus).slice(0, 3),
+          curated: true,
+          featured: true,
+          seller: main.seller,
+          schoolId: main.schoolId,
+          sold: 0,
+          listedAt: Date.now(),
+          lifecycle: "aktif",
+          lifecycleStage: "aktif",
+          bundleOf: productIds,
+          ...(main.photo ? { photo: main.photo } : {}),
+        };
+        setProducts((ps) => [bundle, ...ps]);
+        return { ok: true };
+      },
       reviews,
       addReview: ({ schoolId, rating, comment }) => {
         if (!user) return { ok: false, error: "Masuk dulu untuk memberi ulasan." };
