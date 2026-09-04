@@ -237,7 +237,21 @@ export type Product = {
   sold: number;
   photo?: string;
   specs?: Record<string, string>;
+  /** ==== Siklus Hidup Barang (anti dead-stock) ==== */
+  /** Waktu barang mulai tayang di TOOKU. */
+  listedAt?: number;
+  /** Harga dasar sebelum diskon otomatis cuci gudang. */
+  basePrice?: number;
+  /** Status manual: donasi tersalurkan / masuk daur ulang. */
+  lifecycle?: "aktif" | "donasi" | "upcycle";
+  /** Fase hasil perhitungan sistem (diisi otomatis). */
+  lifecycleStage?: "aktif" | "cuci-gudang" | "obral-akhir" | "donasi" | "upcycle";
+  /** Catatan penyaluran donasi / proyek daur ulang. */
+  lifecycleNote?: string;
+  /** Isi paket bundling (id produk yang digabung). */
+  bundleOf?: string[];
 };
+
 
 export const seedProducts: Product[] = [
   {
