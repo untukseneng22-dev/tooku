@@ -26,7 +26,7 @@ import {
   type ShipZone,
   type ShippingConfig,
 } from "./tooku-shipping";
-import { applyLifecycle, bundleSuggestionPrice, type LifecycleStage } from "./tooku-lifecycle";
+import { applyLifecycle, bundleSuggestionPrice } from "./tooku-lifecycle";
 
 
 export type Role = "buyer" | "admin" | "superadmin";
