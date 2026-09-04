@@ -473,6 +473,20 @@ export const seedProducts: Product[] = [
   },
 ];
 
+/**
+ * Umur tayang contoh (hari) agar demo Siklus Hidup Barang terlihat:
+ * >30 hari masuk Cuci Gudang (−20%), >60 hari Obral Akhir (−50%),
+ * >90 hari otomatis diikhlaskan untuk donasi sosial.
+ */
+const seedListedDays: Record<string, number> = { p3: 34, p4: 44, p5: 67, p7: 73, p8: 96 };
+for (const p of seedProducts) {
+  const days = seedListedDays[p.id] ?? 5;
+  p.listedAt = Date.now() - days * 1000 * 60 * 60 * 24;
+  p.basePrice = p.price;
+}
+
+
+
 export const rupiah = (n: number) =>
   "Rp" + n.toLocaleString("id-ID", { maximumFractionDigits: 0 });
 
