@@ -237,7 +237,21 @@ export type Product = {
   sold: number;
   photo?: string;
   specs?: Record<string, string>;
+  /** ==== Siklus Hidup Barang (anti dead-stock) ==== */
+  /** Waktu barang mulai tayang di TOOKU. */
+  listedAt?: number;
+  /** Harga dasar sebelum diskon otomatis cuci gudang. */
+  basePrice?: number;
+  /** Status manual: donasi tersalurkan / masuk daur ulang. */
+  lifecycle?: "aktif" | "donasi" | "upcycle";
+  /** Fase hasil perhitungan sistem (diisi otomatis). */
+  lifecycleStage?: "aktif" | "cuci-gudang" | "obral-akhir" | "donasi" | "upcycle";
+  /** Catatan penyaluran donasi / proyek daur ulang. */
+  lifecycleNote?: string;
+  /** Isi paket bundling (id produk yang digabung). */
+  bundleOf?: string[];
 };
+
 
 export const seedProducts: Product[] = [
   {
@@ -458,6 +472,20 @@ export const seedProducts: Product[] = [
     },
   },
 ];
+
+/**
+ * Umur tayang contoh (hari) agar demo Siklus Hidup Barang terlihat:
+ * >30 hari masuk Cuci Gudang (−20%), >60 hari Obral Akhir (−50%),
+ * >90 hari otomatis diikhlaskan untuk donasi sosial.
+ */
+const seedListedDays: Record<string, number> = { p3: 34, p4: 44, p5: 67, p7: 73, p8: 96 };
+for (const p of seedProducts) {
+  const days = seedListedDays[p.id] ?? 5;
+  p.listedAt = Date.now() - days * 1000 * 60 * 60 * 24;
+  p.basePrice = p.price;
+}
+
+
 
 export const rupiah = (n: number) =>
   "Rp" + n.toLocaleString("id-ID", { maximumFractionDigits: 0 });
