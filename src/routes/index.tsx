@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useRef, useState } from "react";
 import { useTooku } from "@/lib/tooku-store";
+import { isSellable, isClearance, lifecyclePrice } from "@/lib/tooku-lifecycle";
 import { categories, schools, schoolById, type Category, type SchoolLevel } from "@/lib/tooku-data";
 import { ProductCard } from "@/components/tooku/ui";
 import { PromoCarousel } from "@/components/tooku/promo-carousel";
@@ -38,7 +39,9 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { products, cart } = useTooku();
+  const { products: allProducts, cart } = useTooku();
+  // Barang yang sudah masuk fase donasi / daur ulang tidak lagi dijual.
+  const products = allProducts.filter((p) => isSellable(p));
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Category | "Semua">("Semua");
   const [showFilter, setShowFilter] = useState(false);
@@ -107,6 +110,10 @@ function Home() {
     (schoolId !== "Semua" ? 1 : 0);
   const visibleSchools = schools.filter((sc) => level === "Semua" || sc.level === level);
   const featured = products.filter((p) => p.featured).slice(0, 6);
+  const clearance = products
+    .filter((p) => isClearance(p))
+    .sort((a, b) => lifecyclePrice(b).discount - lifecyclePrice(a).discount)
+    .slice(0, 8);
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -327,6 +334,28 @@ function Home() {
             </p>
           )}
         </section>
+
+        {/* Cuci Gudang — diskon otomatis barang lama tayang */}
+        {clearance.length > 0 && (
+          <section>
+            <div className="mb-3 flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-destructive" />
+              <h2 className="text-sm font-bold">Cuci Gudang Koperasi</h2>
+              <span className="ml-auto text-[10px] font-semibold text-muted-foreground">Diskon otomatis</span>
+            </div>
+            <p className="mb-2 text-[11px] leading-relaxed text-muted-foreground">
+              Barang yang sudah lama tayang otomatis turun harga: 30 hari −20%, 60 hari −50%. Buruan sebelum diambil
+              orang lain.
+            </p>
+            <HScroll className="gap-3 pb-1">
+              {clearance.map((p) => (
+                <div key={p.id} className="w-36 shrink-0">
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </HScroll>
+          </section>
+        )}
 
         {/* Unggulan */}
         <section>
