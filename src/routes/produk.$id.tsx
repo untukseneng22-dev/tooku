@@ -3,6 +3,7 @@ import { ArrowLeft, BadgeCheck, MapPin, Clock, Check, X, Store, MessageCircle } 
 import { useState } from "react";
 import { useTooku } from "@/lib/tooku-store";
 import { rupiah, productSpecs, schoolById, ratingSummary } from "@/lib/tooku-data";
+import { lifecyclePrice, stageMeta, DONATION_DAY } from "@/lib/tooku-lifecycle";
 import { ProductThumb, CuratedBadge, ProductCard, KoperasiBadge, Stars } from "@/components/tooku/ui";
 
 export const Route = createFileRoute("/produk/$id")({
@@ -42,6 +43,10 @@ function ProductDetail() {
     );
   }
 
+  const life = lifecyclePrice(product);
+  const bundleItems = (product.bundleOf ?? [])
+    .map((bid) => products.find((x) => x.id === bid))
+    .filter(Boolean) as typeof products;
   const rating = product ? ratingSummary(reviews, product.schoolId) : null;
   const related = products.filter((p) => p.category === product.category && p.id !== product.id).slice(0, 4);
 
@@ -84,6 +89,28 @@ function ProductDetail() {
               <p className="pb-1 text-sm text-muted-foreground line-through">{rupiah(product.originalPrice)}</p>
             )}
           </div>
+          {life.discount > 0 && (
+            <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-3">
+              <p className="text-xs font-bold text-destructive">
+                {stageMeta[life.stage].label} · potongan otomatis {life.discount}%
+              </p>
+              <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                Sudah {life.days} hari tayang di TOOKU (harga asli {rupiah(life.base)}). Bila belum terjual sampai{" "}
+                {DONATION_DAY} hari, barang ini diikhlaskan penitip untuk disalurkan sebagai donasi sosial oleh
+                koperasi.
+              </p>
+            </div>
+          )}
+          {bundleItems.length > 0 && (
+            <div className="rounded-2xl border border-primary/25 bg-primary/5 p-3">
+              <p className="text-xs font-bold text-primary">Paket Bundling Koperasi</p>
+              <ul className="mt-1 space-y-0.5 text-[11px] text-muted-foreground">
+                {bundleItems.map((b) => (
+                  <li key={b.id}>• {b.name}</li>
+                ))}
+              </ul>
+            </div>
+          )}
           <div className="flex flex-wrap gap-2 text-xs">
             <span className="rounded-full bg-secondary px-2.5 py-1 font-medium">{product.category}</span>
             <span className="rounded-full bg-secondary px-2.5 py-1 font-medium">Kondisi: {product.condition}</span>

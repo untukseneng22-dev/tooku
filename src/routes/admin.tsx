@@ -17,6 +17,12 @@ import {
   Pencil,
   ShoppingBag,
   Truck,
+  Recycle,
+  Gift,
+  Scissors,
+  TrendingDown,
+  RotateCcw,
+  Layers,
 
 } from "lucide-react";
 import {
@@ -30,6 +36,17 @@ import {
   type OrderStatus,
 } from "@/lib/tooku-store";
 import { couriers, payOptionLabel, zoneLabel, zones, type PayOption } from "@/lib/tooku-shipping";
+import {
+  DONATION_DAY,
+  MARKDOWN_1_DAY,
+  MARKDOWN_2_DAY,
+  bundleSuggestionPrice,
+  daysListed,
+  lifecyclePrice,
+  stageMeta,
+  stageOf,
+  type LifecycleStage,
+} from "@/lib/tooku-lifecycle";
 
 import {
   categories,
@@ -56,7 +73,7 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "dashboard" | "orders" | "products" | "new" | "shipping";
+type Tab = "dashboard" | "orders" | "products" | "new" | "shipping" | "lifecycle";
 
 const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -64,6 +81,7 @@ const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "products", label: "Produk", icon: Boxes },
   { id: "new", label: "Tambah Produk", icon: PlusCircle },
   { id: "shipping", label: "Pengiriman & Bayar", icon: Truck },
+  { id: "lifecycle", label: "Siklus Barang", icon: Recycle },
 ];
 
 
@@ -180,6 +198,7 @@ function AdminPage() {
             />
           )}
           {tab === "shipping" && <ShippingAdmin />}
+          {tab === "lifecycle" && <LifecycleAdmin />}
 
         </main>
       </div>
@@ -814,6 +833,197 @@ function ShippingAdmin() {
           COD hanya berlaku untuk pesanan yang dikirim kurir. Bila COD dimatikan, pembeli luar sekolah wajib bayar
           online lebih dulu.
         </p>
+      </section>
+    </div>
+  );
+}
+
+/**
+ * Fase 1–4 Siklus Hidup Barang: pantau umur tayang, diskon otomatis,
+ * buat paket bundling, salurkan donasi, dan tandai bahan daur ulang.
+ */
+function LifecycleAdmin() {
+  const { user, products, setLifecycle, relistProduct, createBundle } = useTooku();
+  const schoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
+  const mine = products.filter((p) => p.schoolId === schoolId);
+  const [filter, setFilter] = useState<LifecycleStage | "semua">("semua");
+  const [picked, setPicked] = useState<string[]>([]);
+  const [bundleName, setBundleName] = useState("");
+  const [bundlePrice, setBundlePrice] = useState("");
+  const [msg, setMsg] = useState<string | null>(null);
+
+  const counts = mine.reduce<Record<string, number>>((acc, p) => {
+    const s = stageOf(p);
+    acc[s] = (acc[s] ?? 0) + 1;
+    return acc;
+  }, {});
+  const list = mine
+    .filter((p) => filter === "semua" || stageOf(p) === filter)
+    .sort((a, b) => daysListed(b) - daysListed(a));
+  const pickedItems = mine.filter((p) => picked.includes(p.id));
+  const suggested = pickedItems.length >= 2 ? bundleSuggestionPrice(pickedItems) : 0;
+
+  const togglePick = (id: string) =>
+    setPicked((ps) => (ps.includes(id) ? ps.filter((x) => x !== id) : [...ps, id]));
+
+  const submitBundle = () => {
+    const res = createBundle({
+      name: bundleName,
+      productIds: picked,
+      ...(bundlePrice ? { price: Number(bundlePrice) } : {}),
+    });
+    setMsg(res.ok ? "Paket bundling berhasil dibuat dan langsung tayang." : (res.error ?? "Gagal membuat paket."));
+    if (res.ok) {
+      setPicked([]);
+      setBundleName("");
+      setBundlePrice("");
+    }
+  };
+
+  return (
+    <div className="space-y-4">
+      <section className="rounded-2xl border border-border bg-card p-4">
+        <h2 className="flex items-center gap-2 text-sm font-bold">
+          <Recycle className="h-4 w-4 text-primary" /> Siklus Hidup Barang
+        </h2>
+        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+          Empat fase mitigasi penumpukan stok: diskon otomatis {MARKDOWN_1_DAY} hari (−20%) dan {MARKDOWN_2_DAY} hari
+          (−50%), paket bundling barang lambat terjual, donasi otomatis setelah {DONATION_DAY} hari tayang, serta daur
+          ulang kreatif untuk kain yang tidak layak jual.
+        </p>
+        <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">
+          {(["aktif", "cuci-gudang", "obral-akhir", "donasi", "upcycle"] as LifecycleStage[]).map((st) => (
+            <button
+              key={st}
+              onClick={() => setFilter(filter === st ? "semua" : st)}
+              className={`rounded-xl border p-2.5 text-left ${
+                filter === st ? "border-primary bg-primary/5" : "border-border"
+              }`}
+            >
+              <p className="text-lg font-extrabold tabular-nums">{counts[st] ?? 0}</p>
+              <p className="text-[10px] font-semibold text-muted-foreground">{stageMeta[st].short}</p>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-4">
+        <h2 className="flex items-center gap-2 text-sm font-bold">
+          <Layers className="h-4 w-4 text-primary" /> Fase 2 — Buat Paket Bundling
+        </h2>
+        <p className="mt-1 text-[11px] text-muted-foreground">
+          Centang barang di daftar bawah (minimal 2, satu koperasi), lalu beri nama paket. Cocok untuk menggabungkan
+          dasi/topi/sabuk yang menumpuk dengan seragam utama.
+        </p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          <input
+            value={bundleName}
+            onChange={(e) => setBundleName(e.target.value)}
+            placeholder="Paket Seragam + Dasi + Topi"
+            className="rounded-xl border border-border bg-background p-2.5 text-xs"
+          />
+          <input
+            value={bundlePrice}
+            onChange={(e) => setBundlePrice(e.target.value.replace(/\D/g, ""))}
+            placeholder={suggested ? `Harga paket (saran ${rupiah(suggested)})` : "Harga paket"}
+            className="rounded-xl border border-border bg-background p-2.5 text-xs"
+          />
+        </div>
+        <div className="mt-2 flex items-center gap-2">
+          <button
+            onClick={submitBundle}
+            disabled={picked.length < 2}
+            className="rounded-xl bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground disabled:opacity-50"
+          >
+            Buat Paket ({picked.length} barang)
+          </button>
+          {picked.length > 0 && (
+            <button onClick={() => setPicked([])} className="text-xs font-semibold text-muted-foreground">
+              Kosongkan pilihan
+            </button>
+          )}
+        </div>
+        {msg && <p className="mt-2 text-[11px] font-semibold text-primary">{msg}</p>}
+      </section>
+
+      <section className="space-y-3">
+        {list.length === 0 && <p className="text-sm text-muted-foreground">Belum ada barang pada fase ini.</p>}
+        {list.map((p) => {
+          const life = lifecyclePrice(p);
+          const meta = stageMeta[life.stage];
+          const donationLeft = Math.max(0, DONATION_DAY - life.days);
+          return (
+            <article key={p.id} className="rounded-2xl border border-border bg-card p-3">
+              <div className="flex gap-3">
+                <label className="flex shrink-0 items-start">
+                  <input
+                    type="checkbox"
+                    checked={picked.includes(p.id)}
+                    onChange={() => togglePick(p.id)}
+                    className="mt-1 h-4 w-4"
+                  />
+                </label>
+                <div className="h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-muted">
+                  <ProductThumb product={p} />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="line-clamp-2 text-xs font-bold">{p.name}</p>
+                  <p className="mt-0.5 text-[11px] text-muted-foreground">
+                    Tayang {life.days} hari · stok {p.stock} · {p.sold} terjual
+                  </p>
+                  <div className="mt-1 flex flex-wrap items-center gap-1.5">
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] font-bold ${meta.tone}`}>{meta.label}</span>
+                    <span className="text-[11px] font-bold text-primary">{rupiah(life.price)}</span>
+                    {life.discount > 0 && (
+                      <span className="text-[10px] text-muted-foreground line-through">{rupiah(life.base)}</span>
+                    )}
+                  </div>
+                  <p className="mt-1 text-[10px] leading-relaxed text-muted-foreground">
+                    {life.stage === "donasi" || life.stage === "upcycle"
+                      ? meta.desc
+                      : `Otomatis diikhlaskan untuk donasi dalam ${donationLeft} hari lagi bila belum terjual.`}
+                  </p>
+                  {p.lifecycleNote && (
+                    <p className="mt-1 text-[10px] font-semibold text-primary">Catatan: {p.lifecycleNote}</p>
+                  )}
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    <button
+                      onClick={() =>
+                        setLifecycle(
+                          p.id,
+                          "donasi",
+                          "Disalurkan sebagai donasi sosial (panti asuhan / siswa jalur afirmasi).",
+                        )
+                      }
+                      className="inline-flex items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold text-primary-foreground"
+                    >
+                      <Gift className="h-3 w-3" /> Salurkan Donasi
+                    </button>
+                    <button
+                      onClick={() =>
+                        setLifecycle(p.id, "upcycle", "Diserahkan ke guru Prakarya sebagai bahan praktik siswa.")
+                      }
+                      className="inline-flex items-center gap-1 rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground"
+                    >
+                      <Scissors className="h-3 w-3" /> Daur Ulang Kreatif
+                    </button>
+                    <button
+                      onClick={() => relistProduct(p.id)}
+                      className="inline-flex items-center gap-1 rounded-full border border-border px-2.5 py-1 text-[10px] font-bold text-muted-foreground"
+                    >
+                      <RotateCcw className="h-3 w-3" /> Tayangkan Ulang
+                    </button>
+                    {life.discount > 0 && (
+                      <span className="inline-flex items-center gap-1 rounded-full border border-destructive/30 px-2.5 py-1 text-[10px] font-bold text-destructive">
+                        <TrendingDown className="h-3 w-3" /> Auto −{life.discount}%
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </article>
+          );
+        })}
       </section>
     </div>
   );

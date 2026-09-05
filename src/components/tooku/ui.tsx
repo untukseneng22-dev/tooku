@@ -2,6 +2,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, ClipboardList, User, ShoppingBag, BadgeCheck, Bell, Store, Star } from "lucide-react";
 import { useTooku } from "@/lib/tooku-store";
 import type { Product } from "@/lib/tooku-data";
+import { lifecyclePrice, stageMeta } from "@/lib/tooku-lifecycle";
 import { rupiah, schoolById } from "@/lib/tooku-data";
 
 export function Stars({ value, size = 14 }: { value: number; size?: number }) {
@@ -76,6 +77,8 @@ export function KoperasiBadge({ schoolId, small = false }: { schoolId?: string; 
 
 
 export function ProductCard({ product }: { product: Product }) {
+  const { stage, discount, days } = lifecyclePrice(product);
+  const clearance = discount > 0;
   return (
     <Link
       to="/produk/$id"
@@ -89,12 +92,27 @@ export function ProductCard({ product }: { product: Product }) {
             Terkurasi
           </span>
         )}
+        {clearance && (
+          <span
+            className={`absolute right-2 top-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${stageMeta[stage].tone}`}
+          >
+            {stageMeta[stage].short} −{discount}%
+          </span>
+        )}
+        {product.bundleOf && product.bundleOf.length > 1 && (
+          <span className="absolute bottom-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
+            Paket Bundling
+          </span>
+        )}
       </div>
       <div className="space-y-1 p-2.5">
         <p className="line-clamp-2 min-h-[2.4rem] text-xs leading-snug text-card-foreground">{product.name}</p>
         <p className="text-sm font-bold text-primary">{rupiah(product.price)}</p>
         {product.originalPrice && (
           <p className="text-[10px] text-muted-foreground line-through">{rupiah(product.originalPrice)}</p>
+        )}
+        {clearance && (
+          <p className="text-[10px] font-semibold text-destructive">Tayang {days} hari · harga turun otomatis</p>
         )}
         <KoperasiBadge schoolId={product.schoolId} small />
 
