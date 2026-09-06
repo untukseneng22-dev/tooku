@@ -322,6 +322,10 @@ type CheckoutInput = {
   paymentChannel?: string;
   fulfillment: Fulfillment;
   shipping?: ShippingInput;
+  /** Kode voucher promo (opsional). */
+  voucherCode?: string;
+  /** Pakai seluruh poin loyalitas yang dimiliki. */
+  usePoints?: boolean;
 };
 
 
@@ -371,6 +375,37 @@ type Store = {
   relistProduct: (id: string) => void;
   /** Gabung barang lambat terjual dengan barang utama menjadi paket bundling. */
   createBundle: (input: { name: string; productIds: string[]; price?: number }) => { ok: boolean; error?: string };
+
+  /** ==== Fitur marketplace umum ==== */
+  wishlist: string[];
+  toggleWishlist: (productId: string) => void;
+  productReviews: ProductReview[];
+  addProductReview: (input: {
+    productId: string;
+    orderId: string;
+    rating: number;
+    text: string;
+  }) => { ok: boolean; error?: string };
+  flashSales: FlashSale[];
+  addFlashSale: (input: { title: string; productIds: string[]; discountPct: number; hours: number }) => {
+    ok: boolean;
+    error?: string;
+  };
+  removeFlashSale: (id: string) => void;
+  vouchers: Voucher[];
+  upsertVoucher: (v: Voucher) => { ok: boolean; error?: string };
+  deleteVoucher: (code: string) => void;
+  /** Saldo & riwayat poin loyalitas pengguna. */
+  points: PointsEntry[];
+  pointsBalance: (userId: string) => number;
+  /** Notifikasi dalam aplikasi untuk pengguna saat ini + broadcast. */
+  notifs: AppNotif[];
+  markAllNotifsRead: () => void;
+  markNotifRead: (id: string) => void;
+  /** Laporan barang bermasalah dari pembeli. */
+  reports: ProductReport[];
+  addReport: (productId: string, reason: string) => { ok: boolean; error?: string };
+  setReportStatus: (id: string, status: ReportStatus) => void;
 };
 
 type TookuContextRegistry = typeof globalThis & {
