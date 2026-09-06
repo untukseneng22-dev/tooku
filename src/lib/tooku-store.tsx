@@ -472,6 +472,13 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   const [shippingConfigs, setShippingConfigs] = useState<Record<string, ShippingConfig>>(() =>
     seedShippingConfigs(),
   );
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [productReviews, setProductReviews] = useState<ProductReview[]>([]);
+  const [flashSales, setFlashSales] = useState<FlashSale[]>(seedFlashSales);
+  const [vouchers, setVouchers] = useState<Voucher[]>(seedVouchers);
+  const [points, setPoints] = useState<PointsEntry[]>([]);
+  const [reports, setReports] = useState<ProductReport[]>([]);
+  const [notifs, setNotifs] = useState<AppNotif[]>([]);
 
   const [hydrated, setHydrated] = useState(false);
 
