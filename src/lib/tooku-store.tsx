@@ -581,6 +581,13 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
 
   const user = users.find((u) => u.id === userId) ?? null;
 
+  /** Kirim notifikasi dalam aplikasi (userId null = semua pengguna). */
+  const pushNotif = (target: string | null, kind: AppNotif["kind"], title: string, body: string) =>
+    setNotifs((ns) => [
+      { id: "n" + Date.now() + Math.floor(Math.random() * 999), userId: target, kind, title, body, at: Date.now(), read: false },
+      ...ns,
+    ].slice(0, 100));
+
   const restoreStock = (items: OrderItem[]) =>
     setProducts((ps) =>
       ps.map((p) => {
@@ -749,7 +756,8 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         setCart([]);
         return order;
       },
-      setOrderStatus: (id, status) =>
+      setOrderStatus: (id, status) => {
+        const target = orders.find((o) => o.id === id);
         setOrders((os) =>
           os.map((o) =>
             o.id === id
@@ -764,7 +772,31 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
                 }
               : o,
           ) as Order[],
-        ),
+        );
+        if (!target || target.status === status) return;
+        // Notifikasi perubahan status ke pembeli.
+        pushNotif(
+          target.userId,
+          "pesanan",
+          `Pesanan ${target.code}: ${status}`,
+          status === "Siap Diambil"
+            ? "Barangmu sudah bisa diambil di koperasi. Jangan lewatkan batas 1x24 jam."
+            : status === "Dikirim"
+              ? "Paketmu sudah diserahkan ke kurir. Cek nomor resi di detail pesanan."
+              : status === "Selesai" || status === "Diterima"
+                ? "Transaksi selesai. Terima kasih sudah belanja barang layak pakai!"
+                : `Status pesananmu kini ${status}.`,
+        );
+        // Poin loyalitas diberikan sekali saat pesanan selesai/diterima.
+        if ((status === "Selesai" || status === "Diterima") && target.status !== "Selesai" && target.status !== "Diterima") {
+          const earned = pointsEarnedFor(target.total);
+          if (earned > 0)
+            setPoints((pt) => [
+              { id: "pt" + Date.now(), userId: target.userId, delta: earned, reason: `Poin dari pesanan ${target.code}`, at: Date.now() },
+              ...pt,
+            ]);
+        }
+      },
       setTracking: (id, courier, tracking) =>
         setOrders((os) =>
           os.map((o) =>
