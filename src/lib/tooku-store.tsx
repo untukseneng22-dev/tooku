@@ -27,6 +27,18 @@ import {
   type ShippingConfig,
 } from "./tooku-shipping";
 import { applyLifecycle, bundleSuggestionPrice } from "./tooku-lifecycle";
+import {
+  pointsEarnedFor,
+  seedFlashSales,
+  seedVouchers,
+  voucherDiscount,
+  type FlashSale,
+  type PointsEntry,
+  type ProductReport,
+  type ProductReview,
+  type ReportStatus,
+  type Voucher,
+} from "./tooku-extras";
 
 
 export type Role = "buyer" | "admin" | "superadmin";
@@ -116,7 +128,25 @@ export type Order = {
   paymentMethod: PaymentMethod;
   paymentChannel?: string;
   paymentStatus: PaymentStatus;
+  /** Kode voucher yang dipakai & potongannya. */
+  voucherCode?: string;
+  voucherCut?: number;
+  /** Poin loyalitas yang dipakai & nilai potongannya. */
+  pointsUsed?: number;
+  pointsCut?: number;
   timeline: { status: OrderStatus; at: number }[];
+};
+
+/** Notifikasi dalam aplikasi (status pesanan, promo, info). */
+export type AppNotif = {
+  id: string;
+  /** null = untuk semua pengguna. */
+  userId: string | null;
+  kind: "pesanan" | "promo" | "sistem";
+  title: string;
+  body: string;
+  at: number;
+  read: boolean;
 };
 
 
@@ -292,6 +322,10 @@ type CheckoutInput = {
   paymentChannel?: string;
   fulfillment: Fulfillment;
   shipping?: ShippingInput;
+  /** Kode voucher promo (opsional). */
+  voucherCode?: string;
+  /** Pakai seluruh poin loyalitas yang dimiliki. */
+  usePoints?: boolean;
 };
 
 
@@ -341,6 +375,37 @@ type Store = {
   relistProduct: (id: string) => void;
   /** Gabung barang lambat terjual dengan barang utama menjadi paket bundling. */
   createBundle: (input: { name: string; productIds: string[]; price?: number }) => { ok: boolean; error?: string };
+
+  /** ==== Fitur marketplace umum ==== */
+  wishlist: string[];
+  toggleWishlist: (productId: string) => void;
+  productReviews: ProductReview[];
+  addProductReview: (input: {
+    productId: string;
+    orderId: string;
+    rating: number;
+    text: string;
+  }) => { ok: boolean; error?: string };
+  flashSales: FlashSale[];
+  addFlashSale: (input: { title: string; productIds: string[]; discountPct: number; hours: number }) => {
+    ok: boolean;
+    error?: string;
+  };
+  removeFlashSale: (id: string) => void;
+  vouchers: Voucher[];
+  upsertVoucher: (v: Voucher) => { ok: boolean; error?: string };
+  deleteVoucher: (code: string) => void;
+  /** Saldo & riwayat poin loyalitas pengguna. */
+  points: PointsEntry[];
+  pointsBalance: (userId: string) => number;
+  /** Notifikasi dalam aplikasi untuk pengguna saat ini + broadcast. */
+  notifs: AppNotif[];
+  markAllNotifsRead: () => void;
+  markNotifRead: (id: string) => void;
+  /** Laporan barang bermasalah dari pembeli. */
+  reports: ProductReport[];
+  addReport: (productId: string, reason: string) => { ok: boolean; error?: string };
+  setReportStatus: (id: string, status: ReportStatus) => void;
 };
 
 type TookuContextRegistry = typeof globalThis & {
@@ -407,6 +472,13 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   const [shippingConfigs, setShippingConfigs] = useState<Record<string, ShippingConfig>>(() =>
     seedShippingConfigs(),
   );
+  const [wishlist, setWishlist] = useState<string[]>([]);
+  const [productReviews, setProductReviews] = useState<ProductReview[]>([]);
+  const [flashSales, setFlashSales] = useState<FlashSale[]>(seedFlashSales);
+  const [vouchers, setVouchers] = useState<Voucher[]>(seedVouchers);
+  const [points, setPoints] = useState<PointsEntry[]>([]);
+  const [reports, setReports] = useState<ProductReport[]>([]);
+  const [notifs, setNotifs] = useState<AppNotif[]>([]);
 
   const [hydrated, setHydrated] = useState(false);
 
@@ -440,6 +512,13 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
             })),
           );
         if (p.userId !== undefined) setUserId(p.userId);
+        if (p.wishlist) setWishlist(p.wishlist);
+        if (p.productReviews) setProductReviews(p.productReviews);
+        if (p.flashSales) setFlashSales(p.flashSales);
+        if (p.vouchers) setVouchers(p.vouchers);
+        if (p.points) setPoints(p.points);
+        if (p.reports) setReports(p.reports);
+        if (p.notifs) setNotifs(p.notifs);
       }
     } catch {
       /* ignore */
@@ -461,12 +540,27 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(
         KEY,
-        JSON.stringify({ products, cart, orders, users, userId, reviews, shippingConfigs }),
+        JSON.stringify({
+          products,
+          cart,
+          orders,
+          users,
+          userId,
+          reviews,
+          shippingConfigs,
+          wishlist,
+          productReviews,
+          flashSales,
+          vouchers,
+          points,
+          reports,
+          notifs,
+        }),
       );
     } catch {
       /* ignore */
     }
-  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs]);
+  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs]);
 
 
   // Evaluasi ulang fase siklus hidup (diskon otomatis / donasi) tiap jam.
@@ -486,6 +580,13 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const user = users.find((u) => u.id === userId) ?? null;
+
+  /** Kirim notifikasi dalam aplikasi (userId null = semua pengguna). */
+  const pushNotif = (target: string | null, kind: AppNotif["kind"], title: string, body: string) =>
+    setNotifs((ns) => [
+      { id: "n" + Date.now() + Math.floor(Math.random() * 999), userId: target, kind, title, body, at: Date.now(), read: false },
+      ...ns,
+    ].slice(0, 100));
 
   const restoreStock = (items: OrderItem[]) =>
     setProducts((ps) =>
@@ -559,7 +660,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           qty <= 0 ? c.filter((l) => l.productId !== id) : c.map((l) => (l.productId === id ? { ...l, qty } : l)),
         ),
       clearCart: () => setCart([]),
-      checkout: ({ paymentMethod, paymentChannel, fulfillment, shipping }) => {
+      checkout: ({ paymentMethod, paymentChannel, fulfillment, shipping, voucherCode, usePoints }) => {
         if (!user || cart.length === 0) return null;
         const items: OrderItem[] = cart.flatMap((l) => {
           const p = products.find((x) => x.id === l.productId);
@@ -592,6 +693,30 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           };
         }
 
+        // Voucher promo (opsional).
+        let voucherCut = 0;
+        let shippingCut = 0;
+        let appliedVoucher: string | undefined;
+        if (voucherCode) {
+          const v = vouchers.find((x) => x.code.toUpperCase() === voucherCode.trim().toUpperCase());
+          if (v) {
+            const res = voucherDiscount(v, subtotal, shippingTotal);
+            if (res.ok) {
+              voucherCut = res.cutSubtotal;
+              shippingCut = res.cutShipping;
+              appliedVoucher = v.code.toUpperCase();
+            }
+          }
+        }
+
+        // Poin loyalitas (1 poin = potongan Rp1.000).
+        const balance = points
+          .filter((p) => p.userId === user.id)
+          .reduce((s, p) => s + p.delta, 0);
+        const maxPointsCut = subtotal - voucherCut;
+        const pointsUsed = usePoints ? Math.min(balance, Math.floor(maxPointsCut / 1000)) : 0;
+        const pointsCut = pointsUsed * 1000;
+
         const order: Order = {
           id: "o" + now,
           code: "TKU-" + Math.floor(1000 + Math.random() * 8999),
@@ -600,8 +725,10 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           items,
           subtotal,
           serviceFee,
-          shippingTotal,
-          total: subtotal + serviceFee + shippingTotal,
+          shippingTotal: Math.max(0, shippingTotal - shippingCut),
+          ...(appliedVoucher ? { voucherCode: appliedVoucher, voucherCut } : {}),
+          ...(pointsUsed > 0 ? { pointsUsed, pointsCut } : {}),
+          total: Math.max(0, subtotal - voucherCut - pointsCut) + serviceFee + Math.max(0, shippingTotal - shippingCut),
           createdAt: now,
           // Ambil sendiri: 1x24 jam. Kirim: koperasi punya 2x24 jam untuk serahkan ke kurir.
           deadline: now + 1000 * 60 * 60 * (fulfillment === "delivery" ? 48 : 24),
@@ -620,10 +747,17 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
             return line ? { ...p, stock: Math.max(0, p.stock - line.qty) } : p;
           }),
         );
+        if (pointsUsed > 0)
+          setPoints((pt) => [
+            { id: "pt" + now, userId: user.id, delta: -pointsUsed, reason: `Dipakai di pesanan ${order.code}`, at: now },
+            ...pt,
+          ]);
+        pushNotif(user.id, "pesanan", "Pesanan berhasil dibuat", `Kode ${order.code} · total ${order.total.toLocaleString("id-ID")}. Pantau statusnya di Pesanan Saya.`);
         setCart([]);
         return order;
       },
-      setOrderStatus: (id, status) =>
+      setOrderStatus: (id, status) => {
+        const target = orders.find((o) => o.id === id);
         setOrders((os) =>
           os.map((o) =>
             o.id === id
@@ -638,7 +772,31 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
                 }
               : o,
           ) as Order[],
-        ),
+        );
+        if (!target || target.status === status) return;
+        // Notifikasi perubahan status ke pembeli.
+        pushNotif(
+          target.userId,
+          "pesanan",
+          `Pesanan ${target.code}: ${status}`,
+          status === "Siap Diambil"
+            ? "Barangmu sudah bisa diambil di koperasi. Jangan lewatkan batas 1x24 jam."
+            : status === "Dikirim"
+              ? "Paketmu sudah diserahkan ke kurir. Cek nomor resi di detail pesanan."
+              : status === "Selesai" || status === "Diterima"
+                ? "Transaksi selesai. Terima kasih sudah belanja barang layak pakai!"
+                : `Status pesananmu kini ${status}.`,
+        );
+        // Poin loyalitas diberikan sekali saat pesanan selesai/diterima.
+        if ((status === "Selesai" || status === "Diterima") && target.status !== "Selesai" && target.status !== "Diterima") {
+          const earned = pointsEarnedFor(target.total);
+          if (earned > 0)
+            setPoints((pt) => [
+              { id: "pt" + Date.now(), userId: target.userId, delta: earned, reason: `Poin dari pesanan ${target.code}`, at: Date.now() },
+              ...pt,
+            ]);
+        }
+      },
       setTracking: (id, courier, tracking) =>
         setOrders((os) =>
           os.map((o) =>
@@ -766,8 +924,109 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         ]);
         return { ok: true };
       },
+      wishlist,
+      toggleWishlist: (productId) =>
+        setWishlist((w) => (w.includes(productId) ? w.filter((x) => x !== productId) : [...w, productId])),
+      productReviews,
+      addProductReview: ({ productId, orderId, rating, text }) => {
+        if (!user) return { ok: false, error: "Masuk dulu untuk memberi ulasan." };
+        const order = orders.find((o) => o.id === orderId && o.userId === user.id);
+        if (!order || (order.status !== "Selesai" && order.status !== "Diterima"))
+          return { ok: false, error: "Ulasan hanya bisa diberikan untuk pesanan yang sudah selesai." };
+        if (!order.items.some((i) => i.productId === productId))
+          return { ok: false, error: "Barang ini tidak ada di pesanan tersebut." };
+        if (productReviews.some((r) => r.orderId === orderId && r.productId === productId && r.userId === user.id))
+          return { ok: false, error: "Kamu sudah mengulas barang ini untuk pesanan itu." };
+        if (rating < 1 || rating > 5) return { ok: false, error: "Pilih rating 1–5 bintang." };
+        if (text.trim().length < 5) return { ok: false, error: "Tulis ulasan minimal 5 karakter." };
+        setProductReviews((rs) => [
+          {
+            id: "pr" + Date.now(),
+            productId,
+            orderId,
+            userId: user.id,
+            author: user.name,
+            rating,
+            text: text.trim(),
+            createdAt: Date.now(),
+          },
+          ...rs,
+        ]);
+        return { ok: true };
+      },
+      flashSales,
+      addFlashSale: ({ title, productIds, discountPct, hours }) => {
+        if (!isAdmin) return { ok: false, error: "Hanya admin yang bisa membuat flash sale." };
+        if (productIds.length === 0) return { ok: false, error: "Pilih minimal 1 barang." };
+        if (discountPct < 1 || discountPct > 90) return { ok: false, error: "Diskon 1–90%." };
+        const schoolId = user?.role === "admin" ? products.find((p) => p.seller === user.name)?.schoolId : undefined;
+        setFlashSales((fs) => [
+          {
+            id: "fs" + Date.now(),
+            title: title.trim() || "Flash Sale Koperasi",
+            productIds,
+            discountPct,
+            endsAt: Date.now() + Math.max(1, hours) * 1000 * 60 * 60,
+            ...(schoolId ? { schoolId } : {}),
+            createdAt: Date.now(),
+          },
+          ...fs,
+        ]);
+        pushNotif(null, "promo", "Flash sale dimulai!", `${title.trim() || "Flash Sale Koperasi"} — diskon ${discountPct}% untuk ${productIds.length} barang pilihan.`);
+        return { ok: true };
+      },
+      removeFlashSale: (id) => setFlashSales((fs) => fs.filter((f) => f.id !== id)),
+      vouchers,
+      upsertVoucher: (v) => {
+        if (user?.role !== "superadmin") return { ok: false, error: "Hanya Admin Pusat yang mengelola voucher." };
+        const code = v.code.trim().toUpperCase();
+        if (!/^[A-Z0-9]{4,16}$/.test(code)) return { ok: false, error: "Kode 4–16 karakter huruf/angka." };
+        setVouchers((vs) => {
+          const next = { ...v, code };
+          return vs.some((x) => x.code === code)
+            ? vs.map((x) => (x.code === code ? next : x))
+            : [next, ...vs];
+        });
+        return { ok: true };
+      },
+      deleteVoucher: (code) => {
+        if (user?.role !== "superadmin") return;
+        setVouchers((vs) => vs.filter((v) => v.code !== code));
+      },
+      points,
+      pointsBalance: (uid) => points.filter((p) => p.userId === uid).reduce((s, p) => s + p.delta, 0),
+      notifs: notifs.filter((n) => n.userId === null || (user && n.userId === user.id)),
+      markAllNotifsRead: () =>
+        setNotifs((ns) => ns.map((n) => (n.userId === null || (user && n.userId === user.id) ? { ...n, read: true } : n))),
+      markNotifRead: (id) => setNotifs((ns) => ns.map((n) => (n.id === id ? { ...n, read: true } : n))),
+      reports,
+      addReport: (productId, reason) => {
+        if (!user) return { ok: false, error: "Masuk dulu untuk melapor." };
+        const p = products.find((x) => x.id === productId);
+        if (!p) return { ok: false, error: "Barang tidak ditemukan." };
+        if (reason.trim().length < 5) return { ok: false, error: "Jelaskan masalahnya minimal 5 karakter." };
+        if (reports.some((r) => r.productId === productId && r.reporter === user.name && r.status !== "selesai"))
+          return { ok: false, error: "Laporanmu untuk barang ini sedang diproses." };
+        setReports((rs) => [
+          {
+            id: "rp" + Date.now(),
+            productId,
+            productName: p.name,
+            reporter: user.name,
+            reason: reason.trim(),
+            at: Date.now(),
+            status: "baru",
+          },
+          ...rs,
+        ]);
+        return { ok: true };
+      },
+      setReportStatus: (id, status) => {
+        if (user?.role !== "superadmin") return;
+        setReports((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
+      },
     }),
-    [products, cart, orders, users, user, addToCart, reviews],
+    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
