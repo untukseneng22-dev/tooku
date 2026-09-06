@@ -512,6 +512,13 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
             })),
           );
         if (p.userId !== undefined) setUserId(p.userId);
+        if (p.wishlist) setWishlist(p.wishlist);
+        if (p.productReviews) setProductReviews(p.productReviews);
+        if (p.flashSales) setFlashSales(p.flashSales);
+        if (p.vouchers) setVouchers(p.vouchers);
+        if (p.points) setPoints(p.points);
+        if (p.reports) setReports(p.reports);
+        if (p.notifs) setNotifs(p.notifs);
       }
     } catch {
       /* ignore */
@@ -533,12 +540,27 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
     try {
       localStorage.setItem(
         KEY,
-        JSON.stringify({ products, cart, orders, users, userId, reviews, shippingConfigs }),
+        JSON.stringify({
+          products,
+          cart,
+          orders,
+          users,
+          userId,
+          reviews,
+          shippingConfigs,
+          wishlist,
+          productReviews,
+          flashSales,
+          vouchers,
+          points,
+          reports,
+          notifs,
+        }),
       );
     } catch {
       /* ignore */
     }
-  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs]);
+  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs]);
 
 
   // Evaluasi ulang fase siklus hidup (diskon otomatis / donasi) tiap jam.
