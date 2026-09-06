@@ -27,6 +27,18 @@ import {
   type ShippingConfig,
 } from "./tooku-shipping";
 import { applyLifecycle, bundleSuggestionPrice } from "./tooku-lifecycle";
+import {
+  pointsEarnedFor,
+  seedFlashSales,
+  seedVouchers,
+  voucherDiscount,
+  type FlashSale,
+  type PointsEntry,
+  type ProductReport,
+  type ProductReview,
+  type ReportStatus,
+  type Voucher,
+} from "./tooku-extras";
 
 
 export type Role = "buyer" | "admin" | "superadmin";
@@ -116,7 +128,25 @@ export type Order = {
   paymentMethod: PaymentMethod;
   paymentChannel?: string;
   paymentStatus: PaymentStatus;
+  /** Kode voucher yang dipakai & potongannya. */
+  voucherCode?: string;
+  voucherCut?: number;
+  /** Poin loyalitas yang dipakai & nilai potongannya. */
+  pointsUsed?: number;
+  pointsCut?: number;
   timeline: { status: OrderStatus; at: number }[];
+};
+
+/** Notifikasi dalam aplikasi (status pesanan, promo, info). */
+export type AppNotif = {
+  id: string;
+  /** null = untuk semua pengguna. */
+  userId: string | null;
+  kind: "pesanan" | "promo" | "sistem";
+  title: string;
+  body: string;
+  at: number;
+  read: boolean;
 };
 
 
