@@ -653,7 +653,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           qty <= 0 ? c.filter((l) => l.productId !== id) : c.map((l) => (l.productId === id ? { ...l, qty } : l)),
         ),
       clearCart: () => setCart([]),
-      checkout: ({ paymentMethod, paymentChannel, fulfillment, shipping }) => {
+      checkout: ({ paymentMethod, paymentChannel, fulfillment, shipping, voucherCode, usePoints }) => {
         if (!user || cart.length === 0) return null;
         const items: OrderItem[] = cart.flatMap((l) => {
           const p = products.find((x) => x.id === l.productId);
@@ -686,6 +686,30 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           };
         }
 
+        // Voucher promo (opsional).
+        let voucherCut = 0;
+        let shippingCut = 0;
+        let appliedVoucher: string | undefined;
+        if (voucherCode) {
+          const v = vouchers.find((x) => x.code.toUpperCase() === voucherCode.trim().toUpperCase());
+          if (v) {
+            const res = voucherDiscount(v, subtotal, shippingTotal);
+            if (res.ok) {
+              voucherCut = res.cutSubtotal;
+              shippingCut = res.cutShipping;
+              appliedVoucher = v.code.toUpperCase();
+            }
+          }
+        }
+
+        // Poin loyalitas (1 poin = potongan Rp1.000).
+        const balance = points
+          .filter((p) => p.userId === user.id)
+          .reduce((s, p) => s + p.delta, 0);
+        const maxPointsCut = subtotal - voucherCut;
+        const pointsUsed = usePoints ? Math.min(balance, Math.floor(maxPointsCut / 1000)) : 0;
+        const pointsCut = pointsUsed * 1000;
+
         const order: Order = {
           id: "o" + now,
           code: "TKU-" + Math.floor(1000 + Math.random() * 8999),
@@ -694,8 +718,10 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           items,
           subtotal,
           serviceFee,
-          shippingTotal,
-          total: subtotal + serviceFee + shippingTotal,
+          shippingTotal: Math.max(0, shippingTotal - shippingCut),
+          ...(appliedVoucher ? { voucherCode: appliedVoucher, voucherCut } : {}),
+          ...(pointsUsed > 0 ? { pointsUsed, pointsCut } : {}),
+          total: Math.max(0, subtotal - voucherCut - pointsCut) + serviceFee + Math.max(0, shippingTotal - shippingCut),
           createdAt: now,
           // Ambil sendiri: 1x24 jam. Kirim: koperasi punya 2x24 jam untuk serahkan ke kurir.
           deadline: now + 1000 * 60 * 60 * (fulfillment === "delivery" ? 48 : 24),
