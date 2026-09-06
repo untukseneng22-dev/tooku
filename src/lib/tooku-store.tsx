@@ -740,6 +740,12 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
             return line ? { ...p, stock: Math.max(0, p.stock - line.qty) } : p;
           }),
         );
+        if (pointsUsed > 0)
+          setPoints((pt) => [
+            { id: "pt" + now, userId: user.id, delta: -pointsUsed, reason: `Dipakai di pesanan ${order.code}`, at: now },
+            ...pt,
+          ]);
+        pushNotif(user.id, "pesanan", "Pesanan berhasil dibuat", `Kode ${order.code} · total ${order.total.toLocaleString("id-ID")}. Pantau statusnya di Pesanan Saya.`);
         setCart([]);
         return order;
       },
