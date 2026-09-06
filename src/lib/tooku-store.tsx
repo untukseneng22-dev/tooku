@@ -924,8 +924,109 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         ]);
         return { ok: true };
       },
+      wishlist,
+      toggleWishlist: (productId) =>
+        setWishlist((w) => (w.includes(productId) ? w.filter((x) => x !== productId) : [...w, productId])),
+      productReviews,
+      addProductReview: ({ productId, orderId, rating, text }) => {
+        if (!user) return { ok: false, error: "Masuk dulu untuk memberi ulasan." };
+        const order = orders.find((o) => o.id === orderId && o.userId === user.id);
+        if (!order || (order.status !== "Selesai" && order.status !== "Diterima"))
+          return { ok: false, error: "Ulasan hanya bisa diberikan untuk pesanan yang sudah selesai." };
+        if (!order.items.some((i) => i.productId === productId))
+          return { ok: false, error: "Barang ini tidak ada di pesanan tersebut." };
+        if (productReviews.some((r) => r.orderId === orderId && r.productId === productId && r.userId === user.id))
+          return { ok: false, error: "Kamu sudah mengulas barang ini untuk pesanan itu." };
+        if (rating < 1 || rating > 5) return { ok: false, error: "Pilih rating 1–5 bintang." };
+        if (text.trim().length < 5) return { ok: false, error: "Tulis ulasan minimal 5 karakter." };
+        setProductReviews((rs) => [
+          {
+            id: "pr" + Date.now(),
+            productId,
+            orderId,
+            userId: user.id,
+            author: user.name,
+            rating,
+            text: text.trim(),
+            createdAt: Date.now(),
+          },
+          ...rs,
+        ]);
+        return { ok: true };
+      },
+      flashSales,
+      addFlashSale: ({ title, productIds, discountPct, hours }) => {
+        if (!isAdmin) return { ok: false, error: "Hanya admin yang bisa membuat flash sale." };
+        if (productIds.length === 0) return { ok: false, error: "Pilih minimal 1 barang." };
+        if (discountPct < 1 || discountPct > 90) return { ok: false, error: "Diskon 1–90%." };
+        const schoolId = user?.role === "admin" ? products.find((p) => p.seller === user.name)?.schoolId : undefined;
+        setFlashSales((fs) => [
+          {
+            id: "fs" + Date.now(),
+            title: title.trim() || "Flash Sale Koperasi",
+            productIds,
+            discountPct,
+            endsAt: Date.now() + Math.max(1, hours) * 1000 * 60 * 60,
+            ...(schoolId ? { schoolId } : {}),
+            createdAt: Date.now(),
+          },
+          ...fs,
+        ]);
+        pushNotif(null, "promo", "Flash sale dimulai!", `${title.trim() || "Flash Sale Koperasi"} — diskon ${discountPct}% untuk ${productIds.length} barang pilihan.`);
+        return { ok: true };
+      },
+      removeFlashSale: (id) => setFlashSales((fs) => fs.filter((f) => f.id !== id)),
+      vouchers,
+      upsertVoucher: (v) => {
+        if (user?.role !== "superadmin") return { ok: false, error: "Hanya Admin Pusat yang mengelola voucher." };
+        const code = v.code.trim().toUpperCase();
+        if (!/^[A-Z0-9]{4,16}$/.test(code)) return { ok: false, error: "Kode 4–16 karakter huruf/angka." };
+        setVouchers((vs) => {
+          const next = { ...v, code };
+          return vs.some((x) => x.code === code)
+            ? vs.map((x) => (x.code === code ? next : x))
+            : [next, ...vs];
+        });
+        return { ok: true };
+      },
+      deleteVoucher: (code) => {
+        if (user?.role !== "superadmin") return;
+        setVouchers((vs) => vs.filter((v) => v.code !== code));
+      },
+      points,
+      pointsBalance: (uid) => points.filter((p) => p.userId === uid).reduce((s, p) => s + p.delta, 0),
+      notifs: notifs.filter((n) => n.userId === null || (user && n.userId === user.id)),
+      markAllNotifsRead: () =>
+        setNotifs((ns) => ns.map((n) => (n.userId === null || (user && n.userId === user.id) ? { ...n, read: true } : n))),
+      markNotifRead: (id) => setNotifs((ns) => ns.map((n) => (n.id === id ? { ...n, read: true } : n))),
+      reports,
+      addReport: (productId, reason) => {
+        if (!user) return { ok: false, error: "Masuk dulu untuk melapor." };
+        const p = products.find((x) => x.id === productId);
+        if (!p) return { ok: false, error: "Barang tidak ditemukan." };
+        if (reason.trim().length < 5) return { ok: false, error: "Jelaskan masalahnya minimal 5 karakter." };
+        if (reports.some((r) => r.productId === productId && r.reporter === user.name && r.status !== "selesai"))
+          return { ok: false, error: "Laporanmu untuk barang ini sedang diproses." };
+        setReports((rs) => [
+          {
+            id: "rp" + Date.now(),
+            productId,
+            productName: p.name,
+            reporter: user.name,
+            reason: reason.trim(),
+            at: Date.now(),
+            status: "baru",
+          },
+          ...rs,
+        ]);
+        return { ok: true };
+      },
+      setReportStatus: (id, status) => {
+        if (user?.role !== "superadmin") return;
+        setReports((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
+      },
     }),
-    [products, cart, orders, users, user, addToCart, reviews],
+    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
