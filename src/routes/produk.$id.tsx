@@ -49,10 +49,41 @@ export const Route = createFileRoute("/produk/$id")({
 
 function ProductDetail() {
   const { id } = Route.useParams();
-  const { products, addToCart, reviews } = useTooku();
+  const { products, addToCart, reviews, wishlist, toggleWishlist, productReviews, addReport } = useTooku();
   const navigate = useNavigate();
   const product = products.find((p) => p.id === id);
   const [active, setActive] = useState(0);
+  const [shared, setShared] = useState("");
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportText, setReportText] = useState("");
+  const [reportMsg, setReportMsg] = useState("");
+
+  // Catat barang ke daftar "terakhir dilihat".
+  useEffect(() => {
+    if (product) recordView(product.id);
+  }, [product?.id]);
+
+  const loved = product ? wishlist.includes(product.id) : false;
+  const itemReviews = productReviews.filter((r) => r.productId === id);
+  const itemRating =
+    itemReviews.length > 0 ? itemReviews.reduce((s, r) => s + r.rating, 0) / itemReviews.length : null;
+
+  const share = async () => {
+    if (!product) return;
+    const url = `${window.location.origin}/produk/${product.id}`;
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: product.name, text: `${product.name} — ${rupiah(product.price)} di TOOKU`, url });
+        return;
+      }
+      await navigator.clipboard.writeText(url);
+      setShared("Tautan barang disalin!");
+    } catch {
+      setShared("Tautan gagal disalin. Salin dari kolom alamat browser, ya.");
+    }
+    setTimeout(() => setShared(""), 2500);
+  };
+
 
   if (!product) {
     return (
