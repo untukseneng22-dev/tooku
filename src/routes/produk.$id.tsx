@@ -98,6 +98,8 @@ function ProductDetail() {
   }
 
   const life = lifecyclePrice(product);
+  const sale = activeFlashFor(flashSales, product.id);
+  const flash = flashPrice(product.price, sale);
   const bundleItems = (product.bundleOf ?? [])
     .map((bid) => products.find((x) => x.id === bid))
     .filter(Boolean) as typeof products;
@@ -111,7 +113,20 @@ function ProductDetail() {
           <ArrowLeft className="h-5 w-5" />
         </button>
         <h1 className="truncate text-sm font-semibold">Detail Barang</h1>
+        <button
+          onClick={() => toggleWishlist(product.id)}
+          aria-label={loved ? "Hapus dari favorit" : "Simpan ke favorit"}
+          className="ml-auto text-foreground"
+        >
+          <Heart className={`h-5 w-5 ${loved ? "fill-destructive text-destructive" : ""}`} />
+        </button>
+        <button onClick={share} aria-label="Bagikan barang" className="text-foreground">
+          <Share2 className="h-5 w-5" />
+        </button>
       </header>
+      {shared && (
+        <p className="bg-primary px-4 py-2 text-center text-xs font-semibold text-primary-foreground">{shared}</p>
+      )}
 
       <div className="mx-auto max-w-2xl">
         <div className="aspect-square w-full overflow-hidden bg-muted">
