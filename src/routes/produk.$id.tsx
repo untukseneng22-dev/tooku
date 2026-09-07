@@ -1,10 +1,32 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, BadgeCheck, MapPin, Clock, Check, X, Store, MessageCircle } from "lucide-react";
-import { useState } from "react";
+import {
+  ArrowLeft,
+  BadgeCheck,
+  MapPin,
+  Clock,
+  Check,
+  X,
+  Store,
+  MessageCircle,
+  Heart,
+  Share2,
+  Flag,
+  Star,
+  Zap,
+} from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTooku } from "@/lib/tooku-store";
 import { rupiah, productSpecs, schoolById, ratingSummary } from "@/lib/tooku-data";
 import { lifecyclePrice, stageMeta, DONATION_DAY } from "@/lib/tooku-lifecycle";
-import { ProductThumb, CuratedBadge, ProductCard, KoperasiBadge, Stars } from "@/components/tooku/ui";
+import { recordView } from "@/lib/tooku-recent";
+import {
+  ProductThumb,
+  CuratedBadge,
+  ProductCard,
+  KoperasiBadge,
+  Stars,
+  useEffectivePrice,
+} from "@/components/tooku/ui";
 
 export const Route = createFileRoute("/produk/$id")({
   head: () => ({
