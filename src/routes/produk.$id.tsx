@@ -25,8 +25,8 @@ import {
   ProductCard,
   KoperasiBadge,
   Stars,
-  useEffectivePrice,
 } from "@/components/tooku/ui";
+import { activeFlashFor, flashPrice } from "@/lib/tooku-extras";
 
 export const Route = createFileRoute("/produk/$id")({
   head: () => ({
@@ -49,7 +49,8 @@ export const Route = createFileRoute("/produk/$id")({
 
 function ProductDetail() {
   const { id } = Route.useParams();
-  const { products, addToCart, reviews, wishlist, toggleWishlist, productReviews, addReport } = useTooku();
+  const { products, addToCart, reviews, wishlist, toggleWishlist, productReviews, addReport, flashSales } =
+    useTooku();
   const navigate = useNavigate();
   const product = products.find((p) => p.id === id);
   const [active, setActive] = useState(0);
