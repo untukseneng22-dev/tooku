@@ -956,7 +956,8 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       },
       flashSales,
       addFlashSale: ({ title, productIds, discountPct, hours }) => {
-        if (!isAdmin) return { ok: false, error: "Hanya admin yang bisa membuat flash sale." };
+        if (user?.role !== "admin" && user?.role !== "superadmin")
+          return { ok: false, error: "Hanya admin yang bisa membuat flash sale." };
         if (productIds.length === 0) return { ok: false, error: "Pilih minimal 1 barang." };
         if (discountPct < 1 || discountPct > 90) return { ok: false, error: "Diskon 1–90%." };
         const schoolId = user?.role === "admin" ? products.find((p) => p.seller === user.name)?.schoolId : undefined;

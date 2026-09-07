@@ -12,7 +12,9 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
+import { Route as BantuanRouteImport } from './routes/bantuan'
 import { Route as ChatRouteImport } from './routes/chat'
+import { Route as FavoritRouteImport } from './routes/favorit'
 import { Route as KeranjangRouteImport } from './routes/keranjang'
 import { Route as NotifikasiRouteImport } from './routes/notifikasi'
 import { Route as PesananRouteImport } from './routes/pesanan'
@@ -38,9 +40,19 @@ const AuthRoute = AuthRouteImport.update({
   path: '/auth',
   getParentRoute: () => rootRouteImport,
 } as any)
+const BantuanRoute = BantuanRouteImport.update({
+  id: '/bantuan',
+  path: '/bantuan',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const FavoritRoute = FavoritRouteImport.update({
+  id: '/favorit',
+  path: '/favorit',
   getParentRoute: () => rootRouteImport,
 } as any)
 const KeranjangRoute = KeranjangRouteImport.update({
@@ -93,7 +105,9 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/bantuan': typeof BantuanRoute
   '/chat': typeof ChatRoute
+  '/favorit': typeof FavoritRoute
   '/keranjang': typeof KeranjangRoute
   '/notifikasi': typeof NotifikasiRoute
   '/pesanan': typeof PesananRoute
@@ -108,7 +122,9 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/bantuan': typeof BantuanRoute
   '/chat': typeof ChatRoute
+  '/favorit': typeof FavoritRoute
   '/keranjang': typeof KeranjangRoute
   '/notifikasi': typeof NotifikasiRoute
   '/pesanan': typeof PesananRoute
@@ -124,7 +140,9 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
+  '/bantuan': typeof BantuanRoute
   '/chat': typeof ChatRoute
+  '/favorit': typeof FavoritRoute
   '/keranjang': typeof KeranjangRoute
   '/notifikasi': typeof NotifikasiRoute
   '/pesanan': typeof PesananRoute
@@ -141,7 +159,9 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/bantuan'
     | '/chat'
+    | '/favorit'
     | '/keranjang'
     | '/notifikasi'
     | '/pesanan'
@@ -156,7 +176,9 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/bantuan'
     | '/chat'
+    | '/favorit'
     | '/keranjang'
     | '/notifikasi'
     | '/pesanan'
@@ -171,7 +193,9 @@ export interface FileRouteTypes {
     | '/'
     | '/admin'
     | '/auth'
+    | '/bantuan'
     | '/chat'
+    | '/favorit'
     | '/keranjang'
     | '/notifikasi'
     | '/pesanan'
@@ -187,7 +211,9 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
+  BantuanRoute: typeof BantuanRoute
   ChatRoute: typeof ChatRoute
+  FavoritRoute: typeof FavoritRoute
   KeranjangRoute: typeof KeranjangRoute
   NotifikasiRoute: typeof NotifikasiRoute
   PesananRoute: typeof PesananRoute
@@ -222,11 +248,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/bantuan': {
+      id: '/bantuan'
+      path: '/bantuan'
+      fullPath: '/bantuan'
+      preLoaderRoute: typeof BantuanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/chat': {
       id: '/chat'
       path: '/chat'
       fullPath: '/chat'
       preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/favorit': {
+      id: '/favorit'
+      path: '/favorit'
+      fullPath: '/favorit'
+      preLoaderRoute: typeof FavoritRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/keranjang': {
@@ -299,7 +339,9 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
+  BantuanRoute: BantuanRoute,
   ChatRoute: ChatRoute,
+  FavoritRoute: FavoritRoute,
   KeranjangRoute: KeranjangRoute,
   NotifikasiRoute: NotifikasiRoute,
   PesananRoute: PesananRoute,

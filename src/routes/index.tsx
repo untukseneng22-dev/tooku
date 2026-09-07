@@ -17,6 +17,8 @@ import { isSellable, isClearance, lifecyclePrice } from "@/lib/tooku-lifecycle";
 import { categories, schools, schoolById, type Category, type SchoolLevel } from "@/lib/tooku-data";
 import { ProductCard } from "@/components/tooku/ui";
 import { PromoCarousel } from "@/components/tooku/promo-carousel";
+import { FlashSaleSection } from "@/components/tooku/flash-sale";
+import { useRecentlyViewed, useSearchHistory } from "@/lib/tooku-recent";
 import { HScroll, ScrollDownHint } from "@/components/tooku/scroll-hint";
 
 export const Route = createFileRoute("/")({
@@ -51,7 +53,12 @@ function Home() {
   const [focused, setFocused] = useState(false);
   const [level, setLevel] = useState<SchoolLevel | "Semua">("Semua");
   const [schoolId, setSchoolId] = useState<string | "Semua">("Semua");
-  const [recent, setRecent] = useState<string[]>(["seragam putih", "buku matematika"]);
+  const { history: recent, push: pushRecent, clear: clearRecent } = useSearchHistory();
+  const recentViewIds = useRecentlyViewed();
+  const recentlyViewed = recentViewIds
+    .map((id) => products.find((p) => p.id === id))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p))
+    .slice(0, 8);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const cartCount = cart.reduce((n, l) => n + l.qty, 0);
@@ -77,7 +84,7 @@ function Home() {
     const t = q.trim();
     setQuery(t);
     setFocused(false);
-    if (t) setRecent((r) => [t, ...r.filter((x) => x !== t)].slice(0, 6));
+    if (t) pushRecent(t);
   };
 
   const conditionPct = (c: string) => Number(c.match(/(\d+)%/)?.[1] ?? 0);
@@ -220,7 +227,15 @@ function Home() {
                 <div className="space-y-3">
                   {recent.length > 0 && (
                     <div>
-                      <p className="px-1 pb-1 text-[11px] font-bold text-muted-foreground">Pencarian terakhir</p>
+                      <div className="flex items-center justify-between px-1 pb-1">
+                        <p className="text-[11px] font-bold text-muted-foreground">Pencarian terakhir</p>
+                        <button
+                          onMouseDown={clearRecent}
+                          className="text-[11px] font-semibold text-primary"
+                        >
+                          Hapus
+                        </button>
+                      </div>
                       {recent.map((r) => (
                         <button
                           key={r}
@@ -335,6 +350,9 @@ function Home() {
           )}
         </section>
 
+        {/* Flash sale berjalan */}
+        <FlashSaleSection />
+
         {/* Cuci Gudang — diskon otomatis barang lama tayang */}
         {clearance.length > 0 && (
           <section>
@@ -372,6 +390,26 @@ function Home() {
             ))}
           </HScroll>
         </section>
+
+        {/* Terakhir dilihat */}
+        {recentlyViewed.length > 0 && (
+          <section>
+            <div className="mb-3 flex items-center gap-2">
+              <Clock className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-bold">Terakhir Kamu Lihat</h2>
+              <Link to="/favorit" className="ml-auto text-[11px] font-semibold text-primary">
+                Favorit →
+              </Link>
+            </div>
+            <HScroll className="gap-3 pb-1">
+              {recentlyViewed.map((p) => (
+                <div key={p.id} className="w-36 shrink-0">
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </HScroll>
+          </section>
+        )}
 
         {/* Grid */}
         <section>
