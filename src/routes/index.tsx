@@ -227,7 +227,15 @@ function Home() {
                 <div className="space-y-3">
                   {recent.length > 0 && (
                     <div>
-                      <p className="px-1 pb-1 text-[11px] font-bold text-muted-foreground">Pencarian terakhir</p>
+                      <div className="flex items-center justify-between px-1 pb-1">
+                        <p className="text-[11px] font-bold text-muted-foreground">Pencarian terakhir</p>
+                        <button
+                          onMouseDown={clearRecent}
+                          className="text-[11px] font-semibold text-primary"
+                        >
+                          Hapus
+                        </button>
+                      </div>
                       {recent.map((r) => (
                         <button
                           key={r}
