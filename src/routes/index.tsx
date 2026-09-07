@@ -17,6 +17,8 @@ import { isSellable, isClearance, lifecyclePrice } from "@/lib/tooku-lifecycle";
 import { categories, schools, schoolById, type Category, type SchoolLevel } from "@/lib/tooku-data";
 import { ProductCard } from "@/components/tooku/ui";
 import { PromoCarousel } from "@/components/tooku/promo-carousel";
+import { FlashSaleSection } from "@/components/tooku/flash-sale";
+import { useRecentlyViewed, useSearchHistory } from "@/lib/tooku-recent";
 import { HScroll, ScrollDownHint } from "@/components/tooku/scroll-hint";
 
 export const Route = createFileRoute("/")({
@@ -51,7 +53,12 @@ function Home() {
   const [focused, setFocused] = useState(false);
   const [level, setLevel] = useState<SchoolLevel | "Semua">("Semua");
   const [schoolId, setSchoolId] = useState<string | "Semua">("Semua");
-  const [recent, setRecent] = useState<string[]>(["seragam putih", "buku matematika"]);
+  const { history: recent, push: pushRecent, clear: clearRecent } = useSearchHistory();
+  const recentViewIds = useRecentlyViewed();
+  const recentlyViewed = recentViewIds
+    .map((id) => products.find((p) => p.id === id))
+    .filter((p): p is NonNullable<typeof p> => Boolean(p))
+    .slice(0, 8);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const cartCount = cart.reduce((n, l) => n + l.qty, 0);
@@ -77,7 +84,7 @@ function Home() {
     const t = q.trim();
     setQuery(t);
     setFocused(false);
-    if (t) setRecent((r) => [t, ...r.filter((x) => x !== t)].slice(0, 6));
+    if (t) pushRecent(t);
   };
 
   const conditionPct = (c: string) => Number(c.match(/(\d+)%/)?.[1] ?? 0);
