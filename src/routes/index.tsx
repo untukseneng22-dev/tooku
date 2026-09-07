@@ -350,6 +350,9 @@ function Home() {
           )}
         </section>
 
+        {/* Flash sale berjalan */}
+        <FlashSaleSection />
+
         {/* Cuci Gudang — diskon otomatis barang lama tayang */}
         {clearance.length > 0 && (
           <section>
@@ -387,6 +390,26 @@ function Home() {
             ))}
           </HScroll>
         </section>
+
+        {/* Terakhir dilihat */}
+        {recentlyViewed.length > 0 && (
+          <section>
+            <div className="mb-3 flex items-center gap-2">
+              <Clock className="h-4 w-4 text-primary" />
+              <h2 className="text-sm font-bold">Terakhir Kamu Lihat</h2>
+              <Link to="/favorit" className="ml-auto text-[11px] font-semibold text-primary">
+                Favorit →
+              </Link>
+            </div>
+            <HScroll className="gap-3 pb-1">
+              {recentlyViewed.map((p) => (
+                <div key={p.id} className="w-36 shrink-0">
+                  <ProductCard product={p} />
+                </div>
+              ))}
+            </HScroll>
+          </section>
+        )}
 
         {/* Grid */}
         <section>
