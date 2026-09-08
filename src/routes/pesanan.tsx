@@ -170,7 +170,12 @@ function OrderCard({ order }: { order: Order }) {
             <span className="min-w-0 truncate text-muted-foreground">
               {i.qty}x {i.name}
             </span>
-            <span className="shrink-0 font-semibold">{rupiah(i.price * i.qty)}</span>
+            <span className="flex shrink-0 items-center gap-2 font-semibold">
+              {rupiah(i.price * i.qty)}
+              {(order.status === "Selesai" || order.status === "Diterima") && (
+                <ReviewBox order={order} productId={i.productId} name={i.name} />
+              )}
+            </span>
           </div>
         ))}
       </div>
@@ -281,6 +286,18 @@ function OrderCard({ order }: { order: Order }) {
             <span>{rupiah(order.serviceFee)}</span>
           </div>
         )}
+        {order.voucherCode && order.voucherCut ? (
+          <div className="flex justify-between text-primary">
+            <span>Voucher {order.voucherCode}</span>
+            <span>−{rupiah(order.voucherCut)}</span>
+          </div>
+        ) : null}
+        {order.pointsUsed && order.pointsCut ? (
+          <div className="flex justify-between text-primary">
+            <span>Poin dipakai ({order.pointsUsed})</span>
+            <span>−{rupiah(order.pointsCut)}</span>
+          </div>
+        ) : null}
       </div>
       <p className="text-sm font-bold text-primary">Total {rupiah(order.total)}</p>
 
