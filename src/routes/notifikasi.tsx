@@ -159,7 +159,7 @@ function NotifikasiPage() {
         <div className="mt-3 flex items-center justify-between">
           <p className="text-[11px] text-muted-foreground">{shown.length} notifikasi</p>
           {unread > 0 && (
-            <button onClick={() => markAllNotifsRead(user?.id ?? null)} className="text-[11px] font-bold text-primary">
+            <button onClick={() => markAllNotifsRead()} className="text-[11px] font-bold text-primary">
               Tandai semua dibaca
             </button>
           )}
