@@ -153,11 +153,26 @@ function ProductDetail() {
           </div>
           <h2 className="text-lg font-bold leading-snug">{product.name}</h2>
           <div className="flex items-end gap-2">
-            <p className="text-2xl font-extrabold text-primary">{rupiah(product.price)}</p>
-            {product.originalPrice && (
-              <p className="pb-1 text-sm text-muted-foreground line-through">{rupiah(product.originalPrice)}</p>
+            <p className="text-2xl font-extrabold text-primary">{rupiah(flash.price)}</p>
+            {flash.discount > 0 ? (
+              <p className="pb-1 text-sm text-muted-foreground line-through">{rupiah(product.price)}</p>
+            ) : (
+              product.originalPrice && (
+                <p className="pb-1 text-sm text-muted-foreground line-through">{rupiah(product.originalPrice)}</p>
+              )
             )}
           </div>
+          {flash.discount > 0 && (
+            <p className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-[11px] font-bold text-destructive">
+              <Zap className="h-3 w-3" /> Flash Sale {sale?.title} · hemat {rupiah(product.price - flash.price)}
+            </p>
+          )}
+          {itemRating !== null && (
+            <p className="flex items-center gap-1.5 text-xs font-semibold">
+              <Star className="h-4 w-4 fill-accent text-accent" /> {itemRating.toFixed(1)}
+              <span className="font-normal text-muted-foreground">· {itemReviews.length} ulasan pembeli</span>
+            </p>
+          )}
           {life.discount > 0 && (
             <div className="rounded-2xl border border-destructive/30 bg-destructive/5 p-3">
               <p className="text-xs font-bold text-destructive">
