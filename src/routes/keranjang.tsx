@@ -154,6 +154,8 @@ function CartPage() {
       fulfillment: isDelivery ? "delivery" : "pickup",
       paymentMethod: effectiveMethod,
       ...(effectiveMethod === "online" ? { paymentChannel: channel } : {}),
+      ...(appliedCode ? { voucherCode: appliedCode } : {}),
+      ...(usePoints && pointsUsed > 0 ? { usePoints: true } : {}),
       ...(isDelivery
         ? {
             shipping: {
@@ -518,6 +520,56 @@ function CartPage() {
               )}
             </section>
 
+            {/* Voucher & poin */}
+            <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
+              <h2 className="text-sm font-bold">Voucher & Poin</h2>
+              <div className="flex gap-2">
+                <input
+                  value={voucherInput}
+                  onChange={(e) => setVoucherInput(e.target.value.toUpperCase())}
+                  placeholder="Kode voucher (mis. TOOKU10)"
+                  className="min-w-0 flex-1 rounded-xl border border-border bg-background px-3 py-2 text-xs uppercase outline-none focus:border-primary"
+                />
+                <button
+                  onClick={applyVoucher}
+                  className="shrink-0 rounded-xl bg-secondary px-4 py-2 text-xs font-bold text-foreground"
+                >
+                  Pakai
+                </button>
+              </div>
+              {appliedCode && (
+                <div className="flex items-center justify-between rounded-xl bg-primary/10 px-3 py-2 text-xs font-semibold text-primary">
+                  <span>Voucher {appliedCode} aktif</span>
+                  <button
+                    onClick={() => {
+                      setAppliedCode("");
+                      setVoucherMsg("");
+                    }}
+                    className="font-bold text-destructive"
+                  >
+                    Lepas
+                  </button>
+                </div>
+              )}
+              {voucherMsg && <p className="text-[11px] text-muted-foreground">{voucherMsg}</p>}
+              {balance > 0 && (
+                <label className="flex items-center justify-between gap-3 rounded-xl border border-border px-3 py-2.5">
+                  <span className="text-xs">
+                    <span className="block font-semibold">Pakai {balance} poin</span>
+                    <span className="block text-[10px] text-muted-foreground">
+                      Setara potongan {rupiah(Math.min(balance, Math.floor((subtotal - vCut) / 1000)) * 1000)}
+                    </span>
+                  </span>
+                  <input
+                    type="checkbox"
+                    checked={usePoints}
+                    onChange={(e) => setUsePoints(e.target.checked)}
+                    className="h-4 w-4 accent-primary"
+                  />
+                </label>
+              )}
+            </section>
+
             <section className="space-y-1.5 rounded-2xl border border-border bg-card p-4 text-xs">
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Subtotal ({lines.length} item)</span>
@@ -525,15 +577,30 @@ function CartPage() {
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Ongkir</span>
-                <span className="font-semibold">{isDelivery ? rupiah(shippingTotal) : "Gratis (ambil sendiri)"}</span>
+                <span className="font-semibold">
+                  {isDelivery ? rupiah(Math.max(0, shippingTotal - sCut)) : "Gratis (ambil sendiri)"}
+                  {sCut > 0 && <span className="ml-1 text-[10px] text-primary">(voucher)</span>}
+                </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Biaya layanan</span>
                 <span className="font-semibold">{rupiah(fee)}</span>
               </div>
+              {vCut > 0 && (
+                <div className="flex justify-between text-primary">
+                  <span>Diskon voucher</span>
+                  <span className="font-semibold">−{rupiah(vCut)}</span>
+                </div>
+              )}
+              {pointsCut > 0 && (
+                <div className="flex justify-between text-primary">
+                  <span>Poin dipakai ({pointsUsed})</span>
+                  <span className="font-semibold">−{rupiah(pointsCut)}</span>
+                </div>
+              )}
               <div className="flex justify-between border-t border-border pt-2 text-sm">
                 <span className="font-bold">Total</span>
-                <span className="font-extrabold text-primary">{rupiah(subtotal + shippingTotal + fee)}</span>
+                <span className="font-extrabold text-primary">{rupiah(grandTotal)}</span>
               </div>
               <p className="pt-1 text-[11px] text-muted-foreground">
                 Stok direservasi setelah checkout dan dikembalikan otomatis bila pesanan dibatalkan.
