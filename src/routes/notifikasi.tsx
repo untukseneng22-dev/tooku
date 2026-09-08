@@ -77,30 +77,38 @@ const kindMeta: Record<NotifKind, { label: string; icon: typeof Bell }> = {
   sistem: { label: "Info", icon: ShieldCheck },
 };
 
+const fmtAgo = (at: number) => {
+  const m = Math.max(0, Math.round((Date.now() - at) / 60000));
+  if (m < 1) return "baru saja";
+  if (m < 60) return `${m} mnt lalu`;
+  if (m < 1440) return `${Math.floor(m / 60)} jam lalu`;
+  return `${Math.floor(m / 1440)} hari lalu`;
+};
+
 function NotifikasiPage() {
-  const { user } = useTooku();
-  const [notifs, setNotifs] = useState<Notif[]>(seedNotifs);
+  const { user, notifs: storeNotifs, markNotifRead, markAllNotifsRead } = useTooku();
   const [filter, setFilter] = useState<"semua" | NotifKind | "belum">("semua");
-  const [hydrated, setHydrated] = useState(false);
 
-  useEffect(() => {
-    try {
-      const n = localStorage.getItem(NOTIF_KEY);
-      if (n) setNotifs(JSON.parse(n));
-    } catch {
-      /* ignore */
-    }
-    setHydrated(true);
-  }, []);
+  // Gabung notifikasi nyata dari sistem (pesanan, promo) dengan info umum.
+  const mine: (Notif & { realId?: string })[] = useMemo(() => {
+    const real = storeNotifs
+      .filter((n) => n.userId === null || n.userId === user?.id)
+      .map((n) => ({
+        id: n.id,
+        realId: n.id,
+        kind: n.kind,
+        title: n.title,
+        body: n.body,
+        time: fmtAgo(n.at),
+        read: n.read,
+      }));
+    return [...real, ...seedNotifs];
+  }, [storeNotifs, user?.id]);
 
-  useEffect(() => {
-    if (hydrated) localStorage.setItem(NOTIF_KEY, JSON.stringify(notifs));
-  }, [hydrated, notifs]);
-
-  const unread = notifs.filter((n) => !n.read).length;
+  const unread = mine.filter((n) => !n.read).length;
   const shown = useMemo(
-    () => notifs.filter((n) => (filter === "semua" ? true : filter === "belum" ? !n.read : n.kind === filter)),
-    [notifs, filter],
+    () => mine.filter((n) => (filter === "semua" ? true : filter === "belum" ? !n.read : n.kind === filter)),
+    [mine, filter],
   );
 
   const filters: { key: typeof filter; label: string }[] = [
