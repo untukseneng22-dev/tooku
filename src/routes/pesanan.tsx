@@ -1,8 +1,77 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Ticket, MapPin, Check, Clock, Wallet, Store, XCircle, Truck, Copy } from "lucide-react";
+import { Ticket, MapPin, Check, Clock, Wallet, Store, XCircle, Truck, Copy, Star } from "lucide-react";
+import { useState } from "react";
 import { useTooku, useCountdown, flowFor, isFinalStatus, type Order } from "@/lib/tooku-store";
 import { rupiah, schoolById } from "@/lib/tooku-data";
 import { zoneEta, zoneLabel } from "@/lib/tooku-shipping";
+
+/** Form ulasan bintang untuk satu barang dalam pesanan selesai. */
+function ReviewBox({ order, productId, name }: { order: Order; productId: string; name: string }) {
+  const { addProductReview, productReviews, user } = useTooku();
+  const [open, setOpen] = useState(false);
+  const [rating, setRating] = useState(5);
+  const [text, setText] = useState("");
+  const [msg, setMsg] = useState("");
+  const existing = productReviews.find(
+    (r) => r.orderId === order.id && r.productId === productId && r.userId === user?.id,
+  );
+
+  if (existing)
+    return (
+      <p className="flex items-center gap-1 rounded-lg bg-primary/10 px-2 py-1 text-[10px] font-semibold text-primary">
+        <Star className="h-3 w-3 fill-accent text-accent" /> Sudah kamu ulas ({existing.rating}/5)
+      </p>
+    );
+  if (!open)
+    return (
+      <button
+        onClick={() => setOpen(true)}
+        className="rounded-lg border border-primary px-2 py-1 text-[10px] font-bold text-primary"
+      >
+        Beri Ulasan
+      </button>
+    );
+  return (
+    <div className="w-full space-y-2 rounded-xl border border-border bg-card p-2.5">
+      <p className="text-[11px] font-bold">Ulasan untuk {name}</p>
+      <div className="flex gap-1">
+        {[1, 2, 3, 4, 5].map((n) => (
+          <button key={n} onClick={() => setRating(n)} aria-label={`${n} bintang`}>
+            <Star
+              className={`h-5 w-5 ${n <= rating ? "fill-accent text-accent" : "text-border"}`}
+            />
+          </button>
+        ))}
+      </div>
+      <textarea
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+        rows={2}
+        placeholder="Ceritakan kondisi barang dan pelayanan koperasi…"
+        className="w-full rounded-lg border border-border bg-background px-2 py-1.5 text-[11px] outline-none focus:border-primary"
+      />
+      {msg && <p className="text-[10px] font-semibold text-destructive">{msg}</p>}
+      <div className="flex gap-2">
+        <button
+          onClick={() => setOpen(false)}
+          className="flex-1 rounded-lg border border-border py-1.5 text-[10px] font-semibold"
+        >
+          Batal
+        </button>
+        <button
+          onClick={() => {
+            const res = addProductReview({ productId, orderId: order.id, rating, text });
+            if (res.ok) setOpen(false);
+            else setMsg(res.error ?? "Gagal mengirim ulasan.");
+          }}
+          className="flex-1 rounded-lg bg-primary py-1.5 text-[10px] font-bold text-primary-foreground"
+        >
+          Kirim
+        </button>
+      </div>
+    </div>
+  );
+}
 
 
 export const Route = createFileRoute("/pesanan")({
@@ -97,11 +166,16 @@ function OrderCard({ order }: { order: Order }) {
 
       <div className="space-y-1 rounded-xl bg-secondary/50 p-3">
         {order.items.map((i) => (
-          <div key={i.productId} className="flex justify-between gap-2 text-xs">
+          <div key={i.productId} className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs">
             <span className="min-w-0 truncate text-muted-foreground">
               {i.qty}x {i.name}
             </span>
             <span className="shrink-0 font-semibold">{rupiah(i.price * i.qty)}</span>
+            {(order.status === "Selesai" || order.status === "Diterima") && (
+              <div className="w-full">
+                <ReviewBox order={order} productId={i.productId} name={i.name} />
+              </div>
+            )}
           </div>
         ))}
       </div>
@@ -212,6 +286,18 @@ function OrderCard({ order }: { order: Order }) {
             <span>{rupiah(order.serviceFee)}</span>
           </div>
         )}
+        {order.voucherCode && order.voucherCut ? (
+          <div className="flex justify-between text-primary">
+            <span>Voucher {order.voucherCode}</span>
+            <span>−{rupiah(order.voucherCut)}</span>
+          </div>
+        ) : null}
+        {order.pointsUsed && order.pointsCut ? (
+          <div className="flex justify-between text-primary">
+            <span>Poin dipakai ({order.pointsUsed})</span>
+            <span>−{rupiah(order.pointsCut)}</span>
+          </div>
+        ) : null}
       </div>
       <p className="text-sm font-bold text-primary">Total {rupiah(order.total)}</p>
 
