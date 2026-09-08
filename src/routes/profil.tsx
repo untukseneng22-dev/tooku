@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, LogIn, Store } from "lucide-react";
+import { ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, LogIn, Store, Heart, Star, HelpCircle } from "lucide-react";
 import { useTooku, roleLabel } from "@/lib/tooku-store";
 import { rupiah } from "@/lib/tooku-data";
 import { InstallAppCard } from "@/components/tooku/install-prompt";
@@ -17,7 +17,7 @@ export const Route = createFileRoute("/profil")({
 });
 
 function ProfilePage() {
-  const { user, myOrders, logout, isAdmin, isSuperAdmin, pendingUsers, orders, users } = useTooku();
+  const { user, myOrders, logout, isAdmin, isSuperAdmin, pendingUsers, orders, users, wishlist, pointsBalance } = useTooku();
   const navigate = useNavigate();
   const done = myOrders.filter((o) => o.status === "Selesai");
   const saved = done.reduce((s, o) => s + o.total * 2.5, 0);
