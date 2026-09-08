@@ -26,6 +26,7 @@ import {
   zoneLabel,
   type Courier,
 } from "@/lib/tooku-shipping";
+import { voucherDiscount } from "@/lib/tooku-extras";
 import { ProductThumb } from "@/components/tooku/ui";
 
 export const Route = createFileRoute("/keranjang")({
