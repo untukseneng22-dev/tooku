@@ -127,7 +127,7 @@ function CartPage() {
     }
     const res = voucherDiscount(v, subtotal, shippingTotal);
     if (!res.ok) {
-      setVoucherMsg(res.error ?? "Voucher tidak bisa dipakai.");
+      setVoucherMsg(res.message ?? "Voucher tidak bisa dipakai.");
       return;
     }
     setAppliedCode(code);
