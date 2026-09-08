@@ -159,10 +159,7 @@ function NotifikasiPage() {
         <div className="mt-3 flex items-center justify-between">
           <p className="text-[11px] text-muted-foreground">{shown.length} notifikasi</p>
           {unread > 0 && (
-            <button
-              onClick={() => setNotifs((prev) => prev.map((n) => ({ ...n, read: true })))}
-              className="text-[11px] font-bold text-primary"
-            >
+            <button onClick={() => markAllNotifsRead(user?.id ?? null)} className="text-[11px] font-bold text-primary">
               Tandai semua dibaca
             </button>
           )}
@@ -177,7 +174,7 @@ function NotifikasiPage() {
               return (
                 <button
                   key={n.id}
-                  onClick={() => setNotifs((prev) => prev.map((x) => (x.id === n.id ? { ...x, read: true } : x)))}
+                  onClick={() => n.realId && markNotifRead(n.realId)}
                   className={`flex w-full gap-3 rounded-2xl border p-3 text-left transition-colors ${
                     n.read ? "border-border bg-card" : "border-primary/30 bg-primary/5"
                   }`}
