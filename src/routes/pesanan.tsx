@@ -166,16 +166,16 @@ function OrderCard({ order }: { order: Order }) {
 
       <div className="space-y-1 rounded-xl bg-secondary/50 p-3">
         {order.items.map((i) => (
-          <div key={i.productId} className="flex justify-between gap-2 text-xs">
+          <div key={i.productId} className="flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs">
             <span className="min-w-0 truncate text-muted-foreground">
               {i.qty}x {i.name}
             </span>
-            <span className="flex shrink-0 items-center gap-2 font-semibold">
-              {rupiah(i.price * i.qty)}
-              {(order.status === "Selesai" || order.status === "Diterima") && (
+            <span className="shrink-0 font-semibold">{rupiah(i.price * i.qty)}</span>
+            {(order.status === "Selesai" || order.status === "Diterima") && (
+              <div className="w-full">
                 <ReviewBox order={order} productId={i.productId} name={i.name} />
-              )}
-            </span>
+              </div>
+            )}
           </div>
         ))}
       </div>
