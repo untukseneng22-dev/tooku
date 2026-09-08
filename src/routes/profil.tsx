@@ -163,12 +163,28 @@ function ProfilePage() {
             <Wallet className="h-4 w-4 text-primary" /> Riwayat & Status Pesanan
             <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
           </Link>
+          <Link to="/favorit" className="flex items-center gap-3 p-4 text-sm">
+            <Heart className="h-4 w-4 text-primary" /> Favorit Saya
+            <span className="ml-auto rounded-full bg-secondary px-2 py-0.5 text-[10px] font-bold">
+              {wishlist.length}
+            </span>
+          </Link>
+          <div className="flex items-center gap-3 p-4 text-sm">
+            <Star className="h-4 w-4 text-accent" /> Poin TOOKU
+            <span className="ml-auto rounded-full bg-accent/20 px-2.5 py-0.5 text-[11px] font-extrabold text-accent-foreground">
+              {pointsBalance(user.id)} poin
+            </span>
+          </div>
           <Link to="/koperasi" className="flex items-center gap-3 p-4 text-sm">
             <Store className="h-4 w-4 text-primary" /> Daftar Koperasi Sekolah
             <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
           </Link>
           <Link to="/standar-kurasi" className="flex items-center gap-3 p-4 text-sm">
             <ShieldCheck className="h-4 w-4 text-primary" /> Standar Kurasi Koperasi
+            <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
+          </Link>
+          <Link to="/bantuan" className="flex items-center gap-3 p-4 text-sm">
+            <HelpCircle className="h-4 w-4 text-primary" /> Pusat Bantuan
             <ChevronRight className="ml-auto h-4 w-4 text-muted-foreground" />
           </Link>
           {isAdmin && (
