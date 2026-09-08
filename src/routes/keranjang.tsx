@@ -622,7 +622,7 @@ function CartPage() {
             <div className="min-w-0">
               <p className="text-[10px] text-muted-foreground">Total</p>
               <p className="truncate text-base font-extrabold text-primary">
-                {rupiah(subtotal + shippingTotal + fee)}
+                {rupiah(grandTotal)}
               </p>
             </div>
             {user ? (
