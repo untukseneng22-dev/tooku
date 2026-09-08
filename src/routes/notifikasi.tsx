@@ -1,5 +1,5 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Bell, MessageCircle, ShieldCheck, Package, Tag, Clock } from "lucide-react";
 import { useTooku } from "@/lib/tooku-store";
 
@@ -69,7 +69,7 @@ const seedNotifs: Notif[] = [
   },
 ];
 
-const NOTIF_KEY = "tooku.notifs.v1";
+
 
 const kindMeta: Record<NotifKind, { label: string; icon: typeof Bell }> = {
   pesanan: { label: "Pesanan", icon: Package },
