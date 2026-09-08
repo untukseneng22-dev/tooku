@@ -304,6 +304,84 @@ function ProductDetail() {
           </p>
         </section>
 
+        {/* Ulasan pembeli */}
+        <section className="space-y-3 border-b border-border px-4 py-5">
+          <div className="flex items-center justify-between">
+            <h3 className="text-sm font-bold">Ulasan Pembeli</h3>
+            {itemRating !== null && (
+              <span className="flex items-center gap-1 text-xs font-bold">
+                <Star className="h-3.5 w-3.5 fill-accent text-accent" /> {itemRating.toFixed(1)}
+                <span className="font-normal text-muted-foreground">/ 5</span>
+              </span>
+            )}
+          </div>
+          {itemReviews.length === 0 ? (
+            <p className="rounded-2xl border border-dashed border-border p-4 text-center text-xs text-muted-foreground">
+              Belum ada ulasan. Ulasan bisa diberikan setelah pesananmu selesai.
+            </p>
+          ) : (
+            <ul className="space-y-2">
+              {itemReviews.slice(0, 5).map((r) => (
+                <li key={r.id} className="rounded-2xl border border-border bg-card p-3">
+                  <div className="flex items-center justify-between gap-2">
+                    <p className="truncate text-xs font-bold">{r.author}</p>
+                    <Stars value={r.rating} size={11} />
+                  </div>
+                  <p className="mt-1 text-xs leading-relaxed text-muted-foreground">{r.text}</p>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
+
+        {/* Laporkan barang */}
+        <section className="border-b border-border px-4 py-5">
+          {!reportOpen ? (
+            <button
+              onClick={() => setReportOpen(true)}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border py-2.5 text-xs font-semibold text-muted-foreground"
+            >
+              <Flag className="h-3.5 w-3.5" /> Laporkan barang ini
+            </button>
+          ) : (
+            <div className="space-y-2 rounded-2xl border border-border p-3">
+              <p className="text-xs font-bold">Ada masalah dengan barang ini?</p>
+              <textarea
+                value={reportText}
+                onChange={(e) => setReportText(e.target.value)}
+                rows={3}
+                placeholder="Contoh: foto tidak sesuai kondisi asli, ukuran salah…"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none focus:border-primary"
+              />
+              {reportMsg && <p className="text-[11px] font-semibold text-primary">{reportMsg}</p>}
+              <div className="flex gap-2">
+                <button
+                  onClick={() => {
+                    setReportOpen(false);
+                    setReportText("");
+                  }}
+                  className="flex-1 rounded-xl border border-border py-2 text-xs font-semibold"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={() => {
+                    const res = addReport(product.id, reportText);
+                    setReportMsg(res.ok ? "Laporan terkirim ke Admin Pusat. Terima kasih!" : (res.error ?? "Gagal mengirim."));
+                    if (res.ok) {
+                      setReportText("");
+                      setTimeout(() => setReportOpen(false), 1500);
+                    }
+                  }}
+                  className="flex-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground"
+                >
+                  Kirim Laporan
+                </button>
+              </div>
+            </div>
+          )}
+        </section>
+
         {related.length > 0 && (
           <section className="px-4 py-5">
             <h3 className="mb-3 text-sm font-bold">Barang Serupa</h3>
