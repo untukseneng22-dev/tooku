@@ -56,7 +56,8 @@ const onlineChannels = [
 const districts = [...new Set(schools.map((s) => s.district))].sort();
 
 function CartPage() {
-  const { cart, products, setQty, removeFromCart, checkout, user, shippingConfigs } = useTooku();
+  const { cart, products, setQty, removeFromCart, checkout, user, shippingConfigs, vouchers, pointsBalance } =
+    useTooku();
   const navigate = useNavigate();
   const [fulfillment, setFulfillment] = useState<Fulfillment>("pickup");
   const [method, setMethod] = useState<PaymentMethod>("koperasi");
@@ -97,6 +98,40 @@ function CartPage() {
   const isDelivery = fulfillment === "delivery" && canDeliver;
   const shippingTotal = isDelivery ? quote.total : 0;
   const fee = method === "online" ? 2500 : 0;
+
+  // Voucher promo & poin loyalitas.
+  const [voucherInput, setVoucherInput] = useState("");
+  const [appliedCode, setAppliedCode] = useState("");
+  const [voucherMsg, setVoucherMsg] = useState("");
+  const [usePoints, setUsePoints] = useState(false);
+  const voucher = appliedCode
+    ? vouchers.find((v) => v.code.toUpperCase() === appliedCode.toUpperCase())
+    : undefined;
+  const vRes = voucher ? voucherDiscount(voucher, subtotal, shippingTotal) : null;
+  const vCut = vRes && vRes.ok ? vRes.cutSubtotal : 0;
+  const sCut = vRes && vRes.ok ? vRes.cutShipping : 0;
+  const balance = user ? pointsBalance(user.id) : 0;
+  const pointsUsed = usePoints ? Math.min(balance, Math.floor((subtotal - vCut) / 1000)) : 0;
+  const pointsCut = pointsUsed * 1000;
+  const grandTotal =
+    Math.max(0, subtotal - vCut - pointsCut) + fee + Math.max(0, shippingTotal - sCut);
+
+  const applyVoucher = () => {
+    const code = voucherInput.trim().toUpperCase();
+    if (!code) return;
+    const v = vouchers.find((x) => x.code === code);
+    if (!v) {
+      setVoucherMsg("Kode voucher tidak ditemukan.");
+      return;
+    }
+    const res = voucherDiscount(v, subtotal, shippingTotal);
+    if (!res.ok) {
+      setVoucherMsg(res.error ?? "Voucher tidak bisa dipakai.");
+      return;
+    }
+    setAppliedCode(code);
+    setVoucherMsg(`Voucher ${code} dipakai: hemat ${rupiah(res.cutSubtotal + res.cutShipping)}.`);
+  };
 
   // Metode yang boleh dipakai pada mode fulfillment terpilih.
   const methodsForMode: PaymentMethod[] = isDelivery
