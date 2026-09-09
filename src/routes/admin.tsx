@@ -1030,3 +1030,109 @@ function LifecycleAdmin() {
     </div>
   );
 }
+
+/** Kelola flash sale koperasi: pilih barang, potongan, dan durasi. */
+function PromoAdmin() {
+  const { user, products, flashSales, addFlashSale, removeFlashSale } = useTooku();
+  const mySchoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
+  const mine = products.filter((p) => p.schoolId === mySchoolId && p.stock > 0);
+  const [title, setTitle] = useState("Flash Sale Koperasi");
+  const [pct, setPct] = useState(15);
+  const [hours, setHours] = useState(12);
+  const [picked, setPicked] = useState<string[]>([]);
+  const [msg, setMsg] = useState("");
+
+  const active = flashSales.filter((f) => f.schoolId === mySchoolId && f.endsAt > Date.now());
+
+  const toggle = (id: string) =>
+    setPicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  return (
+    <div className="space-y-4">
+      <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
+        <h2 className="text-sm font-bold">Buat Flash Sale</h2>
+        <input
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Nama promo"
+          className="w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+        />
+        <div className="grid grid-cols-2 gap-2">
+          <label className="text-xs text-muted-foreground">
+            Potongan (%)
+            <input
+              type="number"
+              min={1}
+              max={90}
+              value={pct}
+              onChange={(e) => setPct(Number(e.target.value))}
+              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+          </label>
+          <label className="text-xs text-muted-foreground">
+            Durasi (jam)
+            <input
+              type="number"
+              min={1}
+              max={72}
+              value={hours}
+              onChange={(e) => setHours(Number(e.target.value))}
+              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+          </label>
+        </div>
+        <p className="text-[11px] font-semibold text-muted-foreground">Pilih barang yang ikut:</p>
+        <div className="grid gap-1.5">
+          {mine.length === 0 && <p className="text-xs text-muted-foreground">Belum ada barang aktif dengan stok.</p>}
+          {mine.map((p) => (
+            <label
+              key={p.id}
+              className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs ${
+                picked.includes(p.id) ? "border-primary bg-primary/5 font-semibold" : "border-border"
+              }`}
+            >
+              <input type="checkbox" checked={picked.includes(p.id)} onChange={() => toggle(p.id)} className="h-4 w-4" />
+              <span className="min-w-0 flex-1 truncate">{p.name}</span>
+              <span className="shrink-0 text-muted-foreground">{rupiah(p.price)}</span>
+            </label>
+          ))}
+        </div>
+        {msg && <p className="text-[11px] font-semibold text-destructive">{msg}</p>}
+        <button
+          onClick={() => {
+            const res = addFlashSale({ title, productIds: picked, discountPct: pct, hours });
+            if (res.ok) {
+              setPicked([]);
+              setMsg("");
+            } else setMsg(res.error ?? "Gagal membuat flash sale.");
+          }}
+          className="w-full rounded-xl bg-primary py-2.5 text-xs font-bold text-primary-foreground"
+        >
+          Jalankan Flash Sale ({picked.length} barang)
+        </button>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-sm font-bold">Flash Sale Aktif ({active.length})</h2>
+        {active.length === 0 && <p className="text-xs text-muted-foreground">Belum ada flash sale yang berjalan.</p>}
+        {active.map((f) => (
+          <div key={f.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-bold">{f.title}</p>
+              <p className="text-[11px] text-muted-foreground">
+                −{f.discountPct}% · {f.productIds.length} barang · berakhir{" "}
+                {new Date(f.endsAt).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+              </p>
+            </div>
+            <button
+              onClick={() => removeFlashSale(f.id)}
+              className="inline-flex items-center gap-1 rounded-full border border-destructive/30 px-2.5 py-1 text-[10px] font-bold text-destructive"
+            >
+              <Trash2 className="h-3 w-3" /> Hentikan
+            </button>
+          </div>
+        ))}
+      </section>
+    </div>
+  );
+}
