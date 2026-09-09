@@ -179,10 +179,10 @@ function ProductDetail() {
                 {stageMeta[life.stage].label} · potongan otomatis {life.discount}%
               </p>
               <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                Sudah {life.days} hari tayang di TOOKU (harga asli {rupiah(life.base)}). Bila belum terjual sampai{" "}
-                {DONATION_DAY} hari, barang ini diikhlaskan penitip untuk disalurkan sebagai donasi sosial oleh
-                koperasi.
+                Harga cuci gudang koperasi (harga asli {rupiah(life.base)}). Stok terbatas dan bisa ditarik koperasi
+                kapan saja untuk disalurkan sebagai donasi sosial, jadi jangan ditunda.
               </p>
+
             </div>
           )}
           {bundleItems.length > 0 && (

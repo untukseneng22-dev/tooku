@@ -362,9 +362,10 @@ function Home() {
               <span className="ml-auto text-[10px] font-semibold text-muted-foreground">Diskon otomatis</span>
             </div>
             <p className="mb-2 text-[11px] leading-relaxed text-muted-foreground">
-              Barang yang sudah lama tayang otomatis turun harga: 30 hari −20%, 60 hari −50%. Buruan sebelum diambil
-              orang lain.
+              Barang pilihan koperasi dengan harga cuci gudang. Jumlahnya terbatas dan bisa ditarik untuk donasi sosial
+              kapan saja — buruan sebelum diambil orang lain.
             </p>
+
             <HScroll className="gap-3 pb-1">
               {clearance.map((p) => (
                 <div key={p.id} className="w-36 shrink-0">
