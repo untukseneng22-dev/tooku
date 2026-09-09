@@ -153,8 +153,9 @@ export function ProductCard({ product }: { product: Product }) {
             <p className="text-[10px] text-muted-foreground line-through">{rupiah(product.originalPrice)}</p>
           )}
           {clearance && flashDiscount === 0 && (
-            <p className="text-[10px] font-semibold text-destructive">Tayang {days} hari · harga turun otomatis</p>
+            <p className="text-[10px] font-semibold text-destructive">Harga khusus cuci gudang</p>
           )}
+
           <KoperasiBadge schoolId={product.schoolId} small />
 
           <div className="flex items-center justify-between text-[10px] text-muted-foreground">
