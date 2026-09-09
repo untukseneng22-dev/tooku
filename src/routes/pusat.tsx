@@ -39,13 +39,15 @@ export const Route = createFileRoute("/pusat")({
   component: PusatPage,
 });
 
-type Tab = "monitor" | "transaksi" | "akun" | "callcenter";
+type Tab = "monitor" | "transaksi" | "akun" | "callcenter" | "voucher" | "laporan";
 
 const tabs: { id: Tab; label: string; icon: typeof Activity }[] = [
   { id: "monitor", label: "Pemantauan", icon: Activity },
   { id: "transaksi", label: "Transaksi", icon: ClipboardList },
   { id: "akun", label: "Persetujuan Akun", icon: UserCheck },
   { id: "callcenter", label: "Call Center", icon: Headphones },
+  { id: "voucher", label: "Voucher Promo", icon: BadgeCheck },
+  { id: "laporan", label: "Laporan Produk", icon: ShieldAlert },
 ];
 
 function StatCard({
@@ -476,6 +478,8 @@ function PusatPage() {
           {tab === "transaksi" && <Transaksi />}
           {tab === "akun" && <Akun />}
           {tab === "callcenter" && <CallCenter />}
+          {tab === "voucher" && <VoucherAdmin />}
+          {tab === "laporan" && <Laporan />}
         </main>
       </div>
     </div>
