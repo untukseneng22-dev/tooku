@@ -73,13 +73,14 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "dashboard" | "orders" | "products" | "new" | "shipping" | "lifecycle";
+type Tab = "dashboard" | "orders" | "products" | "new" | "promo" | "shipping" | "lifecycle";
 
 const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "orders", label: "Pesanan", icon: ClipboardList },
   { id: "products", label: "Produk", icon: Boxes },
   { id: "new", label: "Tambah Produk", icon: PlusCircle },
+  { id: "promo", label: "Flash Sale", icon: ShoppingBag },
   { id: "shipping", label: "Pengiriman & Bayar", icon: Truck },
   { id: "lifecycle", label: "Siklus Barang", icon: Recycle },
 ];
@@ -197,6 +198,7 @@ function AdminPage() {
               }}
             />
           )}
+          {tab === "promo" && <PromoAdmin />}
           {tab === "shipping" && <ShippingAdmin />}
           {tab === "lifecycle" && <LifecycleAdmin />}
 
