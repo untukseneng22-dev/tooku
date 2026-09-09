@@ -39,13 +39,15 @@ export const Route = createFileRoute("/pusat")({
   component: PusatPage,
 });
 
-type Tab = "monitor" | "transaksi" | "akun" | "callcenter";
+type Tab = "monitor" | "transaksi" | "akun" | "callcenter" | "voucher" | "laporan";
 
 const tabs: { id: Tab; label: string; icon: typeof Activity }[] = [
   { id: "monitor", label: "Pemantauan", icon: Activity },
   { id: "transaksi", label: "Transaksi", icon: ClipboardList },
   { id: "akun", label: "Persetujuan Akun", icon: UserCheck },
   { id: "callcenter", label: "Call Center", icon: Headphones },
+  { id: "voucher", label: "Voucher Promo", icon: BadgeCheck },
+  { id: "laporan", label: "Laporan Produk", icon: ShieldAlert },
 ];
 
 function StatCard({
@@ -398,6 +400,191 @@ function CallCenter() {
   );
 }
 
+/** Kelola voucher promo yang berlaku di seluruh aplikasi. */
+function VoucherAdmin() {
+  const { vouchers, upsertVoucher } = useTooku();
+  const [code, setCode] = useState("");
+  const [kind, setKind] = useState<"nominal" | "percent" | "ongkir">("nominal");
+  const [value, setValue] = useState(5000);
+  const [minSpend, setMinSpend] = useState(0);
+  const [desc, setDesc] = useState("");
+  const [msg, setMsg] = useState("");
+
+  return (
+    <div className="space-y-4">
+      <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
+        <h2 className="text-sm font-bold">Buat Voucher Baru</h2>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <input
+            value={code}
+            onChange={(e) => setCode(e.target.value.toUpperCase())}
+            placeholder="Kode voucher (mis. TOOKU10)"
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm uppercase outline-none focus:border-primary"
+          />
+          <select
+            value={kind}
+            onChange={(e) => setKind(e.target.value as typeof kind)}
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          >
+            <option value="nominal">Potongan nominal (Rp)</option>
+            <option value="percent">Potongan persen (%)</option>
+            <option value="ongkir">Gratis ongkir</option>
+          </select>
+          {kind !== "ongkir" && (
+            <input
+              type="number"
+              value={value}
+              onChange={(e) => setValue(Number(e.target.value))}
+              placeholder={kind === "percent" ? "Persen (1–100)" : "Nominal (Rp)"}
+              className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+          )}
+          <input
+            type="number"
+            value={minSpend}
+            onChange={(e) => setMinSpend(Number(e.target.value))}
+            placeholder="Min. belanja (Rp, 0 = bebas)"
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+          <input
+            value={desc}
+            onChange={(e) => setDesc(e.target.value)}
+            placeholder="Deskripsi singkat"
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary sm:col-span-2"
+          />
+        </div>
+        {msg && <p className="text-[11px] font-semibold text-destructive">{msg}</p>}
+        <button
+          onClick={() => {
+            if (!code.trim()) return setMsg("Kode voucher wajib diisi.");
+            const res = upsertVoucher({
+              code: code.trim().toUpperCase(),
+              kind,
+              value: kind === "ongkir" ? 1 : value,
+              minSpend,
+              desc: desc.trim() || "Voucher promo TOOKU",
+              active: true,
+            });
+            if (res.ok) {
+              setCode("");
+              setDesc("");
+              setMsg("");
+            } else setMsg(res.error ?? "Gagal menyimpan voucher.");
+          }}
+          className="w-full rounded-xl bg-primary py-2.5 text-xs font-bold text-primary-foreground"
+        >
+          Simpan Voucher
+        </button>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-sm font-bold">Daftar Voucher ({vouchers.length})</h2>
+        {vouchers.map((v) => (
+          <div key={v.code} className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-xs font-extrabold tracking-wide">{v.code}</p>
+              <p className="text-[11px] text-muted-foreground">
+                {v.kind === "nominal"
+                  ? `Potongan ${rupiah(v.value)}`
+                  : v.kind === "percent"
+                    ? `Potongan ${v.value}%`
+                    : "Gratis ongkir"}
+                {v.minSpend > 0 ? ` · min. belanja ${rupiah(v.minSpend)}` : ""}
+              </p>
+              <p className="text-[10px] text-muted-foreground">{v.desc}</p>
+            </div>
+            <button
+              onClick={() => upsertVoucher({ ...v, active: !v.active })}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold ${
+                v.active ? "bg-primary/10 text-primary" : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              {v.active ? "Aktif — matikan" : "Nonaktif — hidupkan"}
+            </button>
+          </div>
+        ))}
+      </section>
+    </div>
+  );
+}
+
+/** Moderasi laporan produk dari pembeli. */
+function Laporan() {
+  const { reports, setReportStatus, deleteProduct } = useTooku();
+  const open = reports.filter((r) => r.status !== "selesai");
+  const done = reports.filter((r) => r.status === "selesai");
+
+  const Row = ({ r }: { r: (typeof reports)[number] }) => (
+    <div className="space-y-2 rounded-2xl border border-border bg-card p-3">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0">
+          <p className="truncate text-xs font-bold">{r.productName}</p>
+          <p className="text-[11px] text-muted-foreground">
+            Dilaporkan oleh {r.reporter} · {new Date(r.at).toLocaleDateString("id-ID")}
+          </p>
+        </div>
+        <span
+          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+            r.status === "selesai" ? "bg-primary/10 text-primary" : "bg-accent/20 text-accent-foreground"
+          }`}
+        >
+          {r.status}
+        </span>
+      </div>
+      <p className="rounded-xl bg-secondary/60 p-2 text-[11px] leading-snug">{r.reason}</p>
+      {r.status !== "selesai" && (
+        <div className="flex flex-wrap gap-1.5">
+          <button
+            onClick={() => setReportStatus(r.id, "diproses")}
+            className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground"
+          >
+            Tandai Diproses
+          </button>
+          <button
+            onClick={() => setReportStatus(r.id, "selesai")}
+            className="rounded-full bg-primary px-2.5 py-1 text-[10px] font-bold text-primary-foreground"
+          >
+            Selesai — Barang Aman
+          </button>
+          <button
+            onClick={() => {
+              deleteProduct(r.productId);
+              setReportStatus(r.id, "selesai");
+            }}
+            className="rounded-full border border-destructive/30 px-2.5 py-1 text-[10px] font-bold text-destructive"
+          >
+            Hapus Produk
+          </button>
+        </div>
+      )}
+    </div>
+  );
+
+  return (
+    <div className="space-y-4">
+      <section className="space-y-2">
+        <h2 className="text-sm font-bold">Perlu Ditindaklanjuti ({open.length})</h2>
+        {open.length === 0 && (
+          <p className="rounded-2xl border border-border bg-card p-4 text-xs text-muted-foreground">
+            Tidak ada laporan produk yang menunggu tindakan.
+          </p>
+        )}
+        {open.map((r) => (
+          <Row key={r.id} r={r} />
+        ))}
+      </section>
+      {done.length > 0 && (
+        <section className="space-y-2">
+          <h2 className="text-sm font-bold">Riwayat Selesai ({done.length})</h2>
+          {done.map((r) => (
+            <Row key={r.id} r={r} />
+          ))}
+        </section>
+      )}
+    </div>
+  );
+}
+
 function PusatPage() {
   const { user, isSuperAdmin, logout, pendingUsers } = useTooku();
   const navigate = useNavigate();
@@ -476,6 +663,8 @@ function PusatPage() {
           {tab === "transaksi" && <Transaksi />}
           {tab === "akun" && <Akun />}
           {tab === "callcenter" && <CallCenter />}
+          {tab === "voucher" && <VoucherAdmin />}
+          {tab === "laporan" && <Laporan />}
         </main>
       </div>
     </div>
