@@ -199,10 +199,13 @@ export function BottomNav() {
         {navItems.map((item) => {
           const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
           const showBadge = item.to === "/keranjang" && cartCount > 0;
+          // Notifikasi hanya untuk akun terdaftar: arahkan ke halaman masuk.
+          const target = item.to === "/notifikasi" && !user ? "/auth" : item.to;
           return (
             <Link
               key={item.to}
-              to={item.to}
+              to={target}
+
               className={`group relative flex flex-col items-center gap-1 rounded-2xl py-2 text-[10px] font-semibold transition-all duration-200 ${
                 active ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
