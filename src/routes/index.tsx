@@ -60,6 +60,10 @@ function Home() {
     .filter((p): p is NonNullable<typeof p> => Boolean(p))
     .slice(0, 8);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Bagian cuci gudang bergantung pada tanggal berjalan: render hanya di browser.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
 
   const cartCount = cart.reduce((n, l) => n + l.qty, 0);
   const popular = ["seragam putih", "rok abu", "dasi navy", "buku kelas XI", "kotak pensil", "topi sekolah"];
