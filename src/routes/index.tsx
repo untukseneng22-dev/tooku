@@ -11,7 +11,7 @@ import {
   Clock,
   X as XIcon,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTooku } from "@/lib/tooku-store";
 import { isSellable, isClearance, lifecyclePrice } from "@/lib/tooku-lifecycle";
 import { categories, schools, schoolById, type Category, type SchoolLevel } from "@/lib/tooku-data";
