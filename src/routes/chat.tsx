@@ -3,6 +3,8 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, MessageCircle, Search, Send, Store } from "lucide-react";
 import { schools } from "@/lib/tooku-data";
 import { useTooku } from "@/lib/tooku-store";
+import { LoginGate } from "@/components/tooku/login-gate";
+
 
 export const Route = createFileRoute("/chat")({
   validateSearch: (
@@ -124,8 +126,17 @@ function ChatPage() {
     return list.filter((s) => s.toLowerCase().includes(q.trim().toLowerCase()));
   }, [isAdmin, isSuperAdmin, users, user, threads, q, products]);
 
+  if (!user)
+    return (
+      <LoginGate
+        title="Chat"
+        desc="Chat dengan koperasi sekolah dan call center TOOKU hanya untuk akun yang sudah masuk atau mendaftar."
+      />
+    );
+
   const active = penjual ?? null;
   const messages = (active && threads[active]) || [];
+
 
   function send() {
     const text = draft.trim();
