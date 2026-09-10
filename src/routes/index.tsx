@@ -359,7 +359,7 @@ function Home() {
         <FlashSaleSection />
 
         {/* Cuci Gudang — diskon otomatis barang lama tayang */}
-        {clearance.length > 0 && (
+        {mounted && clearance.length > 0 && (
           <section>
             <div className="mb-3 flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-destructive" />
