@@ -2,6 +2,8 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Bell, MessageCircle, ShieldCheck, Package, Tag, Clock } from "lucide-react";
 import { useTooku } from "@/lib/tooku-store";
+import { LoginGate } from "@/components/tooku/login-gate";
+
 
 export const Route = createFileRoute("/notifikasi")({
   head: () => ({
@@ -110,6 +112,15 @@ function NotifikasiPage() {
     () => mine.filter((n) => (filter === "semua" ? true : filter === "belum" ? !n.read : n.kind === filter)),
     [mine, filter],
   );
+
+  if (!user)
+    return (
+      <LoginGate
+        title="Notifikasi"
+        desc="Notifikasi status pesanan, promo, dan info koperasi hanya tersedia untuk akun yang sudah masuk."
+      />
+    );
+
 
   const filters: { key: typeof filter; label: string }[] = [
     { key: "semua", label: "Semua" },

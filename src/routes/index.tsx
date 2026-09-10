@@ -11,7 +11,7 @@ import {
   Clock,
   X as XIcon,
 } from "lucide-react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTooku } from "@/lib/tooku-store";
 import { isSellable, isClearance, lifecyclePrice } from "@/lib/tooku-lifecycle";
 import { categories, schools, schoolById, type Category, type SchoolLevel } from "@/lib/tooku-data";
@@ -41,7 +41,7 @@ export const Route = createFileRoute("/")({
 });
 
 function Home() {
-  const { products: allProducts, cart } = useTooku();
+  const { products: allProducts, cart, user } = useTooku();
   // Barang yang sudah masuk fase donasi / daur ulang tidak lagi dijual.
   const products = allProducts.filter((p) => isSellable(p));
   const [query, setQuery] = useState("");
@@ -60,6 +60,10 @@ function Home() {
     .filter((p): p is NonNullable<typeof p> => Boolean(p))
     .slice(0, 8);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Bagian cuci gudang bergantung pada tanggal berjalan: render hanya di browser.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
 
   const cartCount = cart.reduce((n, l) => n + l.qty, 0);
   const popular = ["seragam putih", "rok abu", "dasi navy", "buku kelas XI", "kotak pensil", "topi sekolah"];
@@ -169,12 +173,13 @@ function Home() {
               )}
             </Link>
             <Link
-              to="/chat"
-              aria-label="Chat penjual"
+              to={user ? "/chat" : "/auth"}
+              aria-label={user ? "Chat penjual" : "Masuk untuk chat penjual"}
               className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15"
             >
               <MessageCircle className="h-[18px] w-[18px]" />
             </Link>
+
           </div>
 
           {focused && (
@@ -354,7 +359,7 @@ function Home() {
         <FlashSaleSection />
 
         {/* Cuci Gudang — diskon otomatis barang lama tayang */}
-        {clearance.length > 0 && (
+        {mounted && clearance.length > 0 && (
           <section>
             <div className="mb-3 flex items-center gap-2">
               <TrendingUp className="h-4 w-4 text-destructive" />

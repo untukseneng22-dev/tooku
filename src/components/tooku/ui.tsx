@@ -185,12 +185,13 @@ const navItems = [
 
 export function BottomNav() {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const { cart, isSuperAdmin } = useTooku();
+  const { cart, isSuperAdmin, user } = useTooku();
   // Admin Pusat memakai konsol sendiri, bukan navigasi pembeli.
   if (isSuperAdmin) return null;
   if (pathname.startsWith("/admin") || pathname.startsWith("/pusat") || pathname.startsWith("/auth")) return null;
 
   const cartCount = cart.reduce((s, l) => s + l.qty, 0);
+
 
   return (
     <nav className="fixed inset-x-0 bottom-0 z-50 border-t border-border bg-card/90 pb-[env(safe-area-inset-bottom)] backdrop-blur-xl">
@@ -198,10 +199,13 @@ export function BottomNav() {
         {navItems.map((item) => {
           const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
           const showBadge = item.to === "/keranjang" && cartCount > 0;
+          // Notifikasi hanya untuk akun terdaftar: arahkan ke halaman masuk.
+          const target = item.to === "/notifikasi" && !user ? "/auth" : item.to;
           return (
             <Link
               key={item.to}
-              to={item.to}
+              to={target}
+
               className={`group relative flex flex-col items-center gap-1 rounded-2xl py-2 text-[10px] font-semibold transition-all duration-200 ${
                 active ? "text-primary" : "text-muted-foreground hover:text-foreground"
               }`}
