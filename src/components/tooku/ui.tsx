@@ -40,6 +40,37 @@ export function ProductThumb({ product, className = "" }: { product: Product; cl
   );
 }
 
+/** Empty state ramah dengan ikon besar dan ajakan bertindak. */
+export function EmptyState({
+  icon: Icon,
+  title,
+  desc,
+  cta,
+}: {
+  icon: typeof Heart;
+  title: string;
+  desc: string;
+  cta?: { to: string; label: string };
+}) {
+  return (
+    <div className="animate-fade-up rounded-2xl border border-dashed border-border bg-card p-8 text-center">
+      <span className="mx-auto grid h-16 w-16 place-items-center rounded-3xl bg-primary/10 text-primary">
+        <Icon className="h-7 w-7" />
+      </span>
+      <p className="mt-4 text-sm font-bold">{title}</p>
+      <p className="mx-auto mt-1 max-w-xs text-[12px] leading-relaxed text-muted-foreground">{desc}</p>
+      {cta && (
+        <Link
+          to={cta.to}
+          className="mt-5 inline-block rounded-full bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground transition-transform active:scale-95"
+        >
+          {cta.label}
+        </Link>
+      )}
+    </div>
+  );
+}
+
 export function CuratedBadge({ small = false }: { small?: boolean }) {
   return (
     <span
@@ -103,16 +134,18 @@ export function ProductCard({ product }: { product: Product }) {
   const loved = wishlist.includes(product.id);
 
   return (
-    <div className="relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-shadow hover:shadow-md">
+    <div className="group/card relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]">
       <button
         onClick={(e) => {
           e.preventDefault();
           toggleWishlist(product.id);
         }}
         aria-label={loved ? "Hapus dari favorit" : "Simpan ke favorit"}
-        className="absolute right-1.5 top-1.5 z-10 grid h-7 w-7 place-items-center rounded-full bg-card/85 backdrop-blur"
+        className="absolute right-1.5 top-1.5 z-10 grid h-7 w-7 place-items-center rounded-full bg-card/85 shadow-sm backdrop-blur transition-transform active:scale-90"
       >
-        <Heart className={`h-4 w-4 ${loved ? "fill-destructive text-destructive" : "text-muted-foreground"}`} />
+        <Heart
+          className={`h-4 w-4 transition-all ${loved ? "animate-heart-pop fill-destructive text-destructive" : "text-muted-foreground"}`}
+        />
       </button>
       <Link to="/produk/$id" params={{ id: product.id }} className="block">
         <div className="relative aspect-square overflow-hidden">
@@ -217,7 +250,10 @@ export function BottomNav() {
               >
                 <item.icon className={`h-5 w-5 ${active ? "stroke-[2.4]" : ""}`} />
                 {showBadge && (
-                  <span className="absolute -right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground shadow">
+                  <span
+                    key={cartCount}
+                    className="animate-badge-pulse absolute -right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground shadow"
+                  >
                     {cartCount}
                   </span>
                 )}

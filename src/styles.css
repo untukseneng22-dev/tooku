@@ -172,3 +172,77 @@
     scrollbar-width: none;
   }
 }
+
+/* Animasi halus khas TOOKU */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes heart-pop {
+  0% {
+    transform: scale(0.4);
+  }
+  60% {
+    transform: scale(1.25);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: -200px 0;
+  }
+  to {
+    background-position: 200px 0;
+  }
+}
+
+@keyframes badge-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.15);
+  }
+}
+
+@layer utilities {
+  .animate-fade-up {
+    animation: fade-up 0.45s ease-out both;
+  }
+  .animate-heart-pop {
+    animation: heart-pop 0.3s ease-out;
+  }
+  .animate-badge-pulse {
+    animation: badge-pulse 0.5s ease-out;
+  }
+  .skeleton {
+    background: linear-gradient(
+      90deg,
+      var(--color-muted) 25%,
+      var(--color-secondary) 37%,
+      var(--color-muted) 63%
+    );
+    background-size: 400px 100%;
+    animation: shimmer 1.3s ease-in-out infinite;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-fade-up,
+  .animate-heart-pop,
+  .animate-badge-pulse,
+  .skeleton {
+    animation: none;
+  }
+}

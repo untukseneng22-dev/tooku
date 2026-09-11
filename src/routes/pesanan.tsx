@@ -1,9 +1,11 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { Ticket, MapPin, Check, Clock, Wallet, Store, XCircle, Truck, Copy, Star } from "lucide-react";
+import { Ticket, MapPin, Check, Clock, Wallet, Store, XCircle, Truck, Copy, Star, ClipboardList } from "lucide-react";
 import { useState } from "react";
 import { useTooku, useCountdown, flowFor, isFinalStatus, type Order } from "@/lib/tooku-store";
 import { rupiah, schoolById } from "@/lib/tooku-data";
 import { zoneEta, zoneLabel } from "@/lib/tooku-shipping";
+import { LoginGate } from "@/components/tooku/login-gate";
+import { EmptyState } from "@/components/tooku/ui";
 
 /** Form ulasan bintang untuk satu barang dalam pesanan selesai. */
 function ReviewBox({ order, productId, name }: { order: Order; productId: string; name: string }) {
@@ -307,6 +309,13 @@ function OrderCard({ order }: { order: Order }) {
 
 function OrdersPage() {
   const { myOrders, user } = useTooku();
+  if (!user)
+    return (
+      <LoginGate
+        title="Pesanan Saya"
+        desc="Masuk untuk memantau status pesanan, kode pengambilan, dan batas waktu ambil barangmu."
+      />
+    );
   return (
     <div className="min-h-screen bg-background pb-24">
       <header className="border-b border-border bg-primary px-4 py-5 text-primary-foreground">
@@ -314,23 +323,13 @@ function OrdersPage() {
         <p className="text-xs opacity-80">Booking · Diproses · Siap Diambil · Selesai</p>
       </header>
       <div className="mx-auto max-w-2xl space-y-3 p-4">
-        {!user ? (
-          <div className="py-16 text-center">
-            <p className="text-sm text-muted-foreground">Masuk untuk melihat pesananmu.</p>
-            <Link
-              to="/auth"
-              className="mt-4 inline-block rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground"
-            >
-              Masuk / Daftar
-            </Link>
-          </div>
-        ) : myOrders.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-sm text-muted-foreground">Belum ada pesanan.</p>
-            <Link to="/" className="mt-3 inline-block font-semibold text-primary">
-              Mulai belanja
-            </Link>
-          </div>
+        {myOrders.length === 0 ? (
+          <EmptyState
+            icon={ClipboardList}
+            title="Belum ada pesanan"
+            desc="Barang yang kamu booking akan muncul di sini lengkap dengan statusnya."
+            cta={{ to: "/", label: "Mulai belanja" }}
+          />
         ) : (
           myOrders.map((o) => <OrderCard key={o.id} order={o} />)
         )}
