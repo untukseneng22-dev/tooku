@@ -250,7 +250,10 @@ export function BottomNav() {
               >
                 <item.icon className={`h-5 w-5 ${active ? "stroke-[2.4]" : ""}`} />
                 {showBadge && (
-                  <span className="absolute -right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground shadow">
+                  <span
+                    key={cartCount}
+                    className="animate-badge-pulse absolute -right-0.5 top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground shadow"
+                  >
                     {cartCount}
                   </span>
                 )}

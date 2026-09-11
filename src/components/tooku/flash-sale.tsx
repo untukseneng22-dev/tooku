@@ -26,7 +26,11 @@ export function useCountdownTo(endsAt: number) {
 }
 
 function TimeBox({ v }: { v: string }) {
-  return <span className="rounded-md bg-destructive px-1.5 py-0.5 text-[11px] font-bold text-destructive-foreground">{v}</span>;
+  return (
+    <span className="min-w-7 rounded-lg bg-primary px-1.5 py-1 text-center text-[12px] font-extrabold tabular-nums text-primary-foreground shadow-sm">
+      {v}
+    </span>
+  );
 }
 
 export function FlashSaleSection() {
@@ -43,26 +47,30 @@ export function FlashSaleSection() {
 
   return (
     <section>
-      <div className="mb-3 flex items-center gap-2">
-        <Zap className="h-4 w-4 text-destructive" />
-        <h2 className="text-sm font-bold">{sale.title}</h2>
-        <span className="ml-auto flex items-center gap-1">
+      <div className="mb-3 flex items-center gap-2 rounded-2xl bg-gradient-to-r from-accent via-accent to-chart-5 px-3.5 py-2.5 shadow-sm">
+        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-primary/90 text-accent">
+          <Zap className="h-4 w-4 fill-current" />
+        </span>
+        <div className="min-w-0 flex-1">
+          <h2 className="truncate text-sm font-extrabold text-accent-foreground">{sale.title}</h2>
+          <p className="text-[10px] font-semibold text-accent-foreground/80">
+            Diskon ekstra {sale.discountPct}% · stok terbatas
+          </p>
+        </div>
+        <span className="flex shrink-0 items-center gap-1">
           {countdown ? (
             <>
               <TimeBox v={countdown.jam} />
-              <span className="text-[11px] font-bold text-destructive">:</span>
+              <span className="text-xs font-extrabold text-accent-foreground">:</span>
               <TimeBox v={countdown.menit} />
-              <span className="text-[11px] font-bold text-destructive">:</span>
+              <span className="text-xs font-extrabold text-accent-foreground">:</span>
               <TimeBox v={countdown.detik} />
             </>
           ) : (
-            <span className="text-[10px] font-semibold text-muted-foreground">Berlangsung</span>
+            <span className="text-[10px] font-bold text-accent-foreground">Berlangsung</span>
           )}
         </span>
       </div>
-      <p className="mb-2 text-[11px] text-muted-foreground">
-        Diskon tambahan {sale.discountPct}% selama waktu berjalan. Stok terbatas, satu barang satu pembeli.
-      </p>
       <HScroll className="gap-3 pb-1">
         {items.map((p) => (
           <div key={p.id} className="w-36 shrink-0">
