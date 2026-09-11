@@ -126,13 +126,7 @@ function ChatPage() {
     return list.filter((s) => s.toLowerCase().includes(q.trim().toLowerCase()));
   }, [isAdmin, isSuperAdmin, users, user, threads, q, products]);
 
-  if (!user)
-    return (
-      <LoginGate
-        title="Chat"
-        desc="Chat dengan koperasi sekolah dan call center TOOKU hanya untuk akun yang sudah masuk atau mendaftar."
-      />
-    );
+  if (!user) return <Navigate to="/auth" replace />;
 
   const active = penjual ?? null;
   const messages = (active && threads[active]) || [];

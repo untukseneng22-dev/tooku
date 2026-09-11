@@ -309,13 +309,7 @@ function OrderCard({ order }: { order: Order }) {
 
 function OrdersPage() {
   const { myOrders, user } = useTooku();
-  if (!user)
-    return (
-      <LoginGate
-        title="Pesanan Saya"
-        desc="Masuk untuk memantau status pesanan, kode pengambilan, dan batas waktu ambil barangmu."
-      />
-    );
+  if (!user) return <Navigate to="/auth" replace />;
   return (
     <div className="min-h-screen bg-background pb-24">
       <header className="border-b border-border bg-primary px-4 py-5 text-primary-foreground">

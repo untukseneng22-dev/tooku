@@ -20,13 +20,7 @@ function FavoritPage() {
   const { wishlist, products, user } = useTooku();
   const items = products.filter((p) => wishlist.includes(p.id));
 
-  if (!user)
-    return (
-      <LoginGate
-        title="Favorit Saya"
-        desc="Masuk untuk menyimpan barang incaran dan memantau harga barang favoritmu."
-      />
-    );
+  if (!user) return <Navigate to="/auth" replace />;
 
   return (
     <div className="min-h-screen bg-background pb-24">

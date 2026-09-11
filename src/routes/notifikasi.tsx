@@ -114,13 +114,7 @@ function NotifikasiPage() {
     [mine, filter],
   );
 
-  if (!user)
-    return (
-      <LoginGate
-        title="Notifikasi"
-        desc="Notifikasi status pesanan, promo, dan info koperasi hanya tersedia untuk akun yang sudah masuk."
-      />
-    );
+  if (!user) return <Navigate to="/auth" replace />;
 
 
   const filters: { key: typeof filter; label: string }[] = [
