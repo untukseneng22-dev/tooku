@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { Bell, MessageCircle, ShieldCheck, Package, Tag, Clock } from "lucide-react";
 import { useTooku } from "@/lib/tooku-store";
 import { LoginGate } from "@/components/tooku/login-gate";
+import { EmptyState } from "@/components/tooku/ui";
 
 
 export const Route = createFileRoute("/notifikasi")({
@@ -178,7 +179,11 @@ function NotifikasiPage() {
 
         <div className="mt-3 space-y-2.5">
           {shown.length === 0 ? (
-            <p className="py-12 text-center text-sm text-muted-foreground">Tidak ada notifikasi di filter ini.</p>
+            <EmptyState
+              icon={Bell}
+              title="Belum ada notifikasi"
+              desc="Kabar pesanan, promo, dan info koperasi akan muncul di sini."
+            />
           ) : (
             shown.map((n) => {
               const Icon = kindMeta[n.kind].icon;
