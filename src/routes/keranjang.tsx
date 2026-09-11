@@ -13,6 +13,7 @@ import {
   Truck,
   PackageCheck,
   MapPin,
+  ShoppingCart,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useTooku, type Order, type PaymentMethod, type Fulfillment } from "@/lib/tooku-store";
@@ -27,7 +28,8 @@ import {
   type Courier,
 } from "@/lib/tooku-shipping";
 import { voucherDiscount } from "@/lib/tooku-extras";
-import { ProductThumb } from "@/components/tooku/ui";
+import { ProductThumb, EmptyState } from "@/components/tooku/ui";
+import { LoginGate } from "@/components/tooku/login-gate";
 
 export const Route = createFileRoute("/keranjang")({
   head: () => ({
@@ -175,6 +177,15 @@ function CartPage() {
     else setError("Checkout gagal. Pastikan keranjang tidak kosong dan data pengiriman lengkap.");
   }
 
+  // Keranjang & checkout khusus akun terdaftar — kunci dengan tampilan yang sama.
+  if (!user)
+    return (
+      <LoginGate
+        title="Keranjang & Checkout"
+        desc="Masuk untuk menyimpan barang ke keranjang, mengatur pengiriman, dan memesan barang koperasi."
+      />
+    );
+
   if (done) {
     const delivered = done.fulfillment === "delivery";
     return (
@@ -248,12 +259,12 @@ function CartPage() {
 
       <div className="mx-auto max-w-2xl space-y-4 p-4">
         {lines.length === 0 ? (
-          <div className="py-16 text-center">
-            <p className="text-sm text-muted-foreground">Keranjang masih kosong.</p>
-            <Link to="/" className="mt-3 inline-block font-semibold text-primary">
-              Cari barang terkurasi
-            </Link>
-          </div>
+          <EmptyState
+            icon={ShoppingCart}
+            title="Keranjang masih kosong"
+            desc="Semua barang yang kamu pilih akan terkumpul di sini sebelum dipesan."
+            cta={{ to: "/", label: "Cari barang terkurasi" }}
+          />
         ) : (
           <>
             {lines.map(({ line, product }) => (
