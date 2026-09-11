@@ -1,7 +1,8 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { ArrowLeft, Heart } from "lucide-react";
 import { useTooku } from "@/lib/tooku-store";
-import { ProductCard, BottomNav } from "@/components/tooku/ui";
+import { ProductCard, BottomNav, EmptyState } from "@/components/tooku/ui";
+import { LoginGate } from "@/components/tooku/login-gate";
 
 export const Route = createFileRoute("/favorit")({
   head: () => ({
@@ -16,8 +17,16 @@ export const Route = createFileRoute("/favorit")({
 });
 
 function FavoritPage() {
-  const { wishlist, products } = useTooku();
+  const { wishlist, products, user } = useTooku();
   const items = products.filter((p) => wishlist.includes(p.id));
+
+  if (!user)
+    return (
+      <LoginGate
+        title="Favorit Saya"
+        desc="Masuk untuk menyimpan barang incaran dan memantau harga barang favoritmu."
+      />
+    );
 
   return (
     <div className="min-h-screen bg-background pb-24">
@@ -31,23 +40,18 @@ function FavoritPage() {
 
       <main className="mx-auto max-w-2xl px-4 py-4">
         {items.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border bg-card p-8 text-center">
-            <Heart className="mx-auto h-8 w-8 text-muted-foreground" />
-            <p className="mt-3 text-sm font-semibold">Belum ada barang favorit</p>
-            <p className="mt-1 text-xs text-muted-foreground">
-              Tekan ikon hati di kartu barang untuk menyimpannya di sini.
-            </p>
-            <Link
-              to="/"
-              className="mt-4 inline-block rounded-xl bg-primary px-5 py-2.5 text-sm font-bold text-primary-foreground"
-            >
-              Mulai jelajahi
-            </Link>
-          </div>
+          <EmptyState
+            icon={Heart}
+            title="Belum ada barang favorit"
+            desc="Tekan ikon hati di kartu barang untuk menyimpannya di sini."
+            cta={{ to: "/", label: "Mulai jelajahi" }}
+          />
         ) : (
           <div className="grid grid-cols-2 gap-3">
-            {items.map((p) => (
-              <ProductCard key={p.id} product={p} />
+            {items.map((p, i) => (
+              <div key={p.id} className="animate-fade-up" style={{ animationDelay: `${Math.min(i, 8) * 60}ms` }}>
+                <ProductCard product={p} />
+              </div>
             ))}
           </div>
         )}
