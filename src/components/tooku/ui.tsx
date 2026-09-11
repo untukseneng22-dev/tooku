@@ -232,8 +232,8 @@ export function BottomNav() {
         {navItems.map((item) => {
           const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
           const showBadge = item.to === "/keranjang" && cartCount > 0;
-          // Notifikasi hanya untuk akun terdaftar: arahkan ke halaman masuk.
-          const target = item.to === "/notifikasi" && !user ? "/auth" : item.to;
+          // Semua menu akun hanya untuk yang sudah login: arahkan ke halaman masuk.
+          const target = item.to !== "/" && !user ? "/auth" : item.to;
           return (
             <Link
               key={item.to}
