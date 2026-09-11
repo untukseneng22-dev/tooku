@@ -178,13 +178,7 @@ function CartPage() {
   }
 
   // Keranjang & checkout khusus akun terdaftar — kunci dengan tampilan yang sama.
-  if (!user)
-    return (
-      <LoginGate
-        title="Keranjang & Checkout"
-        desc="Masuk untuk menyimpan barang ke keranjang, mengatur pengiriman, dan memesan barang koperasi."
-      />
-    );
+  if (!user) return <Navigate to="/auth" replace />;
 
   if (done) {
     const delivered = done.fulfillment === "delivery";

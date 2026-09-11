@@ -29,14 +29,7 @@ function ProfilePage() {
     .join("")
     .toUpperCase();
 
-  if (!user) {
-    return (
-      <LoginGate
-        title="Profil"
-        desc="Masuk untuk melihat profil, poin TOOKU, riwayat pesanan, dan mengelola akunmu."
-      />
-    );
-  }
+  if (!user) return <Navigate to="/auth" replace />;
 
   if (isSuperAdmin) {
     return (
