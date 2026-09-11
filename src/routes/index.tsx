@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTooku } from "@/lib/tooku-store";
 import { isSellable, isClearance, lifecyclePrice } from "@/lib/tooku-lifecycle";
 import { categories, schools, schoolById, type Category, type SchoolLevel } from "@/lib/tooku-data";
-import { ProductCard } from "@/components/tooku/ui";
+import { ProductCard, EmptyState } from "@/components/tooku/ui";
 import { PromoCarousel } from "@/components/tooku/promo-carousel";
 import { FlashSaleSection } from "@/components/tooku/flash-sale";
 import { useRecentlyViewed, useSearchHistory } from "@/lib/tooku-recent";
@@ -515,12 +515,36 @@ function Home() {
               </button>
             </div>
           )}
-          {filtered.length === 0 ? (
-            <p className="py-10 text-center text-sm text-muted-foreground">Barang tidak ditemukan.</p>
+          {!mounted ? (
+            <div className="grid grid-cols-2 gap-3" aria-hidden>
+              {Array.from({ length: 6 }).map((_, i) => (
+                <div key={i} className="overflow-hidden rounded-2xl border border-border bg-card">
+                  <div className="skeleton aspect-square" />
+                  <div className="space-y-2 p-2.5">
+                    <div className="skeleton h-3 rounded-full" />
+                    <div className="skeleton h-3 w-2/3 rounded-full" />
+                    <div className="skeleton h-4 w-1/2 rounded-full" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : filtered.length === 0 ? (
+            <EmptyState
+              icon={Search}
+              title="Barang tidak ditemukan"
+              desc="Coba kata kunci lain atau longgarkan filter harga dan kondisi."
+              cta={{ to: "/", label: "Lihat semua barang" }}
+            />
           ) : (
             <div className="grid grid-cols-2 gap-3">
-              {filtered.map((p) => (
-                <ProductCard key={p.id} product={p} />
+              {filtered.map((p, i) => (
+                <div
+                  key={p.id}
+                  className="animate-fade-up"
+                  style={{ animationDelay: `${Math.min(i, 10) * 55}ms` }}
+                >
+                  <ProductCard product={p} />
+                </div>
               ))}
             </div>
           )}
