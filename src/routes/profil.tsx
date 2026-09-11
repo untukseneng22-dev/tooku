@@ -1,6 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, LogIn, Store, Heart, Star, HelpCircle } from "lucide-react";
+import { ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, Store, Heart, Star, HelpCircle } from "lucide-react";
 import { useTooku, roleLabel } from "@/lib/tooku-store";
+import { LoginGate } from "@/components/tooku/login-gate";
 import { rupiah } from "@/lib/tooku-data";
 import { InstallAppCard } from "@/components/tooku/install-prompt";
 
@@ -30,25 +31,10 @@ function ProfilePage() {
 
   if (!user) {
     return (
-      <div className="min-h-screen bg-background pb-24">
-        <header className="bg-primary px-4 pb-10 pt-6 text-primary-foreground">
-          <h1 className="text-lg font-bold">Profil</h1>
-          <p className="text-xs opacity-80">Masuk untuk memesan dan memantau pesanan</p>
-        </header>
-        <div className="mx-auto -mt-5 max-w-2xl space-y-4 px-4">
-          <div className="rounded-2xl border border-border bg-card p-5 text-center">
-            <LogIn className="mx-auto h-8 w-8 text-primary" />
-            <p className="mt-3 text-sm text-muted-foreground">Belum masuk ke akun TOOKU.</p>
-            <Link
-              to="/auth"
-              className="mt-4 inline-block rounded-xl bg-primary px-5 py-3 text-sm font-bold text-primary-foreground"
-            >
-              Masuk / Daftar
-            </Link>
-          </div>
-          <InstallAppCard />
-        </div>
-      </div>
+      <LoginGate
+        title="Profil"
+        desc="Masuk untuk melihat profil, poin TOOKU, riwayat pesanan, dan mengelola akunmu."
+      />
     );
   }
 
