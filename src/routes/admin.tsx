@@ -90,9 +90,16 @@ const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
 
 
 function AdminPage() {
-  const { user, isAdmin, isSuperAdmin } = useTooku();
+  const { user, isAdmin, isSuperAdmin, logout } = useTooku();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("dashboard");
   const [editId, setEditId] = useState<string | null>(null);
+  const mySchoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
+  const mySchool = schoolById(mySchoolId);
+  const handleLogout = () => {
+    logout();
+    navigate({ to: "/", replace: true });
+  };
 
   // Admin Pusat punya konsol tersendiri.
   if (isSuperAdmin) {
