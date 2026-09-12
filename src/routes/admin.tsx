@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type ChangeEvent } from "react";
 import {
   ArrowLeft,
@@ -52,11 +52,14 @@ import {
   categories,
   rupiah,
   schools,
+  schoolById,
   schoolIdForAccount,
   specTemplates,
   type Category,
 } from "@/lib/tooku-data";
 import { ProductThumb } from "@/components/tooku/ui";
+import logoAsset from "@/assets/tooku-logo.png.asset.json";
+import { LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -87,9 +90,16 @@ const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
 
 
 function AdminPage() {
-  const { user, isAdmin, isSuperAdmin } = useTooku();
+  const { user, isAdmin, isSuperAdmin, logout } = useTooku();
+  const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("dashboard");
   const [editId, setEditId] = useState<string | null>(null);
+  const mySchoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
+  const mySchool = schoolById(mySchoolId);
+  const handleLogout = () => {
+    logout();
+    navigate({ to: "/", replace: true });
+  };
 
   // Admin Pusat punya konsol tersendiri.
   if (isSuperAdmin) {
@@ -135,26 +145,43 @@ function AdminPage() {
 
   return (
     <div className="min-h-screen bg-secondary/40">
-      <header className="bg-primary text-primary-foreground">
-        <div className="mx-auto grid max-w-6xl grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 px-4 py-4">
-          <Link to="/" aria-label="Kembali ke aplikasi siswa">
-            <ArrowLeft className="h-5 w-5" />
+      <header className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-md">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-4">
+          <Link to="/" aria-label="Kembali ke aplikasi siswa" className="shrink-0">
+            <img
+              src={logoAsset.url}
+              alt="Logo TOOKU"
+              className="h-11 w-11 rounded-xl bg-white object-contain p-1 shadow-sm"
+            />
           </Link>
-          <div className="min-w-0">
-            <p className="truncate text-sm font-bold">
-              Admin Koperasi TOOKU
-            </p>
+          <div className="min-w-0 flex-1">
+            <div className="flex items-center gap-2">
+              <p className="truncate text-sm font-bold sm:text-base">
+                {mySchool?.koperasi ?? "Admin Koperasi TOOKU"}
+              </p>
+              {mySchool && (
+                <span className="hidden shrink-0 rounded-full bg-accent px-2 py-0.5 text-[9px] font-bold text-accent-foreground sm:inline-block">
+                  {mySchool.level}
+                </span>
+              )}
+            </div>
             <p className="truncate text-[11px] opacity-80">
-              {user?.name} · @{user?.username}
+              {mySchool ? `${mySchool.name} · ${mySchool.district}` : "Dashboard Koperasi"} — {user?.name} · @{user?.username}
             </p>
           </div>
           <div className="flex shrink-0 items-center gap-2">
             <Link
               to="/"
-              className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold"
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold transition hover:bg-primary-foreground/25"
             >
               <ShoppingBag className="h-3.5 w-3.5" /> Belanja
             </Link>
+            <button
+              onClick={handleLogout}
+              className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground px-3 py-1.5 text-[11px] font-bold text-primary shadow-sm transition hover:bg-accent hover:text-accent-foreground"
+            >
+              <LogOut className="h-3.5 w-3.5" /> Keluar
+            </button>
           </div>
         </div>
       </header>
