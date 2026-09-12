@@ -51,6 +51,7 @@ export type User = {
   password: string;
   role: Role;
   kelas?: string;
+  avatar?: string;
   status: AccountStatus;
   registeredAt: number;
   note?: string;
@@ -349,6 +350,8 @@ type Store = {
   pendingUsers: User[];
   approveUser: (id: string) => void;
   rejectUser: (id: string, note?: string) => void;
+  updateProfile: (input: { name: string; email: string; avatar?: string }) => { ok: boolean; error?: string };
+  changePassword: (oldPassword: string, newPassword: string) => { ok: boolean; error?: string };
   logout: () => void;
   addToCart: (id: string, qty?: number) => void;
   removeFromCart: (id: string) => void;
