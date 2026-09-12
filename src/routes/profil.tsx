@@ -1,7 +1,12 @@
+import { useRef, useState } from "react";
 import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
-import { ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, Store, Heart, Star, HelpCircle } from "lucide-react";
-import { useTooku, roleLabel } from "@/lib/tooku-store";
+import {
+  ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, Store, Heart, Star,
+  HelpCircle, Camera, KeyRound, CheckCircle2, AlertCircle, Pencil,
+} from "lucide-react";
+import { useTooku, roleLabel, type User } from "@/lib/tooku-store";
 import { rupiah } from "@/lib/tooku-data";
+import { compressImage } from "@/lib/image-compress";
 import { InstallAppCard } from "@/components/tooku/install-prompt";
 
 export const Route = createFileRoute("/profil")({
@@ -35,9 +40,7 @@ function ProfilePage() {
       <div className="min-h-screen bg-secondary/40">
         <header className="bg-primary px-4 pb-10 pt-6 text-primary-foreground">
           <div className="mx-auto flex max-w-2xl items-center gap-3">
-            <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-primary-foreground/15 text-lg font-extrabold">
-              {initials}
-            </div>
+            <AvatarBox user={user} initials={initials} tone="light" />
             <div className="min-w-0">
               <p className="truncate text-base font-bold">{user.name}</p>
               <p className="truncate text-xs opacity-80">@{user.username} · Admin Pusat TOOKU</p>
@@ -96,9 +99,7 @@ function ProfilePage() {
     <div className="min-h-screen bg-background pb-24">
       <header className="bg-primary px-4 pb-8 pt-6 text-primary-foreground">
         <div className="flex items-center gap-3">
-          <div className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-accent text-lg font-extrabold text-accent-foreground">
-            {initials}
-          </div>
+          <AvatarBox user={user} initials={initials} tone="accent" />
           <div className="min-w-0">
             <p className="truncate text-base font-bold">{user.name}</p>
             <p className="truncate text-xs opacity-80">
