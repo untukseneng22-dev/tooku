@@ -1,9 +1,8 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, MessageCircle, Search, Send, Store } from "lucide-react";
 import { schools } from "@/lib/tooku-data";
 import { useTooku } from "@/lib/tooku-store";
-import { LoginGate } from "@/components/tooku/login-gate";
 
 
 export const Route = createFileRoute("/chat")({

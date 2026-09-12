@@ -1,8 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useMemo, useState } from "react";
 import { Bell, MessageCircle, ShieldCheck, Package, Tag, Clock } from "lucide-react";
 import { useTooku } from "@/lib/tooku-store";
-import { LoginGate } from "@/components/tooku/login-gate";
 import { EmptyState } from "@/components/tooku/ui";
 
 
