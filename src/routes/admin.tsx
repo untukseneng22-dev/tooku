@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState, type ChangeEvent } from "react";
 import {
   ArrowLeft,
@@ -52,11 +52,14 @@ import {
   categories,
   rupiah,
   schools,
+  schoolById,
   schoolIdForAccount,
   specTemplates,
   type Category,
 } from "@/lib/tooku-data";
 import { ProductThumb } from "@/components/tooku/ui";
+import logoAsset from "@/assets/tooku-logo.png.asset.json";
+import { LogOut } from "lucide-react";
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
