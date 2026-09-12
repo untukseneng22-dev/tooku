@@ -655,6 +655,27 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         if (user?.role !== "superadmin" || id === user.id) return;
         setUsers((us) => us.filter((u) => u.id !== id));
       },
+      updateProfile: ({ name, email, avatar }) => {
+        if (!user) return { ok: false, error: "Silakan masuk terlebih dahulu." };
+        const nm = name.trim();
+        const em = email.trim().toLowerCase();
+        if (nm.length < 3) return { ok: false, error: "Nama minimal 3 karakter." };
+        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)) return { ok: false, error: "Format email tidak valid." };
+        if (users.some((u) => u.id !== user.id && u.email.toLowerCase() === em))
+          return { ok: false, error: "Email sudah dipakai akun lain." };
+        setUsers((us) =>
+          us.map((u) => (u.id === user.id ? { ...u, name: nm, email: em, ...(avatar !== undefined ? { avatar } : {}) } : u)),
+        );
+        return { ok: true };
+      },
+      changePassword: (oldPassword, newPassword) => {
+        if (!user) return { ok: false, error: "Silakan masuk terlebih dahulu." };
+        if (user.password !== oldPassword) return { ok: false, error: "Kata sandi lama salah." };
+        if (newPassword.length < 6) return { ok: false, error: "Kata sandi baru minimal 6 karakter." };
+        if (newPassword === oldPassword) return { ok: false, error: "Kata sandi baru tidak boleh sama dengan yang lama." };
+        setUsers((us) => us.map((u) => (u.id === user.id ? { ...u, password: newPassword } : u)));
+        return { ok: true };
+      },
       logout: () => setUserId(null),
       addToCart,
       removeFromCart: (id) => setCart((c) => c.filter((l) => l.productId !== id)),
