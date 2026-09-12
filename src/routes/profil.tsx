@@ -65,6 +65,8 @@ function ProfilePage() {
             </div>
           </div>
 
+          <AccountSettings />
+
           <InstallAppCard />
 
           <div className="divide-y divide-border overflow-hidden rounded-2xl border border-border bg-card">
@@ -134,6 +136,8 @@ function ProfilePage() {
             untuk beasiswa siswa.
           </p>
         </div>
+
+        <AccountSettings />
 
         <InstallAppCard />
 
