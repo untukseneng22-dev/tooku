@@ -1,4 +1,4 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
   Minus,
@@ -29,7 +29,6 @@ import {
 } from "@/lib/tooku-shipping";
 import { voucherDiscount } from "@/lib/tooku-extras";
 import { ProductThumb, EmptyState } from "@/components/tooku/ui";
-import { LoginGate } from "@/components/tooku/login-gate";
 
 export const Route = createFileRoute("/keranjang")({
   head: () => ({

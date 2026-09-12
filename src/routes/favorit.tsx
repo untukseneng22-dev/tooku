@@ -1,8 +1,7 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { ArrowLeft, Heart } from "lucide-react";
 import { useTooku } from "@/lib/tooku-store";
 import { ProductCard, BottomNav, EmptyState } from "@/components/tooku/ui";
-import { LoginGate } from "@/components/tooku/login-gate";
 
 export const Route = createFileRoute("/favorit")({
   head: () => ({

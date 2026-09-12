@@ -1,10 +1,9 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { Ticket, MapPin, Check, Clock, Wallet, Store, XCircle, Truck, Copy, Star, ClipboardList } from "lucide-react";
 import { useState } from "react";
 import { useTooku, useCountdown, flowFor, isFinalStatus, type Order } from "@/lib/tooku-store";
 import { rupiah, schoolById } from "@/lib/tooku-data";
 import { zoneEta, zoneLabel } from "@/lib/tooku-shipping";
-import { LoginGate } from "@/components/tooku/login-gate";
 import { EmptyState } from "@/components/tooku/ui";
 
 /** Form ulasan bintang untuk satu barang dalam pesanan selesai. */

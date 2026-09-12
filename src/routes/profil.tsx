@@ -1,7 +1,6 @@
-import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, Navigate, useNavigate } from "@tanstack/react-router";
 import { ShieldCheck, Leaf, Wallet, ChevronRight, LayoutDashboard, LogOut, Store, Heart, Star, HelpCircle } from "lucide-react";
 import { useTooku, roleLabel } from "@/lib/tooku-store";
-import { LoginGate } from "@/components/tooku/login-gate";
 import { rupiah } from "@/lib/tooku-data";
 import { InstallAppCard } from "@/components/tooku/install-prompt";
 
