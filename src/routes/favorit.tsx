@@ -16,9 +16,10 @@ export const Route = createFileRoute("/favorit")({
 });
 
 function FavoritPage() {
-  const { wishlist, products, user } = useTooku();
+  const { wishlist, products, user, hydrated } = useTooku();
   const items = products.filter((p) => wishlist.includes(p.id));
 
+  if (!hydrated) return null;
   if (!user) return <Navigate to="/auth" replace />;
 
   return (

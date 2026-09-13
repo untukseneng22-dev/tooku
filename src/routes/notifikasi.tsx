@@ -88,7 +88,7 @@ const fmtAgo = (at: number) => {
 };
 
 function NotifikasiPage() {
-  const { user, notifs: storeNotifs, markNotifRead, markAllNotifsRead } = useTooku();
+  const { user, notifs: storeNotifs, markNotifRead, markAllNotifsRead, hydrated } = useTooku();
   const [filter, setFilter] = useState<"semua" | NotifKind | "belum">("semua");
 
   // Gabung notifikasi nyata dari sistem (pesanan, promo) dengan info umum.
@@ -113,6 +113,7 @@ function NotifikasiPage() {
     [mine, filter],
   );
 
+  if (!hydrated) return null;
   if (!user) return <Navigate to="/auth" replace />;
 
 

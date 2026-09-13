@@ -58,7 +58,7 @@ const onlineChannels = [
 const districts = [...new Set(schools.map((s) => s.district))].sort();
 
 function CartPage() {
-  const { cart, products, setQty, removeFromCart, checkout, user, shippingConfigs, vouchers, pointsBalance } =
+  const { cart, products, setQty, removeFromCart, checkout, user, shippingConfigs, vouchers, pointsBalance, hydrated } =
     useTooku();
   const navigate = useNavigate();
   const [fulfillment, setFulfillment] = useState<Fulfillment>("pickup");

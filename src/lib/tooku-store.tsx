@@ -339,6 +339,7 @@ type Store = {
   user: User | null;
   isAdmin: boolean;
   isSuperAdmin: boolean;
+  hydrated: boolean;
   login: (
     identifier: string,
     password: string,
@@ -608,6 +609,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       user,
       isAdmin: user?.role === "admin" || user?.role === "superadmin",
       isSuperAdmin: user?.role === "superadmin",
+      hydrated,
       myOrders: user ? orders.filter((o) => o.userId === user.id) : [],
       login: (identifier, password) => {
         const key = identifier.trim().toLowerCase();

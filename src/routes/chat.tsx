@@ -69,7 +69,7 @@ function autoReply(name: string, asAdmin: boolean) {
 }
 
 function ChatPage() {
-  const { user, users, isAdmin, isSuperAdmin, products } = useTooku();
+  const { user, users, isAdmin, isSuperAdmin, products, hydrated: storeHydrated } = useTooku();
   const { penjual, produk } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [threads, setThreads] = useState<Threads>(seedThreads);
@@ -125,6 +125,7 @@ function ChatPage() {
     return list.filter((s) => s.toLowerCase().includes(q.trim().toLowerCase()));
   }, [isAdmin, isSuperAdmin, users, user, threads, q, products]);
 
+  if (!hydrated || !storeHydrated) return null;
   if (!user) return <Navigate to="/auth" replace />;
 
   const active = penjual ?? null;

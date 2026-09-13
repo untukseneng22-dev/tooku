@@ -22,7 +22,7 @@ export const Route = createFileRoute("/profil")({
 });
 
 function ProfilePage() {
-  const { user, myOrders, logout, isAdmin, isSuperAdmin, pendingUsers, orders, users, wishlist, pointsBalance } = useTooku();
+  const { user, myOrders, logout, isAdmin, isSuperAdmin, pendingUsers, orders, users, wishlist, pointsBalance, hydrated } = useTooku();
   const navigate = useNavigate();
   const done = myOrders.filter((o) => o.status === "Selesai");
   const saved = done.reduce((s, o) => s + o.total * 2.5, 0);
@@ -33,6 +33,7 @@ function ProfilePage() {
     .join("")
     .toUpperCase();
 
+  if (!hydrated) return null;
   if (!user) return <Navigate to="/auth" replace />;
 
   if (isSuperAdmin) {
@@ -241,7 +242,7 @@ function AccountSettings() {
   };
 
   const saveProfile = () => {
-    const res = updateProfile({ name, email, avatar });
+    const res = updateProfile({ name, email, ...(avatar !== undefined ? { avatar } : {}) });
     setMsg({ ok: res.ok, text: res.ok ? "Profil berhasil diperbarui." : (res.error ?? "Gagal menyimpan.") });
     if (res.ok) setPwMsg(null);
   };
