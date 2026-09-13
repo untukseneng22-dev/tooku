@@ -241,7 +241,7 @@ function AccountSettings() {
   };
 
   const saveProfile = () => {
-    const res = updateProfile({ name, email, avatar });
+    const res = updateProfile({ name, email, ...(avatar !== undefined ? { avatar } : {}) });
     setMsg({ ok: res.ok, text: res.ok ? "Profil berhasil diperbarui." : (res.error ?? "Gagal menyimpan.") });
     if (res.ok) setPwMsg(null);
   };
