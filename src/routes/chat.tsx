@@ -69,7 +69,7 @@ function autoReply(name: string, asAdmin: boolean) {
 }
 
 function ChatPage() {
-  const { user, users, isAdmin, isSuperAdmin, products, hydrated } = useTooku();
+  const { user, users, isAdmin, isSuperAdmin, products, hydrated: storeHydrated } = useTooku();
   const { penjual, produk } = Route.useSearch();
   const navigate = Route.useNavigate();
   const [threads, setThreads] = useState<Threads>(seedThreads);
