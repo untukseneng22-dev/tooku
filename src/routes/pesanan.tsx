@@ -307,7 +307,8 @@ function OrderCard({ order }: { order: Order }) {
 }
 
 function OrdersPage() {
-  const { myOrders, user } = useTooku();
+  const { myOrders, user, hydrated } = useTooku();
+  if (!hydrated) return null;
   if (!user) return <Navigate to="/auth" replace />;
   return (
     <div className="min-h-screen bg-background pb-24">
