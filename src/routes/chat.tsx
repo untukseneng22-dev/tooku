@@ -125,7 +125,7 @@ function ChatPage() {
     return list.filter((s) => s.toLowerCase().includes(q.trim().toLowerCase()));
   }, [isAdmin, isSuperAdmin, users, user, threads, q, products]);
 
-  if (!hydrated) return null;
+  if (!hydrated || !storeHydrated) return null;
   if (!user) return <Navigate to="/auth" replace />;
 
   const active = penjual ?? null;
