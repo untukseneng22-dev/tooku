@@ -81,14 +81,14 @@ export const Route = createFileRoute("/admin")({
 
 type Tab = "dashboard" | "orders" | "products" | "new" | "promo" | "shipping" | "lifecycle";
 
-const tabs: { id: Tab; label: string; icon: typeof LayoutDashboard }[] = [
-  { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "orders", label: "Pesanan", icon: ClipboardList },
-  { id: "products", label: "Produk", icon: Boxes },
-  { id: "new", label: "Tambah Produk", icon: PlusCircle },
-  { id: "promo", label: "Flash Sale", icon: ShoppingBag },
-  { id: "shipping", label: "Pengiriman & Bayar", icon: Truck },
-  { id: "lifecycle", label: "Siklus Barang", icon: Recycle },
+const tabs: { id: Tab; label: string; short: string; icon: typeof LayoutDashboard; tone: string }[] = [
+  { id: "dashboard", label: "Dashboard", short: "Beranda", icon: LayoutDashboard, tone: "bg-primary/10 text-primary" },
+  { id: "orders", label: "Pesanan Masuk", short: "Pesanan", icon: ClipboardList, tone: "bg-accent/25 text-accent-foreground" },
+  { id: "products", label: "Produk Saya", short: "Produk", icon: Boxes, tone: "bg-primary/10 text-primary" },
+  { id: "new", label: "Tambah Produk", short: "Tambah", icon: PlusCircle, tone: "bg-accent/25 text-accent-foreground" },
+  { id: "promo", label: "Flash Sale", short: "Flash Sale", icon: ShoppingBag, tone: "bg-destructive/10 text-destructive" },
+  { id: "shipping", label: "Pengiriman & Pembayaran", short: "Kirim & Bayar", icon: Truck, tone: "bg-primary/10 text-primary" },
+  { id: "lifecycle", label: "Siklus Barang", short: "Siklus", icon: Recycle, tone: "bg-accent/25 text-accent-foreground" },
 ];
 
 
