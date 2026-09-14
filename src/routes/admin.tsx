@@ -304,7 +304,6 @@ function AdminPage() {
             </div>
           )}
           {tab === "dashboard" && <Dashboard />}
-          {tab === "dashboard" && <Dashboard />}
           {tab === "orders" && <OrdersAdmin />}
           {tab === "products" && (
             <ProductsAdmin
@@ -329,6 +328,8 @@ function AdminPage() {
 
         </main>
       </div>
+
+      <AccountSettingsSheet open={settingsOpen} onClose={() => setSettingsOpen(false)} />
     </div>
   );
 }
