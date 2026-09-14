@@ -147,69 +147,163 @@ function AdminPage() {
     );
   }
 
+  const rating = mySchool ? ratingSummary(reviews, mySchool.id) : { avg: 0, count: 0 };
+  const activeCount = orders.filter((o) => o.status !== "Selesai" && o.status !== "Dibatalkan").length;
+  const soldCount = orders.filter((o) => o.status === "Selesai").length;
+  const activeTab = tabs.find((t) => t.id === tab)!;
+  const koperasiInitials = (mySchool?.koperasi ?? "TK")
+    .replace(/^Koperasi\s*/i, "")
+    .split(" ")
+    .map((w) => w[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
+
   return (
-    <div className="min-h-screen bg-secondary/40">
-      <header className="bg-gradient-to-r from-primary to-primary/90 text-primary-foreground shadow-md">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-center gap-3 px-4 py-4">
-          <Link to="/" aria-label="Kembali ke aplikasi siswa" className="shrink-0">
-            <img
-              src={logoAsset.url}
-              alt="Logo TOOKU"
-              className="h-11 w-11 rounded-xl bg-white object-contain p-1 shadow-sm"
-            />
-          </Link>
-          <div className="min-w-0 flex-1">
-            <div className="flex items-center gap-2">
-              <p className="truncate text-sm font-bold sm:text-base">
-                {mySchool?.koperasi ?? "Admin Koperasi TOOKU"}
-              </p>
-              {mySchool && (
-                <span className="hidden shrink-0 rounded-full bg-accent px-2 py-0.5 text-[9px] font-bold text-accent-foreground sm:inline-block">
-                  {mySchool.level}
-                </span>
-              )}
-            </div>
-            <p className="truncate text-[11px] opacity-80">
-              {mySchool ? `${mySchool.name} · ${mySchool.district}` : "Dashboard Koperasi"} — {user?.name} · @{user?.username}
-            </p>
-          </div>
-          <div className="flex shrink-0 items-center gap-2">
-            <Link
-              to="/"
-              className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold transition hover:bg-primary-foreground/25"
-            >
-              <ShoppingBag className="h-3.5 w-3.5" /> Belanja
+    <div className="min-h-screen bg-secondary/40 pb-12">
+      {/* Banner toko ala Shopee */}
+      <header className="bg-gradient-to-br from-primary via-primary to-primary/75 text-primary-foreground shadow-md">
+        <div className="mx-auto max-w-6xl px-4 pt-4">
+          <div className="flex items-center gap-2">
+            <Link to="/" aria-label="Kembali ke aplikasi siswa" className="shrink-0">
+              <img
+                src={logoAsset.url}
+                alt="Logo TOOKU"
+                className="h-9 w-9 rounded-xl bg-white object-contain p-1 shadow-sm"
+              />
             </Link>
-            <button
-              onClick={handleLogout}
-              className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground px-3 py-1.5 text-[11px] font-bold text-primary shadow-sm transition hover:bg-accent hover:text-accent-foreground"
-            >
-              <LogOut className="h-3.5 w-3.5" /> Keluar
-            </button>
+            <span className="rounded-full bg-primary-foreground/15 px-2.5 py-1 text-[10px] font-bold tracking-wide">
+              TOKO SAYA
+            </span>
+            <div className="ml-auto flex items-center gap-2">
+              <Link
+                to="/"
+                className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground/15 px-3 py-1.5 text-[11px] font-semibold transition hover:bg-primary-foreground/25"
+              >
+                <ShoppingBag className="h-3.5 w-3.5" /> Belanja
+              </Link>
+              <button
+                onClick={() => setSettingsOpen(true)}
+                aria-label="Pengaturan akun"
+                title="Pengaturan Akun"
+                className="grid h-8 w-8 place-items-center rounded-full bg-primary-foreground/15 transition hover:bg-primary-foreground/30"
+              >
+                <Settings className="h-4 w-4" />
+              </button>
+              <button
+                onClick={handleLogout}
+                className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground px-3 py-1.5 text-[11px] font-bold text-primary shadow-sm transition hover:bg-accent hover:text-accent-foreground"
+              >
+                <LogOut className="h-3.5 w-3.5" /> Keluar
+              </button>
+            </div>
+          </div>
+
+          {/* Identitas toko */}
+          <div className="flex items-center gap-3 pb-16 pt-5 sm:gap-4">
+            <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl border-2 border-primary-foreground/40 bg-accent text-xl font-extrabold text-accent-foreground shadow-lg sm:h-20 sm:w-20 sm:text-2xl">
+              {koperasiInitials}
+            </div>
+            <div className="min-w-0">
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="truncate text-base font-extrabold sm:text-xl">
+                  {mySchool?.koperasi ?? "Admin Koperasi TOOKU"}
+                </h1>
+                <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-accent px-2 py-0.5 text-[9px] font-bold text-accent-foreground">
+                  <ShieldCheck className="h-3 w-3" /> Terverifikasi
+                </span>
+              </div>
+              <p className="mt-0.5 truncate text-[11px] opacity-85 sm:text-xs">
+                {mySchool ? `${mySchool.level} · ${mySchool.name} · ${mySchool.district}` : "Dashboard Koperasi"}
+              </p>
+              <div className="mt-1 flex items-center gap-1 text-[11px]">
+                <Star className="h-3.5 w-3.5 fill-accent text-accent" />
+                <span className="font-bold">{rating.avg ? rating.avg.toFixed(1) : "—"}</span>
+                <span className="opacity-75">({rating.count} ulasan)</span>
+                <span className="mx-1 opacity-50">·</span>
+                <span className="truncate opacity-85">{user?.name} · @{user?.username}</span>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      <div className="mx-auto max-w-6xl gap-6 px-4 py-5 lg:flex">
-        <nav className="mb-4 flex gap-2 overflow-x-auto lg:mb-0 lg:w-56 lg:shrink-0 lg:flex-col lg:overflow-visible">
-          {tabs
-            .map((t) => (
-              <button
-                key={t.id}
-                onClick={() => {
-                  if (t.id !== "new") setEditId(null);
-                  setTab(t.id);
-                }}
-                className={`flex shrink-0 items-center gap-2 rounded-xl px-3 py-2.5 text-xs font-semibold ${
-                  tab === t.id ? "bg-primary text-primary-foreground" : "bg-card text-muted-foreground"
-                }`}
-              >
-                <t.icon className="h-4 w-4" /> {t.id === "new" && editId ? "Edit Produk" : t.label}
-              </button>
-            ))}
-        </nav>
+      <div className="mx-auto max-w-6xl px-4">
+        {/* Statistik toko, menimpa banner */}
+        <div className="-mt-10 grid grid-cols-4 divide-x divide-border rounded-2xl border border-border bg-card py-3 text-center shadow-sm">
+          <div>
+            <p className="text-base font-extrabold text-primary sm:text-lg">{products.length}</p>
+            <p className="text-[9px] text-muted-foreground sm:text-[10px]">Produk</p>
+          </div>
+          <div>
+            <p className="text-base font-extrabold text-primary sm:text-lg">{activeCount}</p>
+            <p className="text-[9px] text-muted-foreground sm:text-[10px]">Perlu Diproses</p>
+          </div>
+          <div>
+            <p className="text-base font-extrabold text-primary sm:text-lg">{soldCount}</p>
+            <p className="text-[9px] text-muted-foreground sm:text-[10px]">Terjual</p>
+          </div>
+          <div>
+            <p className="text-base font-extrabold text-primary sm:text-lg">{rating.avg ? rating.avg.toFixed(1) : "—"}</p>
+            <p className="text-[9px] text-muted-foreground sm:text-[10px]">Rating Toko</p>
+          </div>
+        </div>
 
-        <main className="min-w-0 flex-1">
+        {/* Menu ikon grid */}
+        <div className="mt-4 rounded-2xl border border-border bg-card p-3 shadow-sm sm:p-4">
+          <div className="grid grid-cols-4 gap-2 sm:grid-cols-7 sm:gap-3">
+            {tabs.map((t) => {
+              const active = tab === t.id;
+              return (
+                <button
+                  key={t.id}
+                  onClick={() => {
+                    if (t.id !== "new") setEditId(null);
+                    setTab(t.id);
+                  }}
+                  className={`group flex flex-col items-center gap-1.5 rounded-2xl px-1 py-2.5 transition ${
+                    active ? "bg-primary/5 ring-2 ring-primary" : "hover:bg-secondary/60"
+                  }`}
+                  aria-pressed={active}
+                >
+                  <span
+                    className={`grid h-11 w-11 place-items-center rounded-2xl shadow-sm transition group-hover:scale-105 sm:h-12 sm:w-12 ${t.tone}`}
+                  >
+                    <t.icon className="h-5 w-5" />
+                  </span>
+                  <span
+                    className={`text-center text-[9px] font-semibold leading-tight sm:text-[10px] ${
+                      active ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    {t.id === "new" && editId ? "Edit Produk" : t.short}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        {/* Konten */}
+        <main className="mt-4 min-w-0">
+          {tab !== "dashboard" && (
+            <div className="mb-3 flex items-center gap-2">
+              <button
+                onClick={() => {
+                  setEditId(null);
+                  setTab("dashboard");
+                }}
+                aria-label="Kembali ke ringkasan"
+                className="grid h-8 w-8 place-items-center rounded-full bg-card text-muted-foreground shadow-sm transition hover:text-primary"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </button>
+              <h2 className="text-sm font-bold">
+                {tab === "new" && editId ? "Edit Produk" : activeTab.label}
+              </h2>
+            </div>
+          )}
+          {tab === "dashboard" && <Dashboard />}
           {tab === "dashboard" && <Dashboard />}
           {tab === "orders" && <OrdersAdmin />}
           {tab === "products" && (
