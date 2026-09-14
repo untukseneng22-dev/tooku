@@ -93,10 +93,11 @@ const tabs: { id: Tab; label: string; short: string; icon: typeof LayoutDashboar
 
 
 function AdminPage() {
-  const { user, isAdmin, isSuperAdmin, logout } = useTooku();
+  const { user, isAdmin, isSuperAdmin, logout, orders, products, reviews } = useTooku();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("dashboard");
   const [editId, setEditId] = useState<string | null>(null);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const mySchoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
   const mySchool = schoolById(mySchoolId);
   const handleLogout = () => {
