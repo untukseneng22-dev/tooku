@@ -23,7 +23,8 @@ import {
   TrendingDown,
   RotateCcw,
   Layers,
-
+  Settings,
+  Star,
 } from "lucide-react";
 import {
   useTooku,
@@ -55,8 +56,10 @@ import {
   schoolById,
   schoolIdForAccount,
   specTemplates,
+  ratingSummary,
   type Category,
 } from "@/lib/tooku-data";
+import { AccountSettingsSheet } from "@/components/tooku/account-settings";
 import { ProductThumb } from "@/components/tooku/ui";
 import logoAsset from "@/assets/tooku-logo.png.asset.json";
 import { LogOut } from "lucide-react";
