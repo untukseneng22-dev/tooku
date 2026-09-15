@@ -1049,6 +1049,26 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       markAllNotifsRead: () =>
         setNotifs((ns) => ns.map((n) => (n.userId === null || (user && n.userId === user.id) ? { ...n, read: true } : n))),
       markNotifRead: (id) => setNotifs((ns) => ns.map((n) => (n.id === id ? { ...n, read: true } : n))),
+      koperasiList,
+      getSchool: (id) => koperasiList.find((s) => s.id === id),
+      updateSchool: (id, patch) => {
+        if (!user) return { ok: false, error: "Masuk dulu." };
+        const own = schoolIdForAccount({ username: user.username, name: user.name });
+        if (user.role === "admin" && id !== own)
+          return { ok: false, error: "Kamu hanya bisa mengubah profil koperasi sendiri." };
+        if (user.role === "buyer") return { ok: false, error: "Hanya admin koperasi yang bisa mengubah profil toko." };
+        if (patch.koperasi !== undefined && patch.koperasi.trim().length < 4)
+          return { ok: false, error: "Nama koperasi minimal 4 karakter." };
+        if (patch.name !== undefined && patch.name.trim().length < 4)
+          return { ok: false, error: "Nama sekolah minimal 4 karakter." };
+        const clean: SchoolPatch = { ...patch };
+        for (const k of ["koperasi", "name", "district", "pickup", "hours", "phone"] as const) {
+          const v = clean[k];
+          if (typeof v === "string") clean[k] = v.trim();
+        }
+        setSchoolEdits((prev) => ({ ...prev, [id]: { ...prev[id], ...clean } }));
+        return { ok: true };
+      },
       reports,
       addReport: (productId, reason) => {
         if (!user) return { ok: false, error: "Masuk dulu untuk melapor." };
