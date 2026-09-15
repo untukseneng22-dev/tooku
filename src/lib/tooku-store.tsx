@@ -581,12 +581,13 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           points,
           reports,
           notifs,
+          schoolEdits,
         }),
       );
     } catch {
       /* ignore */
     }
-  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs]);
+  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits]);
 
 
   // Evaluasi ulang fase siklus hidup (diskon otomatis / donasi) tiap jam.
