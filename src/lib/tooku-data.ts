@@ -19,6 +19,8 @@ export type School = {
   pickup: string;
   hours: string;
   phone: string;
+  /** Logo koperasi (data URL hasil kompresi) — bisa diunggah admin koperasi. */
+  logo?: string;
 };
 
 /**
