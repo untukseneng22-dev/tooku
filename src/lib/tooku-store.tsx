@@ -12,6 +12,7 @@ import {
   seedProducts,
   seedReviews,
   resolveSchoolId,
+  schoolIdForAccount,
   schools as seedSchools,
   SCHOOLS_SELLER,
   type KoperasiReview,
@@ -1094,6 +1095,10 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       setReportStatus: (id, status) => {
         if (user?.role !== "superadmin") return;
         setReports((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
+      },
+      deleteReport: (id) => {
+        if (user?.role !== "superadmin") return;
+        setReports((rs) => rs.filter((r) => r.id !== id));
       },
     }),
     [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs],
