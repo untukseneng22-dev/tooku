@@ -44,6 +44,18 @@ import {
 } from "./tooku-extras";
 
 
+/** Field profil koperasi yang boleh diubah admin koperasi. */
+export type SchoolPatch = {
+  koperasi?: string;
+  name?: string;
+  level?: SchoolLevel;
+  district?: string;
+  pickup?: string;
+  hours?: string;
+  phone?: string;
+  logo?: string;
+};
+
 export type Role = "buyer" | "admin" | "superadmin";
 export type AccountStatus = "aktif" | "menunggu" | "ditolak";
 export type User = {
