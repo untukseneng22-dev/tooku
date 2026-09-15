@@ -624,6 +624,12 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       }),
     );
 
+  /** Data koperasi = seed + hasil edit admin koperasi masing-masing. */
+  const koperasiList = useMemo<School[]>(
+    () => seedSchools.map((s) => ({ ...s, ...(schoolEdits[s.id] ?? {}) })),
+    [schoolEdits],
+  );
+
   const value = useMemo<Store>(
     () => ({
       products,
