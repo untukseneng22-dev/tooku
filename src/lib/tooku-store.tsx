@@ -12,9 +12,12 @@ import {
   seedProducts,
   seedReviews,
   resolveSchoolId,
+  schools as seedSchools,
   SCHOOLS_SELLER,
   type KoperasiReview,
   type Product,
+  type School,
+  type SchoolLevel,
 } from "./tooku-data";
 import {
   defaultShippingConfig,
