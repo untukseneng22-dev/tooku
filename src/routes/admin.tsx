@@ -215,9 +215,17 @@ function AdminPage() {
 
           {/* Identitas toko */}
           <div className="flex items-center gap-3 pb-16 pt-5 sm:gap-4">
-            <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl border-2 border-primary-foreground/40 bg-accent text-xl font-extrabold text-accent-foreground shadow-lg sm:h-20 sm:w-20 sm:text-2xl">
-              {koperasiInitials}
-            </div>
+            {mySchool?.logo ? (
+              <img
+                src={mySchool.logo}
+                alt={`Logo ${mySchool.koperasi}`}
+                className="h-16 w-16 shrink-0 rounded-2xl border-2 border-primary-foreground/40 bg-white object-cover shadow-lg sm:h-20 sm:w-20"
+              />
+            ) : (
+              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl border-2 border-primary-foreground/40 bg-accent text-xl font-extrabold text-accent-foreground shadow-lg sm:h-20 sm:w-20 sm:text-2xl">
+                {koperasiInitials}
+              </div>
+            )}
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="truncate text-base font-extrabold sm:text-xl">
