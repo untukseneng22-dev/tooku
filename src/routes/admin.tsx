@@ -79,7 +79,16 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "dashboard" | "orders" | "products" | "new" | "promo" | "shipping" | "lifecycle";
+type Tab =
+  | "dashboard"
+  | "orders"
+  | "products"
+  | "new"
+  | "promo"
+  | "shipping"
+  | "lifecycle"
+  | "keuangan"
+  | "toko";
 
 const tabs: { id: Tab; label: string; short: string; icon: typeof LayoutDashboard; tone: string }[] = [
   { id: "dashboard", label: "Dashboard", short: "Beranda", icon: LayoutDashboard, tone: "bg-primary/10 text-primary" },
