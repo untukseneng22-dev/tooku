@@ -57,7 +57,6 @@ import {
   categories,
   rupiah,
   schools,
-  schoolById,
   schoolIdForAccount,
   specTemplates,
   ratingSummary,
