@@ -502,6 +502,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   const [vouchers, setVouchers] = useState<Voucher[]>(seedVouchers);
   const [points, setPoints] = useState<PointsEntry[]>([]);
   const [reports, setReports] = useState<ProductReport[]>([]);
+  const [schoolEdits, setSchoolEdits] = useState<Record<string, SchoolPatch>>({});
   const [notifs, setNotifs] = useState<AppNotif[]>([]);
 
   const [hydrated, setHydrated] = useState(false);
@@ -542,6 +543,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         if (p.vouchers) setVouchers(p.vouchers);
         if (p.points) setPoints(p.points);
         if (p.reports) setReports(p.reports);
+        if (p.schoolEdits) setSchoolEdits(p.schoolEdits as Record<string, SchoolPatch>);
         if (p.notifs) setNotifs(p.notifs);
       }
     } catch {
