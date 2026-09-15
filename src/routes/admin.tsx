@@ -25,6 +25,10 @@ import {
   Layers,
   Settings,
   Star,
+  BarChart3,
+  Store as StoreIcon,
+  Save,
+  ImagePlus,
 } from "lucide-react";
 import {
   useTooku,
@@ -98,17 +102,19 @@ const tabs: { id: Tab; label: string; short: string; icon: typeof LayoutDashboar
   { id: "promo", label: "Flash Sale", short: "Flash Sale", icon: ShoppingBag, tone: "bg-destructive/10 text-destructive" },
   { id: "shipping", label: "Pengiriman & Pembayaran", short: "Kirim & Bayar", icon: Truck, tone: "bg-primary/10 text-primary" },
   { id: "lifecycle", label: "Siklus Barang", short: "Siklus", icon: Recycle, tone: "bg-accent/25 text-accent-foreground" },
+  { id: "keuangan", label: "Laporan Keuangan", short: "Keuangan", icon: BarChart3, tone: "bg-primary/10 text-primary" },
+  { id: "toko", label: "Profil Toko", short: "Profil Toko", icon: StoreIcon, tone: "bg-accent/25 text-accent-foreground" },
 ];
 
 
 function AdminPage() {
-  const { user, isAdmin, isSuperAdmin, logout, orders, products, reviews } = useTooku();
+  const { user, isAdmin, isSuperAdmin, logout, orders, products, reviews, getSchool } = useTooku();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("dashboard");
   const [editId, setEditId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const mySchoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
-  const mySchool = schoolById(mySchoolId);
+  const mySchool = getSchool(mySchoolId);
   const handleLogout = () => {
     logout();
     navigate({ to: "/", replace: true });
