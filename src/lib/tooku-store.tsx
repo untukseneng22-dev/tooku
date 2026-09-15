@@ -12,9 +12,13 @@ import {
   seedProducts,
   seedReviews,
   resolveSchoolId,
+  schoolIdForAccount,
+  schools as seedSchools,
   SCHOOLS_SELLER,
   type KoperasiReview,
   type Product,
+  type School,
+  type SchoolLevel,
 } from "./tooku-data";
 import {
   defaultShippingConfig,
@@ -40,6 +44,18 @@ import {
   type Voucher,
 } from "./tooku-extras";
 
+
+/** Field profil koperasi yang boleh diubah admin koperasi. */
+export type SchoolPatch = {
+  koperasi?: string;
+  name?: string;
+  level?: SchoolLevel;
+  district?: string;
+  pickup?: string;
+  hours?: string;
+  phone?: string;
+  logo?: string;
+};
 
 export type Role = "buyer" | "admin" | "superadmin";
 export type AccountStatus = "aktif" | "menunggu" | "ditolak";
@@ -407,9 +423,14 @@ type Store = {
   markAllNotifsRead: () => void;
   markNotifRead: (id: string) => void;
   /** Laporan barang bermasalah dari pembeli. */
+  /** Profil koperasi — nama, logo, jenjang, alamat; diedit admin koperasi sendiri. */
+  koperasiList: School[];
+  getSchool: (id: string) => School | undefined;
+  updateSchool: (id: string, patch: SchoolPatch) => { ok: boolean; error?: string };
   reports: ProductReport[];
   addReport: (productId: string, reason: string) => { ok: boolean; error?: string };
   setReportStatus: (id: string, status: ReportStatus) => void;
+  deleteReport: (id: string) => void;
 };
 
 type TookuContextRegistry = typeof globalThis & {
@@ -482,6 +503,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   const [vouchers, setVouchers] = useState<Voucher[]>(seedVouchers);
   const [points, setPoints] = useState<PointsEntry[]>([]);
   const [reports, setReports] = useState<ProductReport[]>([]);
+  const [schoolEdits, setSchoolEdits] = useState<Record<string, SchoolPatch>>({});
   const [notifs, setNotifs] = useState<AppNotif[]>([]);
 
   const [hydrated, setHydrated] = useState(false);
@@ -522,6 +544,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         if (p.vouchers) setVouchers(p.vouchers);
         if (p.points) setPoints(p.points);
         if (p.reports) setReports(p.reports);
+        if (p.schoolEdits) setSchoolEdits(p.schoolEdits as Record<string, SchoolPatch>);
         if (p.notifs) setNotifs(p.notifs);
       }
     } catch {
@@ -559,12 +582,13 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           points,
           reports,
           notifs,
+          schoolEdits,
         }),
       );
     } catch {
       /* ignore */
     }
-  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs]);
+  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits]);
 
 
   // Evaluasi ulang fase siklus hidup (diskon otomatis / donasi) tiap jam.
@@ -599,6 +623,12 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         return line ? { ...p, stock: p.stock + line.qty } : p;
       }),
     );
+
+  /** Data koperasi = seed + hasil edit admin koperasi masing-masing. */
+  const koperasiList = useMemo<School[]>(
+    () => seedSchools.map((s) => ({ ...s, ...(schoolEdits[s.id] ?? {}) })),
+    [schoolEdits],
+  );
 
   const value = useMemo<Store>(
     () => ({
@@ -1026,6 +1056,26 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       markAllNotifsRead: () =>
         setNotifs((ns) => ns.map((n) => (n.userId === null || (user && n.userId === user.id) ? { ...n, read: true } : n))),
       markNotifRead: (id) => setNotifs((ns) => ns.map((n) => (n.id === id ? { ...n, read: true } : n))),
+      koperasiList,
+      getSchool: (id) => koperasiList.find((s) => s.id === id),
+      updateSchool: (id, patch) => {
+        if (!user) return { ok: false, error: "Masuk dulu." };
+        const own = schoolIdForAccount({ username: user.username, name: user.name });
+        if (user.role === "admin" && id !== own)
+          return { ok: false, error: "Kamu hanya bisa mengubah profil koperasi sendiri." };
+        if (user.role === "buyer") return { ok: false, error: "Hanya admin koperasi yang bisa mengubah profil toko." };
+        if (patch.koperasi !== undefined && patch.koperasi.trim().length < 4)
+          return { ok: false, error: "Nama koperasi minimal 4 karakter." };
+        if (patch.name !== undefined && patch.name.trim().length < 4)
+          return { ok: false, error: "Nama sekolah minimal 4 karakter." };
+        const clean: SchoolPatch = { ...patch };
+        for (const k of ["koperasi", "name", "district", "pickup", "hours", "phone"] as const) {
+          const v = clean[k];
+          if (typeof v === "string") clean[k] = v.trim();
+        }
+        setSchoolEdits((prev) => ({ ...prev, [id]: { ...prev[id], ...clean } }));
+        return { ok: true };
+      },
       reports,
       addReport: (productId, reason) => {
         if (!user) return { ok: false, error: "Masuk dulu untuk melapor." };
@@ -1052,8 +1102,12 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         if (user?.role !== "superadmin") return;
         setReports((rs) => rs.map((r) => (r.id === id ? { ...r, status } : r)));
       },
+      deleteReport: (id) => {
+        if (user?.role !== "superadmin") return;
+        setReports((rs) => rs.filter((r) => r.id !== id));
+      },
     }),
-    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs],
+    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, koperasiList],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

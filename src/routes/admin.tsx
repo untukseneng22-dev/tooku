@@ -25,6 +25,10 @@ import {
   Layers,
   Settings,
   Star,
+  BarChart3,
+  Store as StoreIcon,
+  Save,
+  ImagePlus,
 } from "lucide-react";
 import {
   useTooku,
@@ -53,7 +57,6 @@ import {
   categories,
   rupiah,
   schools,
-  schoolById,
   schoolIdForAccount,
   specTemplates,
   ratingSummary,
@@ -79,7 +82,16 @@ export const Route = createFileRoute("/admin")({
   component: AdminPage,
 });
 
-type Tab = "dashboard" | "orders" | "products" | "new" | "promo" | "shipping" | "lifecycle";
+type Tab =
+  | "dashboard"
+  | "orders"
+  | "products"
+  | "new"
+  | "promo"
+  | "shipping"
+  | "lifecycle"
+  | "keuangan"
+  | "toko";
 
 const tabs: { id: Tab; label: string; short: string; icon: typeof LayoutDashboard; tone: string }[] = [
   { id: "dashboard", label: "Dashboard", short: "Beranda", icon: LayoutDashboard, tone: "bg-primary/10 text-primary" },
@@ -89,17 +101,19 @@ const tabs: { id: Tab; label: string; short: string; icon: typeof LayoutDashboar
   { id: "promo", label: "Flash Sale", short: "Flash Sale", icon: ShoppingBag, tone: "bg-destructive/10 text-destructive" },
   { id: "shipping", label: "Pengiriman & Pembayaran", short: "Kirim & Bayar", icon: Truck, tone: "bg-primary/10 text-primary" },
   { id: "lifecycle", label: "Siklus Barang", short: "Siklus", icon: Recycle, tone: "bg-accent/25 text-accent-foreground" },
+  { id: "keuangan", label: "Laporan Keuangan", short: "Keuangan", icon: BarChart3, tone: "bg-primary/10 text-primary" },
+  { id: "toko", label: "Profil Toko", short: "Profil Toko", icon: StoreIcon, tone: "bg-accent/25 text-accent-foreground" },
 ];
 
 
 function AdminPage() {
-  const { user, isAdmin, isSuperAdmin, logout, orders, products, reviews } = useTooku();
+  const { user, isAdmin, isSuperAdmin, logout, orders, products, reviews, getSchool } = useTooku();
   const navigate = useNavigate();
   const [tab, setTab] = useState<Tab>("dashboard");
   const [editId, setEditId] = useState<string | null>(null);
   const [settingsOpen, setSettingsOpen] = useState(false);
   const mySchoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
-  const mySchool = schoolById(mySchoolId);
+  const mySchool = getSchool(mySchoolId);
   const handleLogout = () => {
     logout();
     navigate({ to: "/", replace: true });
@@ -201,9 +215,17 @@ function AdminPage() {
 
           {/* Identitas toko */}
           <div className="flex items-center gap-3 pb-16 pt-5 sm:gap-4">
-            <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl border-2 border-primary-foreground/40 bg-accent text-xl font-extrabold text-accent-foreground shadow-lg sm:h-20 sm:w-20 sm:text-2xl">
-              {koperasiInitials}
-            </div>
+            {mySchool?.logo ? (
+              <img
+                src={mySchool.logo}
+                alt={`Logo ${mySchool.koperasi}`}
+                className="h-16 w-16 shrink-0 rounded-2xl border-2 border-primary-foreground/40 bg-white object-cover shadow-lg sm:h-20 sm:w-20"
+              />
+            ) : (
+              <div className="grid h-16 w-16 shrink-0 place-items-center rounded-2xl border-2 border-primary-foreground/40 bg-accent text-xl font-extrabold text-accent-foreground shadow-lg sm:h-20 sm:w-20 sm:text-2xl">
+                {koperasiInitials}
+              </div>
+            )}
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <h1 className="truncate text-base font-extrabold sm:text-xl">
