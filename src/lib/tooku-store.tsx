@@ -1107,7 +1107,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         setReports((rs) => rs.filter((r) => r.id !== id));
       },
     }),
-    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs],
+    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, koperasiList],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
