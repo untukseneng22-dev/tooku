@@ -410,9 +410,14 @@ type Store = {
   markAllNotifsRead: () => void;
   markNotifRead: (id: string) => void;
   /** Laporan barang bermasalah dari pembeli. */
+  /** Profil koperasi — nama, logo, jenjang, alamat; diedit admin koperasi sendiri. */
+  koperasiList: School[];
+  getSchool: (id: string) => School | undefined;
+  updateSchool: (id: string, patch: SchoolPatch) => { ok: boolean; error?: string };
   reports: ProductReport[];
   addReport: (productId: string, reason: string) => { ok: boolean; error?: string };
   setReportStatus: (id: string, status: ReportStatus) => void;
+  deleteReport: (id: string) => void;
 };
 
 type TookuContextRegistry = typeof globalThis & {
