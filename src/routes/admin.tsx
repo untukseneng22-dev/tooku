@@ -347,6 +347,8 @@ function AdminPage() {
           {tab === "promo" && <PromoAdmin />}
           {tab === "shipping" && <ShippingAdmin />}
           {tab === "lifecycle" && <LifecycleAdmin />}
+          {tab === "keuangan" && <FinanceAdmin schoolId={mySchoolId} />}
+          {tab === "toko" && <StoreProfileAdmin schoolId={mySchoolId} />}
 
         </main>
       </div>
