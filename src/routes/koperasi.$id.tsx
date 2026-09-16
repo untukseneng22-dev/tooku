@@ -29,11 +29,11 @@ export const Route = createFileRoute("/koperasi/$id")({
 function KoperasiProfile() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
-  const { products, reviews, addReview, user } = useTooku();
+  const { products, reviews, addReview, user, getSchool } = useTooku();
   const [rating, setRating] = useState(5);
   const [comment, setComment] = useState("");
   const [msg, setMsg] = useState<string | null>(null);
-  const school = schoolById(id);
+  const school = getSchool(id);
 
   if (!school) {
     return (
@@ -62,9 +62,17 @@ function KoperasiProfile() {
       <div className="mx-auto max-w-2xl">
         <section className="bg-primary px-4 pb-8 pt-5 text-primary-foreground">
           <div className="flex items-center gap-3">
-            <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-accent text-accent-foreground">
-              <Store className="h-6 w-6" />
-            </span>
+            {school.logo ? (
+              <img
+                src={school.logo}
+                alt={`Logo ${school.koperasi}`}
+                className="h-14 w-14 shrink-0 rounded-2xl bg-white object-cover"
+              />
+            ) : (
+              <span className="grid h-14 w-14 shrink-0 place-items-center rounded-2xl bg-accent text-accent-foreground">
+                <Store className="h-6 w-6" />
+              </span>
+            )}
             <div className="min-w-0">
               <h2 className="truncate text-base font-bold">{school.koperasi}</h2>
               <p className="truncate text-xs opacity-85">

@@ -510,7 +510,7 @@ function VoucherAdmin() {
 
 /** Moderasi laporan produk dari pembeli. */
 function Laporan() {
-  const { reports, setReportStatus, deleteProduct } = useTooku();
+  const { reports, setReportStatus, deleteProduct, deleteReport } = useTooku();
   const open = reports.filter((r) => r.status !== "selesai");
   const done = reports.filter((r) => r.status === "selesai");
 
@@ -557,6 +557,14 @@ function Laporan() {
           </button>
         </div>
       )}
+      <div className="flex justify-end">
+        <button
+          onClick={() => deleteReport(r.id)}
+          className="rounded-full px-2.5 py-1 text-[10px] font-bold text-muted-foreground underline-offset-2 hover:underline"
+        >
+          Hapus laporan ini
+        </button>
+      </div>
     </div>
   );
 

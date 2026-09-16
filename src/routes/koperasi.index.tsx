@@ -1,7 +1,7 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 import { ArrowLeft, ChevronRight, Clock, MapPin, Search, Store } from "lucide-react";
-import { ratingSummary, schools } from "@/lib/tooku-data";
+import { ratingSummary } from "@/lib/tooku-data";
 import { useTooku } from "@/lib/tooku-store";
 import { Stars } from "@/components/tooku/ui";
 
@@ -28,7 +28,7 @@ export const Route = createFileRoute("/koperasi/")({
 
 function KoperasiList() {
   const navigate = useNavigate();
-  const { reviews } = useTooku();
+  const { reviews, koperasiList: schools } = useTooku();
   const [q, setQ] = useState("");
   const [level, setLevel] = useState<string>("Semua");
   const [district, setDistrict] = useState<string>("Semua");
