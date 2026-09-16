@@ -61,7 +61,9 @@ import {
   specTemplates,
   ratingSummary,
   type Category,
+  type SchoolLevel,
 } from "@/lib/tooku-data";
+import { compressImage } from "@/lib/image-compress";
 import { AccountSettingsSheet } from "@/components/tooku/account-settings";
 import { ProductThumb } from "@/components/tooku/ui";
 import logoAsset from "@/assets/tooku-logo.png.asset.json";
