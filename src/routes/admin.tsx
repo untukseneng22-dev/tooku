@@ -1477,7 +1477,7 @@ function FinanceAdmin({ schoolId }: { schoolId: string }) {
       <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
         <h3 className="text-xs font-bold">Grafik 6 Bulan Terakhir</h3>
         <p className="mt-0.5 text-[11px] text-muted-foreground">
-          Batang biru = pendapatan, batang kuning = ongkir, garis = laba.
+          Biru tua = pendapatan, kuning = biaya ongkir, biru muda = laba.
         </p>
         <div className="mt-4 flex h-44 items-end gap-3">
           {rows.map((r) => (
