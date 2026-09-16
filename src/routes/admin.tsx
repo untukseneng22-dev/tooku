@@ -1286,3 +1286,247 @@ function PromoAdmin() {
     </div>
   );
 }
+
+/* ============ Profil Toko: nama koperasi, logo, jenjang — diedit admin sendiri ============ */
+
+const LEVELS: SchoolLevel[] = ["SD", "SMP", "SMA", "SMK"];
+
+function StoreProfileAdmin({ schoolId }: { schoolId: string }) {
+  const { getSchool, updateSchool } = useTooku();
+  const school = getSchool(schoolId);
+  const [form, setForm] = useState(() => ({
+    koperasi: school?.koperasi ?? "",
+    name: school?.name ?? "",
+    level: (school?.level ?? "SMA") as SchoolLevel,
+    district: school?.district ?? "",
+    pickup: school?.pickup ?? "",
+    hours: school?.hours ?? "",
+    phone: school?.phone ?? "",
+    logo: school?.logo ?? "",
+  }));
+  const [msg, setMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  if (!school) return <p className="text-xs text-muted-foreground">Koperasi tidak ditemukan.</p>;
+
+  const onLogo = async (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setBusy(true);
+    try {
+      const res = await compressImage(file);
+      setForm((f) => ({ ...f, logo: res.dataUrl }));
+      setMsg({ ok: true, text: `Logo siap (${res.compressedKb} KB setelah dikompres otomatis).` });
+    } catch {
+      setMsg({ ok: false, text: "Gagal membaca gambar logo." });
+    } finally {
+      setBusy(false);
+      e.target.value = "";
+    }
+  };
+
+  const save = () => {
+    const res = updateSchool(schoolId, form);
+    setMsg(res.ok ? { ok: true, text: "Profil toko tersimpan." } : { ok: false, text: res.error ?? "Gagal menyimpan." });
+  };
+
+  const field = (label: string, key: "koperasi" | "name" | "district" | "pickup" | "hours" | "phone", ph: string) => (
+    <label className="block">
+      <span className="text-[11px] font-semibold text-muted-foreground">{label}</span>
+      <input
+        value={form[key]}
+        onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))}
+        placeholder={ph}
+        className="mt-1 w-full rounded-xl border border-border bg-card px-3 py-2 text-sm outline-none focus:border-primary"
+      />
+    </label>
+  );
+
+  return (
+    <div className="space-y-4">
+      <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <div className="flex items-center gap-3">
+          {form.logo ? (
+            <img src={form.logo} alt="Logo koperasi" className="h-20 w-20 rounded-2xl border border-border object-cover" />
+          ) : (
+            <div className="grid h-20 w-20 place-items-center rounded-2xl bg-secondary text-xs text-muted-foreground">
+              Belum ada
+            </div>
+          )}
+          <div className="space-y-1.5">
+            <p className="text-xs font-bold">Logo Koperasi</p>
+            <p className="text-[11px] text-muted-foreground">Gambar otomatis dikompres agar aplikasi tetap ringan.</p>
+            <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-full bg-primary px-3 py-1.5 text-[11px] font-bold text-primary-foreground">
+              <ImagePlus className="h-3.5 w-3.5" /> {busy ? "Memproses…" : "Pilih logo"}
+              <input type="file" accept="image/*" onChange={onLogo} className="hidden" />
+            </label>
+            {form.logo && (
+              <button
+                onClick={() => setForm((f) => ({ ...f, logo: "" }))}
+                className="ml-2 text-[11px] font-semibold text-destructive"
+              >
+                Hapus logo
+              </button>
+            )}
+          </div>
+        </div>
+      </section>
+
+      <section className="grid gap-3 rounded-2xl border border-border bg-card p-4 shadow-sm sm:grid-cols-2">
+        {field("Nama Koperasi", "koperasi", "Koperasi SMA ...")}
+        {field("Nama Sekolah", "name", "SMA ...")}
+        <label className="block">
+          <span className="text-[11px] font-semibold text-muted-foreground">Jenjang Sekolah</span>
+          <div className="mt-1 flex gap-2">
+            {LEVELS.map((lv) => (
+              <button
+                key={lv}
+                onClick={() => setForm((f) => ({ ...f, level: lv }))}
+                className={`flex-1 rounded-xl px-2 py-2 text-xs font-bold transition ${
+                  form.level === lv ? "bg-primary text-primary-foreground" : "bg-secondary text-secondary-foreground"
+                }`}
+              >
+                {lv}
+              </button>
+            ))}
+          </div>
+        </label>
+        {field("Kecamatan", "district", "Maospati")}
+        {field("Alamat Pengambilan", "pickup", "Koperasi Sekolah — gedung ...")}
+        {field("Jam Layanan", "hours", "Senin–Jumat 07.00–15.00")}
+        {field("Nomor Telepon", "phone", "0851-...")}
+      </section>
+
+      {msg && (
+        <p className={`text-xs font-semibold ${msg.ok ? "text-primary" : "text-destructive"}`}>{msg.text}</p>
+      )}
+      <button
+        onClick={save}
+        className="inline-flex items-center gap-1.5 rounded-xl bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground shadow-sm"
+      >
+        <Save className="h-4 w-4" /> Simpan Profil Toko
+      </button>
+    </div>
+  );
+}
+
+/* ============ Laporan Keuangan koperasi: pendapatan, ongkir, laba per bulan ============ */
+
+type MonthRow = { key: string; label: string; revenue: number; shipping: number; profit: number; orders: number };
+
+function financeRows(orders: Order[], schoolId: string, months = 6): MonthRow[] {
+  const rows: MonthRow[] = [];
+  const now = new Date();
+  for (let i = months - 1; i >= 0; i--) {
+    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+    rows.push({
+      key: `${d.getFullYear()}-${d.getMonth()}`,
+      label: d.toLocaleDateString("id-ID", { month: "short" }),
+      revenue: 0,
+      shipping: 0,
+      profit: 0,
+      orders: 0,
+    });
+  }
+  const index = new Map(rows.map((r) => [r.key, r]));
+
+  for (const o of orders) {
+    if (o.status === "Dibatalkan") continue;
+    const mine = o.items.filter((it) => it.schoolId === schoolId);
+    if (mine.length === 0) continue;
+    const d = new Date(o.createdAt);
+    const row = index.get(`${d.getFullYear()}-${d.getMonth()}`);
+    if (!row) continue;
+    const revenue = mine.reduce((s, it) => s + it.price * it.qty, 0);
+    const share = o.subtotal > 0 ? revenue / o.subtotal : 1;
+    const shipping = Math.round((o.shippingTotal ?? 0) * share);
+    row.revenue += revenue;
+    row.shipping += shipping;
+    row.profit += revenue - shipping;
+    row.orders += 1;
+  }
+  return rows;
+}
+
+function FinanceAdmin({ schoolId }: { schoolId: string }) {
+  const { orders } = useTooku();
+  const rows = financeRows(orders, schoolId);
+  const total = rows.reduce(
+    (a, r) => ({ revenue: a.revenue + r.revenue, shipping: a.shipping + r.shipping, profit: a.profit + r.profit }),
+    { revenue: 0, shipping: 0, profit: 0 },
+  );
+  const max = Math.max(1, ...rows.map((r) => r.revenue));
+
+  return (
+    <div className="space-y-4">
+      <section className="grid grid-cols-3 gap-2">
+        {[
+          { label: "Pendapatan", value: total.revenue, tone: "text-primary" },
+          { label: "Biaya Ongkir", value: total.shipping, tone: "text-destructive" },
+          { label: "Laba", value: total.profit, tone: "text-primary" },
+        ].map((c) => (
+          <div key={c.label} className="rounded-2xl border border-border bg-card p-3 shadow-sm">
+            <p className="text-[10px] text-muted-foreground">{c.label}</p>
+            <p className={`mt-0.5 text-sm font-extrabold tabular-nums ${c.tone}`}>{rupiah(c.value)}</p>
+          </div>
+        ))}
+      </section>
+
+      <section className="rounded-2xl border border-border bg-card p-4 shadow-sm">
+        <h3 className="text-xs font-bold">Grafik 6 Bulan Terakhir</h3>
+        <p className="mt-0.5 text-[11px] text-muted-foreground">
+          Batang biru = pendapatan, batang kuning = ongkir, garis = laba.
+        </p>
+        <div className="mt-4 flex h-44 items-end gap-3">
+          {rows.map((r) => (
+            <div key={r.key} className="flex flex-1 flex-col items-center gap-1.5">
+              <div className="flex h-36 w-full items-end justify-center gap-1">
+                <div
+                  className="w-1/3 rounded-t-md bg-primary transition-all"
+                  style={{ height: `${Math.max(2, (r.revenue / max) * 100)}%` }}
+                  title={`Pendapatan ${rupiah(r.revenue)}`}
+                />
+                <div
+                  className="w-1/4 rounded-t-md bg-accent transition-all"
+                  style={{ height: `${Math.max(2, (r.shipping / max) * 100)}%` }}
+                  title={`Ongkir ${rupiah(r.shipping)}`}
+                />
+                <div
+                  className="w-1/3 rounded-t-md bg-primary/40 transition-all"
+                  style={{ height: `${Math.max(2, (Math.max(0, r.profit) / max) * 100)}%` }}
+                  title={`Laba ${rupiah(r.profit)}`}
+                />
+              </div>
+              <span className="text-[10px] font-semibold text-muted-foreground">{r.label}</span>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      <section className="overflow-hidden rounded-2xl border border-border bg-card shadow-sm">
+        <table className="w-full text-left text-[11px]">
+          <thead className="bg-secondary/60 text-[10px] uppercase text-muted-foreground">
+            <tr>
+              <th className="px-3 py-2">Bulan</th>
+              <th className="px-3 py-2">Pesanan</th>
+              <th className="px-3 py-2">Pendapatan</th>
+              <th className="px-3 py-2">Ongkir</th>
+              <th className="px-3 py-2">Laba</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((r) => (
+              <tr key={r.key} className="border-t border-border">
+                <td className="px-3 py-2 font-semibold">{r.label}</td>
+                <td className="px-3 py-2 tabular-nums">{r.orders}</td>
+                <td className="px-3 py-2 tabular-nums">{rupiah(r.revenue)}</td>
+                <td className="px-3 py-2 tabular-nums text-destructive">{rupiah(r.shipping)}</td>
+                <td className="px-3 py-2 font-bold tabular-nums text-primary">{rupiah(r.profit)}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+    </div>
+  );
+}
