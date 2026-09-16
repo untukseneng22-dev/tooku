@@ -116,10 +116,7 @@ function AdminPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const mySchoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
   const mySchool = getSchool(mySchoolId);
-  const handleLogout = () => {
-    logout();
-    navigate({ to: "/", replace: true });
-  };
+
 
   // Admin Pusat punya konsol tersendiri.
   if (isSuperAdmin) {
