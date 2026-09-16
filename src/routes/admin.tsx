@@ -67,7 +67,7 @@ import { compressImage } from "@/lib/image-compress";
 import { AccountSettingsSheet } from "@/components/tooku/account-settings";
 import { ProductThumb } from "@/components/tooku/ui";
 import logoAsset from "@/assets/tooku-logo.png.asset.json";
-import { LogOut } from "lucide-react";
+
 
 export const Route = createFileRoute("/admin")({
   head: () => ({
@@ -116,10 +116,7 @@ function AdminPage() {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const mySchoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
   const mySchool = getSchool(mySchoolId);
-  const handleLogout = () => {
-    logout();
-    navigate({ to: "/", replace: true });
-  };
+
 
   // Admin Pusat punya konsol tersendiri.
   if (isSuperAdmin) {
@@ -206,14 +203,9 @@ function AdminPage() {
               >
                 <Settings className="h-4 w-4" />
               </button>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground px-3 py-1.5 text-[11px] font-bold text-primary shadow-sm transition hover:bg-accent hover:text-accent-foreground"
-              >
-                <LogOut className="h-3.5 w-3.5" /> Keluar
-              </button>
             </div>
           </div>
+
 
           {/* Identitas toko */}
           <div className="flex items-center gap-3 pb-16 pt-5 sm:gap-4">
