@@ -203,14 +203,9 @@ function AdminPage() {
               >
                 <Settings className="h-4 w-4" />
               </button>
-              <button
-                onClick={handleLogout}
-                className="inline-flex items-center gap-1.5 rounded-full bg-primary-foreground px-3 py-1.5 text-[11px] font-bold text-primary shadow-sm transition hover:bg-accent hover:text-accent-foreground"
-              >
-                <LogOut className="h-3.5 w-3.5" /> Keluar
-              </button>
             </div>
           </div>
+
 
           {/* Identitas toko */}
           <div className="flex items-center gap-3 pb-16 pt-5 sm:gap-4">
