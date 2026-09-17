@@ -42,8 +42,11 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { products: allProducts, cart, user } = useTooku();
+  // Penyaringan bergantung tanggal berjalan: hanya di browser agar tampilan awal tetap sama.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   // Barang yang sudah masuk fase donasi / daur ulang tidak lagi dijual.
-  const products = allProducts.filter((p) => isSellable(p));
+  const products = mounted ? allProducts.filter((p) => isSellable(p)) : allProducts;
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Category | "Semua">("Semua");
   const [showFilter, setShowFilter] = useState(false);
@@ -60,9 +63,6 @@ function Home() {
     .filter((p): p is NonNullable<typeof p> => Boolean(p))
     .slice(0, 8);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Bagian cuci gudang bergantung pada tanggal berjalan: render hanya di browser.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
 
   const cartCount = cart.reduce((n, l) => n + l.qty, 0);
