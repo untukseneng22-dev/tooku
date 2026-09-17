@@ -131,7 +131,7 @@ function Home() {
       <header className="sticky top-0 z-40 bg-primary relative px-3 pb-3 pt-3 text-primary-foreground shadow-sm">
         <div className="mx-auto max-w-2xl">
           <div className="flex items-center gap-2">
-            <div className="relative flex min-w-0 flex-1 items-center gap-2 rounded-lg bg-card px-2.5 py-2">
+            <div className="relative flex min-w-0 flex-1 items-center gap-2 rounded-full bg-card py-1.5 pl-3 pr-1.5">
               <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
               <input
                 value={query}
@@ -158,16 +158,23 @@ function Home() {
                   <XIcon className="h-4 w-4" />
                 </button>
               )}
+              <button
+                onClick={() => submitSearch(query)}
+                aria-label="Cari"
+                className="grid h-7 w-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-transform active:scale-95"
+              >
+                <Search className="h-3.5 w-3.5" />
+              </button>
             </div>
 
             <Link
               to="/keranjang"
               aria-label="Keranjang"
-              className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15"
+              className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors active:bg-primary-foreground/15"
             >
-              <ShoppingCart className="h-[18px] w-[18px]" />
+              <ShoppingCart className="h-[21px] w-[21px]" />
               {cartCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
+                <span className="absolute -right-0.5 -top-0.5 grid h-[17px] min-w-[17px] place-items-center rounded-full border border-primary bg-sale px-1 text-[9px] font-bold text-sale-foreground">
                   {cartCount}
                 </span>
               )}
@@ -175,12 +182,21 @@ function Home() {
             <Link
               to={user ? "/chat" : "/auth"}
               aria-label={user ? "Chat penjual" : "Masuk untuk chat penjual"}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors active:bg-primary-foreground/15"
             >
-              <MessageCircle className="h-[18px] w-[18px]" />
+              <MessageCircle className="h-[21px] w-[21px]" />
             </Link>
-
           </div>
+
+          {/* Kata kunci populer ala Shopee */}
+          <div className="no-scrollbar -mb-0.5 mt-2 flex gap-3 overflow-x-auto text-[10px] font-medium text-primary-foreground/80">
+            {popular.map((k) => (
+              <button key={k} onClick={() => submitSearch(k)} className="shrink-0 whitespace-nowrap">
+                {k}
+              </button>
+            ))}
+          </div>
+
 
           {focused && (
             <div className="absolute inset-x-3 top-[calc(100%-6px)] z-50 max-h-[60vh] overflow-y-auto rounded-b-2xl border border-border bg-card p-3 text-foreground shadow-lg">
