@@ -145,7 +145,7 @@ export function ProductCard({ product }: { product: Product }) {
           toggleWishlist(product.id);
         }}
         aria-label={loved ? "Hapus dari favorit" : "Simpan ke favorit"}
-        className="absolute right-1.5 top-1.5 z-10 grid h-7 w-7 place-items-center rounded-full bg-card/85 shadow-sm backdrop-blur transition-transform active:scale-90"
+        className="absolute left-1.5 top-1.5 z-20 grid h-7 w-7 place-items-center rounded-full bg-card/85 shadow-sm backdrop-blur transition-transform active:scale-90"
       >
         <Heart
           className={`h-4 w-4 transition-all ${loved ? "animate-heart-pop fill-destructive text-destructive" : "text-muted-foreground"}`}
@@ -161,7 +161,7 @@ export function ProductCard({ product }: { product: Product }) {
             </span>
           )}
           {product.curated && (
-            <span className="absolute left-0 top-2 inline-flex items-center gap-0.5 rounded-r-full bg-primary px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground">
+            <span className="absolute left-1.5 top-10 inline-flex items-center gap-0.5 rounded bg-primary px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground">
               <BadgeCheck className="h-2.5 w-2.5" /> Terkurasi
             </span>
           )}
