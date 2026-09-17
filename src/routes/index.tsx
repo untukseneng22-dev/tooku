@@ -280,9 +280,9 @@ function Home() {
         {/* Promo carousel */}
         <PromoCarousel />
 
-        {/* Kategori */}
-        <section>
-          <HScroll className="gap-3 pb-1">
+        {/* Menu pintasan kategori — dua baris ikon bulat */}
+        <section className="rounded-xl border border-border bg-card p-3 shadow-sm">
+          <div className="grid grid-cols-5 gap-y-3">
             {(["Semua", ...categories.map((c) => c.name)] as const).map((name) => {
               const icon = categories.find((c) => c.name === name)?.icon ?? "🛍️";
               const active = cat === name;
@@ -290,16 +290,44 @@ function Home() {
                 <button
                   key={name}
                   onClick={() => setCat(name as Category | "Semua")}
-                  className={`flex w-20 shrink-0 flex-col items-center gap-1.5 rounded-2xl border px-2 py-3 text-[10px] font-semibold ${
-                    active ? "border-primary bg-primary/5 text-primary" : "border-border bg-card text-muted-foreground"
-                  }`}
+                  className="flex flex-col items-center gap-1"
                 >
-                  <span className="text-xl">{icon}</span>
-                  <span className="truncate">{name}</span>
+                  <span
+                    className={`grid h-12 w-12 place-items-center rounded-full text-xl transition-transform active:scale-95 ${
+                      active ? "bg-primary text-primary-foreground shadow-md shadow-primary/30" : "bg-secondary"
+                    }`}
+                  >
+                    {icon}
+                  </span>
+                  <span
+                    className={`w-full truncate px-0.5 text-center text-[9px] font-semibold ${
+                      active ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    {name}
+                  </span>
                 </button>
               );
             })}
-          </HScroll>
+            {(
+              [
+                { to: "/koperasi", label: "Koperasi", icon: "🏫" },
+                { to: "/standar-kurasi", label: "Kurasi", icon: "🛡️" },
+                { to: "/favorit", label: "Favorit", icon: "❤️" },
+                { to: "/pesanan", label: "Pesanan", icon: "📦" },
+                { to: "/bantuan", label: "Bantuan", icon: "💬" },
+              ] as const
+            ).map((s) => (
+              <Link key={s.to} to={s.to} className="flex flex-col items-center gap-1">
+                <span className="grid h-12 w-12 place-items-center rounded-full bg-secondary text-xl transition-transform active:scale-95">
+                  {s.icon}
+                </span>
+                <span className="w-full truncate px-0.5 text-center text-[9px] font-semibold text-muted-foreground">
+                  {s.label}
+                </span>
+              </Link>
+            ))}
+          </div>
         </section>
 
         {/* Koperasi sekolah penjual (lintas sekolah se-Kab. Magetan) */}
