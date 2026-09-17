@@ -27,7 +27,7 @@ export function useCountdownTo(endsAt: number) {
 
 function TimeBox({ v }: { v: string }) {
   return (
-    <span className="min-w-7 rounded-lg bg-primary px-1.5 py-1 text-center text-[12px] font-extrabold tabular-nums text-primary-foreground shadow-sm">
+    <span className="min-w-[22px] rounded-[4px] bg-foreground px-1 py-0.5 text-center text-[12px] font-extrabold tabular-nums text-background">
       {v}
     </span>
   );
