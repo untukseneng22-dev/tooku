@@ -417,7 +417,7 @@ function Home() {
 
             <HScroll className="gap-3 pb-1">
               {clearance.map((p) => (
-                <div key={p.id} className="w-36 shrink-0">
+                <div key={p.id} className="w-32 shrink-0">
                   <ProductCard product={p} />
                 </div>
               ))}
@@ -434,7 +434,7 @@ function Home() {
           </div>
           <HScroll className="gap-3 pb-1">
             {featured.map((p) => (
-              <div key={p.id} className="w-36 shrink-0">
+              <div key={p.id} className="w-32 shrink-0">
                 <ProductCard product={p} />
               </div>
             ))}
@@ -453,7 +453,7 @@ function Home() {
             </div>
             <HScroll className="gap-3 pb-1">
               {recentlyViewed.map((p) => (
-                <div key={p.id} className="w-36 shrink-0">
+                <div key={p.id} className="w-32 shrink-0">
                   <ProductCard product={p} />
                 </div>
               ))}
