@@ -46,37 +46,47 @@ export function FlashSaleSection() {
   if (items.length === 0) return null;
 
   return (
-    <section>
-      <div className="mb-3 flex items-center gap-2 rounded-2xl bg-gradient-to-r from-accent via-accent to-chart-5 px-3.5 py-2.5 shadow-sm">
-        <span className="grid h-8 w-8 shrink-0 place-items-center rounded-xl bg-primary/90 text-accent">
-          <Zap className="h-4 w-4 fill-current" />
-        </span>
-        <div className="min-w-0 flex-1">
-          <h2 className="truncate text-sm font-extrabold text-accent-foreground">{sale.title}</h2>
-          <p className="text-[10px] font-semibold text-accent-foreground/80">
-            Diskon ekstra {sale.discountPct}% · stok terbatas
-          </p>
-        </div>
-        <span className="flex shrink-0 items-center gap-1">
+    <section className="overflow-hidden rounded-xl border border-border bg-card shadow-sm">
+      <div className="flex items-center gap-2 border-b border-border px-3 py-2.5">
+        <h2 className="flex shrink-0 items-center gap-1 text-[13px] font-extrabold uppercase tracking-wide text-sale">
+          <Zap className="h-4 w-4 fill-current" /> Flash Sale
+        </h2>
+        <span className="flex shrink-0 items-center gap-0.5">
           {countdown ? (
             <>
               <TimeBox v={countdown.jam} />
-              <span className="text-xs font-extrabold text-accent-foreground">:</span>
+              <span className="text-[11px] font-extrabold text-foreground">:</span>
               <TimeBox v={countdown.menit} />
-              <span className="text-xs font-extrabold text-accent-foreground">:</span>
+              <span className="text-[11px] font-extrabold text-foreground">:</span>
               <TimeBox v={countdown.detik} />
             </>
           ) : (
-            <span className="text-[10px] font-bold text-accent-foreground">Berlangsung</span>
+            <span className="text-[10px] font-bold text-muted-foreground">Sedang berjalan</span>
           )}
         </span>
+        <span className="ml-auto shrink-0 text-[11px] font-bold text-sale">Lihat Semua →</span>
       </div>
-      <HScroll className="gap-3 pb-1">
-        {items.map((p) => (
-          <div key={p.id} className="w-36 shrink-0">
-            <ProductCard product={p} />
-          </div>
-        ))}
+      <p className="px-3 pt-2 text-[10px] font-semibold text-muted-foreground">
+        {sale.title} · diskon ekstra {sale.discountPct}%
+      </p>
+      <HScroll className="gap-2.5 px-3 pb-3 pt-2">
+        {items.map((p) => {
+          const total = p.sold + p.stock;
+          const pct = total > 0 ? Math.min(96, Math.round((p.sold / total) * 100)) : 0;
+          return (
+            <div key={p.id} className="w-32 shrink-0">
+              <ProductCard product={p} />
+              <div className="mt-1.5">
+                <div className="h-2.5 overflow-hidden rounded-full bg-sale-soft">
+                  <div className="h-full rounded-full bg-sale" style={{ width: `${Math.max(12, pct)}%` }} />
+                </div>
+                <p className="mt-0.5 text-center text-[9px] font-bold text-sale">
+                  {p.stock <= 2 ? "Segera habis" : `Terjual ${pct}%`}
+                </p>
+              </div>
+            </div>
+          );
+        })}
       </HScroll>
     </section>
   );
