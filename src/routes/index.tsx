@@ -42,8 +42,11 @@ export const Route = createFileRoute("/")({
 
 function Home() {
   const { products: allProducts, cart, user } = useTooku();
+  // Penyaringan bergantung tanggal berjalan: hanya di browser agar tampilan awal tetap sama.
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
   // Barang yang sudah masuk fase donasi / daur ulang tidak lagi dijual.
-  const products = allProducts.filter((p) => isSellable(p));
+  const products = mounted ? allProducts.filter((p) => isSellable(p)) : allProducts;
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Category | "Semua">("Semua");
   const [showFilter, setShowFilter] = useState(false);
@@ -60,9 +63,6 @@ function Home() {
     .filter((p): p is NonNullable<typeof p> => Boolean(p))
     .slice(0, 8);
   const blurTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Bagian cuci gudang bergantung pada tanggal berjalan: render hanya di browser.
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
 
 
   const cartCount = cart.reduce((n, l) => n + l.qty, 0);
@@ -131,7 +131,7 @@ function Home() {
       <header className="sticky top-0 z-40 bg-primary relative px-3 pb-3 pt-3 text-primary-foreground shadow-sm">
         <div className="mx-auto max-w-2xl">
           <div className="flex items-center gap-2">
-            <div className="relative flex min-w-0 flex-1 items-center gap-2 rounded-lg bg-card px-2.5 py-2">
+            <div className="relative flex min-w-0 flex-1 items-center gap-2 rounded-full bg-card py-1.5 pl-3 pr-1.5">
               <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
               <input
                 value={query}
@@ -158,16 +158,23 @@ function Home() {
                   <XIcon className="h-4 w-4" />
                 </button>
               )}
+              <button
+                onClick={() => submitSearch(query)}
+                aria-label="Cari"
+                className="grid h-7 w-8 shrink-0 place-items-center rounded-full bg-primary text-primary-foreground transition-transform active:scale-95"
+              >
+                <Search className="h-3.5 w-3.5" />
+              </button>
             </div>
 
             <Link
               to="/keranjang"
               aria-label="Keranjang"
-              className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15"
+              className="relative grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors active:bg-primary-foreground/15"
             >
-              <ShoppingCart className="h-[18px] w-[18px]" />
+              <ShoppingCart className="h-[21px] w-[21px]" />
               {cartCount > 0 && (
-                <span className="absolute -right-0.5 -top-0.5 grid h-4 min-w-4 place-items-center rounded-full bg-accent px-1 text-[9px] font-bold text-accent-foreground">
+                <span className="absolute -right-0.5 -top-0.5 grid h-[17px] min-w-[17px] place-items-center rounded-full border border-primary bg-sale px-1 text-[9px] font-bold text-sale-foreground">
                   {cartCount}
                 </span>
               )}
@@ -175,12 +182,21 @@ function Home() {
             <Link
               to={user ? "/chat" : "/auth"}
               aria-label={user ? "Chat penjual" : "Masuk untuk chat penjual"}
-              className="grid h-9 w-9 shrink-0 place-items-center rounded-full bg-primary-foreground/15"
+              className="grid h-9 w-9 shrink-0 place-items-center rounded-full transition-colors active:bg-primary-foreground/15"
             >
-              <MessageCircle className="h-[18px] w-[18px]" />
+              <MessageCircle className="h-[21px] w-[21px]" />
             </Link>
-
           </div>
+
+          {/* Kata kunci populer ala Shopee */}
+          <div className="no-scrollbar -mb-0.5 mt-2 flex gap-3 overflow-x-auto text-[10px] font-medium text-primary-foreground/80">
+            {popular.map((k) => (
+              <button key={k} onClick={() => submitSearch(k)} className="shrink-0 whitespace-nowrap">
+                {k}
+              </button>
+            ))}
+          </div>
+
 
           {focused && (
             <div className="absolute inset-x-3 top-[calc(100%-6px)] z-50 max-h-[60vh] overflow-y-auto rounded-b-2xl border border-border bg-card p-3 text-foreground shadow-lg">
@@ -280,9 +296,9 @@ function Home() {
         {/* Promo carousel */}
         <PromoCarousel />
 
-        {/* Kategori */}
-        <section>
-          <HScroll className="gap-3 pb-1">
+        {/* Menu pintasan kategori — dua baris ikon bulat */}
+        <section className="rounded-xl border border-border bg-card p-3 shadow-sm">
+          <div className="grid grid-cols-5 gap-y-3">
             {(["Semua", ...categories.map((c) => c.name)] as const).map((name) => {
               const icon = categories.find((c) => c.name === name)?.icon ?? "🛍️";
               const active = cat === name;
@@ -290,16 +306,44 @@ function Home() {
                 <button
                   key={name}
                   onClick={() => setCat(name as Category | "Semua")}
-                  className={`flex w-20 shrink-0 flex-col items-center gap-1.5 rounded-2xl border px-2 py-3 text-[10px] font-semibold ${
-                    active ? "border-primary bg-primary/5 text-primary" : "border-border bg-card text-muted-foreground"
-                  }`}
+                  className="flex flex-col items-center gap-1"
                 >
-                  <span className="text-xl">{icon}</span>
-                  <span className="truncate">{name}</span>
+                  <span
+                    className={`grid h-12 w-12 place-items-center rounded-full text-xl transition-transform active:scale-95 ${
+                      active ? "bg-primary text-primary-foreground shadow-md shadow-primary/30" : "bg-secondary"
+                    }`}
+                  >
+                    {icon}
+                  </span>
+                  <span
+                    className={`w-full truncate px-0.5 text-center text-[9px] font-semibold ${
+                      active ? "text-primary" : "text-muted-foreground"
+                    }`}
+                  >
+                    {name}
+                  </span>
                 </button>
               );
             })}
-          </HScroll>
+            {(
+              [
+                { to: "/koperasi", label: "Koperasi", icon: "🏫" },
+                { to: "/standar-kurasi", label: "Kurasi", icon: "🛡️" },
+                { to: "/favorit", label: "Favorit", icon: "❤️" },
+                { to: "/pesanan", label: "Pesanan", icon: "📦" },
+                { to: "/bantuan", label: "Bantuan", icon: "💬" },
+              ] as const
+            ).map((s) => (
+              <Link key={s.to} to={s.to} className="flex flex-col items-center gap-1">
+                <span className="grid h-12 w-12 place-items-center rounded-full bg-secondary text-xl transition-transform active:scale-95">
+                  {s.icon}
+                </span>
+                <span className="w-full truncate px-0.5 text-center text-[9px] font-semibold text-muted-foreground">
+                  {s.label}
+                </span>
+              </Link>
+            ))}
+          </div>
         </section>
 
         {/* Koperasi sekolah penjual (lintas sekolah se-Kab. Magetan) */}
@@ -373,7 +417,7 @@ function Home() {
 
             <HScroll className="gap-3 pb-1">
               {clearance.map((p) => (
-                <div key={p.id} className="w-36 shrink-0">
+                <div key={p.id} className="w-32 shrink-0">
                   <ProductCard product={p} />
                 </div>
               ))}
@@ -390,7 +434,7 @@ function Home() {
           </div>
           <HScroll className="gap-3 pb-1">
             {featured.map((p) => (
-              <div key={p.id} className="w-36 shrink-0">
+              <div key={p.id} className="w-32 shrink-0">
                 <ProductCard product={p} />
               </div>
             ))}
@@ -409,7 +453,7 @@ function Home() {
             </div>
             <HScroll className="gap-3 pb-1">
               {recentlyViewed.map((p) => (
-                <div key={p.id} className="w-36 shrink-0">
+                <div key={p.id} className="w-32 shrink-0">
                   <ProductCard product={p} />
                 </div>
               ))}

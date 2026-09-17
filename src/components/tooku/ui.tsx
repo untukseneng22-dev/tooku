@@ -126,82 +126,104 @@ export function useEffectivePrice(product: Product) {
 }
 
 export function ProductCard({ product }: { product: Product }) {
-  const { stage, discount, days } = lifecyclePrice(product);
+  const { stage, discount } = lifecyclePrice(product);
   const clearance = discount > 0;
   const { wishlist, toggleWishlist } = useTooku();
   const { price, flashDiscount } = useEffectivePrice(product);
   const rating = useProductRating(product.id);
   const loved = wishlist.includes(product.id);
+  const school = product.schoolId ? schoolById(product.schoolId) : undefined;
+  const strike =
+    flashDiscount > 0 || clearance ? product.originalPrice ?? product.price : product.originalPrice;
+  const cut = flashDiscount > 0 ? flashDiscount : clearance ? discount : 0;
 
   return (
-    <div className="group/card relative overflow-hidden rounded-2xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]">
+    <div className="group/card relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]">
       <button
         onClick={(e) => {
           e.preventDefault();
           toggleWishlist(product.id);
         }}
         aria-label={loved ? "Hapus dari favorit" : "Simpan ke favorit"}
-        className="absolute right-1.5 top-1.5 z-10 grid h-7 w-7 place-items-center rounded-full bg-card/85 shadow-sm backdrop-blur transition-transform active:scale-90"
+        className="absolute left-1.5 top-1.5 z-20 grid h-7 w-7 place-items-center rounded-full bg-card/85 shadow-sm backdrop-blur transition-transform active:scale-90"
       >
         <Heart
           className={`h-4 w-4 transition-all ${loved ? "animate-heart-pop fill-destructive text-destructive" : "text-muted-foreground"}`}
         />
       </button>
-      <Link to="/produk/$id" params={{ id: product.id }} className="block">
-        <div className="relative aspect-square overflow-hidden">
+      <Link to="/produk/$id" params={{ id: product.id }} className="flex min-w-0 flex-1 flex-col">
+        <div className="relative aspect-square overflow-hidden bg-secondary">
           <ProductThumb product={product} />
+          {cut > 0 && (
+            <span className="absolute right-0 top-0 flex w-9 flex-col items-center rounded-bl-lg bg-sale py-0.5 text-[10px] font-extrabold leading-tight text-sale-foreground">
+              <span>{cut}%</span>
+              <span className="text-[8px] font-bold">OFF</span>
+            </span>
+          )}
           {product.curated && (
-            <span className="absolute left-2 top-2 rounded-full bg-accent px-2 py-0.5 text-[10px] font-bold text-accent-foreground">
-              Terkurasi
+            <span className="absolute left-1.5 top-10 inline-flex items-center gap-0.5 rounded bg-primary px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground">
+              <BadgeCheck className="h-2.5 w-2.5" /> Terkurasi
             </span>
           )}
           {flashDiscount > 0 ? (
-            <span className="absolute bottom-2 right-2 inline-flex items-center gap-0.5 rounded-full bg-destructive px-2 py-0.5 text-[10px] font-bold text-destructive-foreground">
-              <Zap className="h-3 w-3" /> −{flashDiscount}%
+            <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-sale/95 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-sale-foreground">
+              <Zap className="h-2.5 w-2.5 fill-current" /> Flash Sale
             </span>
           ) : (
             clearance && (
               <span
-                className={`absolute bottom-2 right-2 rounded-full px-2 py-0.5 text-[10px] font-bold ${stageMeta[stage].tone}`}
+                className={`absolute inset-x-0 bottom-0 py-0.5 text-center text-[9px] font-extrabold uppercase tracking-wide ${stageMeta[stage].tone}`}
               >
-                {stageMeta[stage].short} −{discount}%
+                {stageMeta[stage].short}
               </span>
             )
           )}
           {product.bundleOf && product.bundleOf.length > 1 && (
-            <span className="absolute bottom-2 left-2 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">
-              Paket Bundling
+            <span className="absolute bottom-5 left-1.5 rounded bg-primary px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground">
+              Paket
             </span>
           )}
         </div>
-        <div className="space-y-1 p-2.5">
-          <p className="line-clamp-2 min-h-[2.4rem] text-xs leading-snug text-card-foreground">{product.name}</p>
-          <div className="flex items-end gap-1.5">
-            <p className="text-sm font-bold text-primary">{rupiah(price)}</p>
-            {flashDiscount > 0 && (
-              <p className="pb-0.5 text-[10px] text-muted-foreground line-through">{rupiah(product.price)}</p>
+        <div className="flex min-w-0 flex-1 flex-col gap-1 p-2">
+          <p className="line-clamp-2 min-h-[2.2rem] text-[11px] leading-snug text-card-foreground">{product.name}</p>
+
+          <div className="flex flex-wrap items-baseline gap-1">
+            <p className="text-[15px] font-extrabold leading-none text-sale">{rupiah(price)}</p>
+            {strike && strike > price && (
+              <p className="text-[10px] text-muted-foreground line-through">{rupiah(strike)}</p>
             )}
           </div>
-          {product.originalPrice && flashDiscount === 0 && (
-            <p className="text-[10px] text-muted-foreground line-through">{rupiah(product.originalPrice)}</p>
-          )}
-          {clearance && flashDiscount === 0 && (
-            <p className="text-[10px] font-semibold text-destructive">Harga khusus cuci gudang</p>
-          )}
 
-          <KoperasiBadge schoolId={product.schoolId} small />
+          <div className="flex items-center gap-1">
+            <span className="rounded-sm bg-sale-soft px-1 py-[1px] text-[9px] font-bold text-sale">
+              {product.condition}
+            </span>
+            {product.stock <= 2 && (
+              <span className="rounded-sm bg-secondary px-1 py-[1px] text-[9px] font-bold text-primary">
+                Sisa {product.stock}
+              </span>
+            )}
+          </div>
 
-          <div className="flex items-center justify-between text-[10px] text-muted-foreground">
+          <div className="mt-auto flex items-center gap-1 pt-0.5 text-[9px] text-muted-foreground">
             {rating ? (
-              <span className="flex shrink-0 items-center gap-0.5 font-semibold text-foreground">
-                <Star className="h-3 w-3 fill-accent text-accent" /> {rating.label}
-                <span className="font-normal text-muted-foreground">({rating.count})</span>
+              <span className="flex shrink-0 items-center gap-0.5 font-bold text-foreground">
+                <Star className="h-2.5 w-2.5 fill-accent text-accent" /> {rating.label}
               </span>
             ) : (
-              <span className="truncate">{product.condition}</span>
+              <span className="flex shrink-0 items-center gap-0.5 font-bold text-primary">
+                <BadgeCheck className="h-2.5 w-2.5" /> Baru
+              </span>
             )}
+            <span className="shrink-0">·</span>
             <span className="shrink-0">{product.sold} terjual</span>
           </div>
+          {school && (
+            <p className="flex min-w-0 items-center gap-1 text-[9px] font-semibold text-muted-foreground">
+              <Store className="h-2.5 w-2.5 shrink-0 text-primary" />
+              <span className="truncate">{school.district}</span>
+            </p>
+          )}
         </div>
       </Link>
     </div>
