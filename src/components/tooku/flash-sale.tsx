@@ -74,8 +74,10 @@ export function FlashSaleSection() {
           const total = p.sold + p.stock;
           const pct = total > 0 ? Math.min(96, Math.round((p.sold / total) * 100)) : 0;
           return (
-            <div key={p.id} className="w-32 shrink-0">
-              <ProductCard product={p} />
+            <div key={p.id} className="flex w-32 shrink-0 flex-col">
+              <div className="flex-1">
+                <ProductCard product={p} />
+              </div>
               <div className="mt-1.5">
                 <div className="h-2.5 overflow-hidden rounded-full bg-sale-soft">
                   <div className="h-full rounded-full bg-sale" style={{ width: `${Math.max(12, pct)}%` }} />
