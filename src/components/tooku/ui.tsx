@@ -1,5 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Home, ClipboardList, User, ShoppingBag, BadgeCheck, Bell, Store, Star, Heart, Zap } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTooku } from "@/lib/tooku-store";
 import type { Product } from "@/lib/tooku-data";
 import { lifecyclePrice, stageMeta } from "@/lib/tooku-lifecycle";
@@ -126,16 +127,20 @@ export function useEffectivePrice(product: Product) {
 }
 
 export function ProductCard({ product }: { product: Product }) {
-  const { stage, discount } = lifecyclePrice(product);
-  const clearance = discount > 0;
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
+
+  const lifecycle = lifecyclePrice(product);
+  const isClearance = mounted && lifecycle.discount > 0;
   const { wishlist, toggleWishlist } = useTooku();
-  const { price, flashDiscount } = useEffectivePrice(product);
+  const { price: effectivePrice, flashDiscount } = useEffectivePrice(product);
   const rating = useProductRating(product.id);
   const loved = wishlist.includes(product.id);
   const school = product.schoolId ? schoolById(product.schoolId) : undefined;
+  const price = mounted ? effectivePrice : product.price;
   const strike =
-    flashDiscount > 0 || clearance ? product.originalPrice ?? product.price : product.originalPrice;
-  const cut = flashDiscount > 0 ? flashDiscount : clearance ? discount : 0;
+    mounted && (flashDiscount > 0 || isClearance) ? product.originalPrice ?? product.price : product.originalPrice;
+  const cut = mounted ? (flashDiscount > 0 ? flashDiscount : lifecycle.discount) : 0;
 
   return (
     <div className="group/card relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]">
@@ -165,19 +170,17 @@ export function ProductCard({ product }: { product: Product }) {
               <BadgeCheck className="h-2.5 w-2.5" /> Terkurasi
             </span>
           )}
-          {flashDiscount > 0 ? (
+          {flashDiscount > 0 && mounted ? (
             <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-sale/95 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-sale-foreground">
               <Zap className="h-2.5 w-2.5 fill-current" /> Flash Sale
             </span>
-          ) : (
-            clearance && (
-              <span
-                className={`absolute inset-x-0 bottom-0 py-0.5 text-center text-[9px] font-extrabold uppercase tracking-wide ${stageMeta[stage].tone}`}
-              >
-                {stageMeta[stage].short}
-              </span>
-            )
-          )}
+          ) : isClearance ? (
+            <span
+              className={`absolute inset-x-0 bottom-0 py-0.5 text-center text-[9px] font-extrabold uppercase tracking-wide ${stageMeta[lifecycle.stage].tone}`}
+            >
+              {stageMeta[lifecycle.stage].short}
+            </span>
+          ) : null}
           {product.bundleOf && product.bundleOf.length > 1 && (
             <span className="absolute bottom-5 left-1.5 rounded bg-primary px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground">
               Paket
