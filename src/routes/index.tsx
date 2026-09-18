@@ -132,7 +132,6 @@ function Home() {
         <div className="mx-auto max-w-2xl">
           <div className="flex items-center gap-2">
             <div className="relative flex min-w-0 flex-1 items-center gap-2 rounded-full bg-card py-1.5 pl-3 pr-1.5">
-              <Search className="h-4 w-4 shrink-0 text-muted-foreground" />
               <input
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -187,16 +186,6 @@ function Home() {
               <MessageCircle className="h-[21px] w-[21px]" />
             </Link>
           </div>
-
-          {/* Kata kunci populer ala Shopee */}
-          <div className="no-scrollbar -mb-0.5 mt-2 flex gap-3 overflow-x-auto text-[10px] font-medium text-primary-foreground/80">
-            {popular.map((k) => (
-              <button key={k} onClick={() => submitSearch(k)} className="shrink-0 whitespace-nowrap">
-                {k}
-              </button>
-            ))}
-          </div>
-
 
           {focused && (
             <div className="absolute inset-x-3 top-[calc(100%-6px)] z-50 max-h-[60vh] overflow-y-auto rounded-b-2xl border border-border bg-card p-3 text-foreground shadow-lg">
