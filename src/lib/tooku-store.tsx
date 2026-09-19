@@ -432,6 +432,25 @@ type Store = {
   addReport: (productId: string, reason: string) => { ok: boolean; error?: string };
   setReportStatus: (id: string, status: ReportStatus) => void;
   deleteReport: (id: string) => void;
+  /** ==== Event kampanye tanggal cantik (dibuat Admin Pusat) ==== */
+  campaigns: Campaign[];
+  campaignJoins: CampaignJoin[];
+  addCampaign: (input: {
+    badge: string;
+    name: string;
+    tagline: string;
+    startsAt: number;
+    days: number;
+    minDiscountPct: number;
+    maxDiscountPct: number;
+  }) => { ok: boolean; error?: string };
+  deleteCampaign: (id: string) => void;
+  /** Koperasi mendaftarkan barang ke sebuah event. */
+  joinCampaign: (input: { campaignId: string; productIds: string[]; discountPct: number }) => {
+    ok: boolean;
+    error?: string;
+  };
+  leaveCampaign: (campaignId: string) => void;
 };
 
 type TookuContextRegistry = typeof globalThis & {
