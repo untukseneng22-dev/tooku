@@ -1,10 +1,23 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, ClipboardList, User, ShoppingBag, BadgeCheck, Bell, Store, Star, Heart, Zap } from "lucide-react";
+import {
+  Home,
+  ClipboardList,
+  User,
+  ShoppingBag,
+  BadgeCheck,
+  Bell,
+  Store,
+  Star,
+  Heart,
+  Zap,
+  CalendarHeart,
+} from "lucide-react";
 import { useEffect, useState } from "react";
 import { useTooku } from "@/lib/tooku-store";
 import type { Product } from "@/lib/tooku-data";
 import { lifecyclePrice, stageMeta } from "@/lib/tooku-lifecycle";
 import { activeFlashFor, flashPrice } from "@/lib/tooku-extras";
+import { campaignDiscountFor, campaignPrice } from "@/lib/tooku-campaign";
 import { rupiah, schoolById } from "@/lib/tooku-data";
 
 export function Stars({ value, size = 14 }: { value: number; size?: number }) {
@@ -118,12 +131,18 @@ export function useProductRating(productId: string) {
   return { avg, count: list.length, label: avg.toFixed(1) };
 }
 
-/** Harga yang benar-benar dibayar pembeli (siklus hidup + flash sale). */
+/** Harga yang benar-benar dibayar pembeli (siklus hidup + flash sale + event). */
 export function useEffectivePrice(product: Product) {
-  const { flashSales } = useTooku();
+  const { flashSales, campaigns, campaignJoins } = useTooku();
   const sale = activeFlashFor(flashSales, product.id);
   const flash = flashPrice(product.price, sale);
-  return { price: flash.price, flashDiscount: flash.discount, sale };
+  const event = campaignDiscountFor(campaigns, campaignJoins, product.id);
+  const eventPrice = event ? campaignPrice(product.price, event.discountPct) : product.price;
+  // Pembeli selalu mendapat harga termurah di antara flash sale dan event.
+  if (event && eventPrice < flash.price) {
+    return { price: eventPrice, flashDiscount: 0, sale: null, eventDiscount: event.discountPct, campaign: event.campaign };
+  }
+  return { price: flash.price, flashDiscount: flash.discount, sale, eventDiscount: 0, campaign: null };
 }
 
 export function ProductCard({ product }: { product: Product }) {
@@ -133,14 +152,22 @@ export function ProductCard({ product }: { product: Product }) {
   const lifecycle = lifecyclePrice(product);
   const isClearance = mounted && lifecycle.discount > 0;
   const { wishlist, toggleWishlist } = useTooku();
-  const { price: effectivePrice, flashDiscount } = useEffectivePrice(product);
+  const { price: effectivePrice, flashDiscount, eventDiscount, campaign } = useEffectivePrice(product);
   const rating = useProductRating(product.id);
   const loved = wishlist.includes(product.id);
   const school = product.schoolId ? schoolById(product.schoolId) : undefined;
   const price = mounted ? effectivePrice : product.price;
   const strike =
-    mounted && (flashDiscount > 0 || isClearance) ? product.originalPrice ?? product.price : product.originalPrice;
-  const cut = mounted ? (flashDiscount > 0 ? flashDiscount : lifecycle.discount) : 0;
+    mounted && (flashDiscount > 0 || eventDiscount > 0 || isClearance)
+      ? product.originalPrice ?? product.price
+      : product.originalPrice;
+  const cut = mounted
+    ? flashDiscount > 0
+      ? flashDiscount
+      : eventDiscount > 0
+        ? eventDiscount
+        : lifecycle.discount
+    : 0;
 
   return (
     <div className="group/card relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]">
@@ -173,6 +200,10 @@ export function ProductCard({ product }: { product: Product }) {
           {flashDiscount > 0 && mounted ? (
             <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-sale/95 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-sale-foreground">
               <Zap className="h-2.5 w-2.5 fill-current" /> Flash Sale
+            </span>
+          ) : eventDiscount > 0 && mounted && campaign ? (
+            <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-primary/95 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-primary-foreground">
+              <CalendarHeart className="h-2.5 w-2.5" /> Event {campaign.badge}
             </span>
           ) : isClearance ? (
             <span

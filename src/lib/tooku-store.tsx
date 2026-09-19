@@ -43,6 +43,7 @@ import {
   type ReportStatus,
   type Voucher,
 } from "./tooku-extras";
+import { seedCampaigns, type Campaign, type CampaignJoin } from "./tooku-campaign";
 
 
 /** Field profil koperasi yang boleh diubah admin koperasi. */
@@ -431,6 +432,25 @@ type Store = {
   addReport: (productId: string, reason: string) => { ok: boolean; error?: string };
   setReportStatus: (id: string, status: ReportStatus) => void;
   deleteReport: (id: string) => void;
+  /** ==== Event kampanye tanggal cantik (dibuat Admin Pusat) ==== */
+  campaigns: Campaign[];
+  campaignJoins: CampaignJoin[];
+  addCampaign: (input: {
+    badge: string;
+    name: string;
+    tagline: string;
+    startsAt: number;
+    days: number;
+    minDiscountPct: number;
+    maxDiscountPct: number;
+  }) => { ok: boolean; error?: string };
+  deleteCampaign: (id: string) => void;
+  /** Koperasi mendaftarkan barang ke sebuah event. */
+  joinCampaign: (input: { campaignId: string; productIds: string[]; discountPct: number }) => {
+    ok: boolean;
+    error?: string;
+  };
+  leaveCampaign: (campaignId: string) => void;
 };
 
 type TookuContextRegistry = typeof globalThis & {
@@ -505,6 +525,8 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   const [reports, setReports] = useState<ProductReport[]>([]);
   const [schoolEdits, setSchoolEdits] = useState<Record<string, SchoolPatch>>({});
   const [notifs, setNotifs] = useState<AppNotif[]>([]);
+  const [campaigns, setCampaigns] = useState<Campaign[]>(seedCampaigns);
+  const [campaignJoins, setCampaignJoins] = useState<CampaignJoin[]>([]);
 
   const [hydrated, setHydrated] = useState(false);
 
@@ -546,6 +568,8 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         if (p.reports) setReports(p.reports);
         if (p.schoolEdits) setSchoolEdits(p.schoolEdits as Record<string, SchoolPatch>);
         if (p.notifs) setNotifs(p.notifs);
+        if (p.campaigns) setCampaigns(p.campaigns as Campaign[]);
+        if (p.campaignJoins) setCampaignJoins(p.campaignJoins as CampaignJoin[]);
       }
     } catch {
       /* ignore */
@@ -583,12 +607,14 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           reports,
           notifs,
           schoolEdits,
+          campaigns,
+          campaignJoins,
         }),
       );
     } catch {
       /* ignore */
     }
-  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits]);
+  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins]);
 
 
   // Evaluasi ulang fase siklus hidup (diskon otomatis / donasi) tiap jam.
@@ -1106,8 +1132,68 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         if (user?.role !== "superadmin") return;
         setReports((rs) => rs.filter((r) => r.id !== id));
       },
+      campaigns,
+      campaignJoins,
+      addCampaign: ({ badge, name, tagline, startsAt, days, minDiscountPct, maxDiscountPct }) => {
+        if (user?.role !== "superadmin") return { ok: false, error: "Hanya Admin Pusat yang bisa membuat event." };
+        if (!name.trim()) return { ok: false, error: "Nama event wajib diisi." };
+        if (!startsAt || Number.isNaN(startsAt)) return { ok: false, error: "Tanggal mulai belum benar." };
+        if (minDiscountPct < 1 || maxDiscountPct > 90 || minDiscountPct > maxDiscountPct)
+          return { ok: false, error: "Rentang diskon harus 1–90% dan minimal ≤ maksimal." };
+        const c: Campaign = {
+          id: "cp" + Date.now(),
+          badge: badge.trim() || "Event",
+          name: name.trim(),
+          tagline: tagline.trim(),
+          startsAt,
+          endsAt: startsAt + Math.max(1, days) * 1000 * 60 * 60 * 24,
+          minDiscountPct,
+          maxDiscountPct,
+          createdAt: Date.now(),
+        };
+        setCampaigns((cs) => [c, ...cs]);
+        pushNotif(
+          null,
+          "promo",
+          `Event ${c.badge} segera dibuka!`,
+          `${c.name} — koperasi sekolah bisa mendaftarkan barangnya dengan diskon ${minDiscountPct}–${maxDiscountPct}%.`,
+        );
+        return { ok: true };
+      },
+      deleteCampaign: (id) => {
+        if (user?.role !== "superadmin") return;
+        setCampaigns((cs) => cs.filter((c) => c.id !== id));
+        setCampaignJoins((js) => js.filter((j) => j.campaignId !== id));
+      },
+      joinCampaign: ({ campaignId, productIds, discountPct }) => {
+        if (user?.role !== "admin") return { ok: false, error: "Hanya admin koperasi yang bisa ikut event." };
+        const c = campaigns.find((x) => x.id === campaignId);
+        if (!c) return { ok: false, error: "Event tidak ditemukan." };
+        if (Date.now() > c.endsAt) return { ok: false, error: "Event sudah berakhir." };
+        if (productIds.length === 0) return { ok: false, error: "Pilih minimal 1 barang." };
+        if (discountPct < c.minDiscountPct || discountPct > c.maxDiscountPct)
+          return { ok: false, error: `Diskon harus ${c.minDiscountPct}–${c.maxDiscountPct}%.` };
+        const schoolId = schoolIdForAccount({ username: user.username, name: user.name });
+        setCampaignJoins((js) => [
+          {
+            id: "cj" + Date.now(),
+            campaignId,
+            schoolId,
+            productIds,
+            discountPct,
+            joinedAt: Date.now(),
+          },
+          ...js.filter((j) => !(j.campaignId === campaignId && j.schoolId === schoolId)),
+        ]);
+        return { ok: true };
+      },
+      leaveCampaign: (campaignId) => {
+        if (user?.role !== "admin") return;
+        const schoolId = schoolIdForAccount({ username: user.username, name: user.name });
+        setCampaignJoins((js) => js.filter((j) => !(j.campaignId === campaignId && j.schoolId === schoolId)));
+      },
     }),
-    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, koperasiList],
+    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, koperasiList, campaigns, campaignJoins],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

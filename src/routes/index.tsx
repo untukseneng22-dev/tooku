@@ -18,6 +18,7 @@ import { categories, schools, schoolById, type Category, type SchoolLevel } from
 import { ProductCard, EmptyState } from "@/components/tooku/ui";
 import { PromoCarousel } from "@/components/tooku/promo-carousel";
 import { FlashSaleSection } from "@/components/tooku/flash-sale";
+import { EventSection } from "@/components/tooku/event-section";
 import { useRecentlyViewed, useSearchHistory } from "@/lib/tooku-recent";
 import { HScroll, ScrollDownHint } from "@/components/tooku/scroll-hint";
 
@@ -389,6 +390,8 @@ function Home() {
         </section>
 
         {/* Flash sale berjalan */}
+        <EventSection />
+
         <FlashSaleSection />
 
         {/* Cuci Gudang — diskon otomatis barang lama tayang */}
