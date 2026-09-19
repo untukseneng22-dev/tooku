@@ -189,6 +189,10 @@ export function ProductCard({ product }: { product: Product }) {
             <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-sale/95 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-sale-foreground">
               <Zap className="h-2.5 w-2.5 fill-current" /> Flash Sale
             </span>
+          ) : eventDiscount > 0 && mounted && campaign ? (
+            <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-primary/95 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-primary-foreground">
+              <CalendarHeart className="h-2.5 w-2.5" /> Event {campaign.badge}
+            </span>
           ) : isClearance ? (
             <span
               className={`absolute inset-x-0 bottom-0 py-0.5 text-center text-[9px] font-extrabold uppercase tracking-wide ${stageMeta[lifecycle.stage].tone}`}
