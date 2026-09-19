@@ -568,6 +568,8 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         if (p.reports) setReports(p.reports);
         if (p.schoolEdits) setSchoolEdits(p.schoolEdits as Record<string, SchoolPatch>);
         if (p.notifs) setNotifs(p.notifs);
+        if (p.campaigns) setCampaigns(p.campaigns as Campaign[]);
+        if (p.campaignJoins) setCampaignJoins(p.campaignJoins as CampaignJoin[]);
       }
     } catch {
       /* ignore */
