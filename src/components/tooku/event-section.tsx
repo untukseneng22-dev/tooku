@@ -2,6 +2,7 @@
 import { useEffect, useState } from "react";
 import { CalendarHeart } from "lucide-react";
 import { useTooku } from "@/lib/tooku-store";
+import type { Product } from "@/lib/tooku-data";
 import { isSellable } from "@/lib/tooku-lifecycle";
 import { campaignPhase } from "@/lib/tooku-campaign";
 import { ProductCard } from "@/components/tooku/ui";
@@ -48,7 +49,7 @@ function EventCard({
 }: {
   campaign: { badge: string; name: string; tagline: string; startsAt: number; endsAt: number };
   running: boolean;
-  items: ReturnType<typeof Object.values> extends never ? never : Parameters<typeof ProductCard>[0]["product"][];
+  items: Product[];
   kopCount: number;
   total: number;
 }) {
