@@ -45,16 +45,15 @@ export const phaseLabel: Record<CampaignPhase, string> = {
 export function upcomingPrettyDates(from = Date.now(), count = 6) {
   const out: { badge: string; date: Date }[] = [];
   const start = new Date(from);
-  let year = start.getFullYear();
-  let month = start.getMonth(); // 0-indexed
+  const baseYear = start.getFullYear();
+  const baseMonth = start.getMonth(); // 0-indexed
   for (let i = 0; out.length < count && i < 24; i++) {
-    const m = month + i;
-    const y = year + Math.floor(m / 12);
+    const m = baseMonth + i;
+    const y = baseYear + Math.floor(m / 12);
     const mm = (m % 12) + 1; // 1-12
     const d = new Date(y, mm - 1, mm, 0, 0, 0, 0);
     if (d.getTime() > from) out.push({ badge: `${mm}.${mm}`, date: d });
   }
-  year = 0;
   return out;
 }
 
