@@ -5,6 +5,7 @@ import { useTooku } from "@/lib/tooku-store";
 import type { Product } from "@/lib/tooku-data";
 import { lifecyclePrice, stageMeta } from "@/lib/tooku-lifecycle";
 import { activeFlashFor, flashPrice } from "@/lib/tooku-extras";
+import { campaignDiscountFor, campaignPrice } from "@/lib/tooku-campaign";
 import { rupiah, schoolById } from "@/lib/tooku-data";
 
 export function Stars({ value, size = 14 }: { value: number; size?: number }) {
