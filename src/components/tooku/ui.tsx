@@ -118,12 +118,18 @@ export function useProductRating(productId: string) {
   return { avg, count: list.length, label: avg.toFixed(1) };
 }
 
-/** Harga yang benar-benar dibayar pembeli (siklus hidup + flash sale). */
+/** Harga yang benar-benar dibayar pembeli (siklus hidup + flash sale + event). */
 export function useEffectivePrice(product: Product) {
-  const { flashSales } = useTooku();
+  const { flashSales, campaigns, campaignJoins } = useTooku();
   const sale = activeFlashFor(flashSales, product.id);
   const flash = flashPrice(product.price, sale);
-  return { price: flash.price, flashDiscount: flash.discount, sale };
+  const event = campaignDiscountFor(campaigns, campaignJoins, product.id);
+  const eventPrice = event ? campaignPrice(product.price, event.discountPct) : product.price;
+  // Pembeli selalu mendapat harga termurah di antara flash sale dan event.
+  if (event && eventPrice < flash.price) {
+    return { price: eventPrice, flashDiscount: 0, sale: null, eventDiscount: event.discountPct, campaign: event.campaign };
+  }
+  return { price: flash.price, flashDiscount: flash.discount, sale, eventDiscount: 0, campaign: null };
 }
 
 export function ProductCard({ product }: { product: Product }) {
