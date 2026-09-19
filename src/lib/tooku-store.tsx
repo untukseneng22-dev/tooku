@@ -43,6 +43,7 @@ import {
   type ReportStatus,
   type Voucher,
 } from "./tooku-extras";
+import { seedCampaigns, type Campaign, type CampaignJoin } from "./tooku-campaign";
 
 
 /** Field profil koperasi yang boleh diubah admin koperasi. */
