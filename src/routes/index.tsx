@@ -390,6 +390,8 @@ function Home() {
         </section>
 
         {/* Flash sale berjalan */}
+        <EventSection />
+
         <FlashSaleSection />
 
         {/* Cuci Gudang — diskon otomatis barang lama tayang */}
