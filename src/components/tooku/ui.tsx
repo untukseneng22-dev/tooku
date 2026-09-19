@@ -140,14 +140,22 @@ export function ProductCard({ product }: { product: Product }) {
   const lifecycle = lifecyclePrice(product);
   const isClearance = mounted && lifecycle.discount > 0;
   const { wishlist, toggleWishlist } = useTooku();
-  const { price: effectivePrice, flashDiscount } = useEffectivePrice(product);
+  const { price: effectivePrice, flashDiscount, eventDiscount, campaign } = useEffectivePrice(product);
   const rating = useProductRating(product.id);
   const loved = wishlist.includes(product.id);
   const school = product.schoolId ? schoolById(product.schoolId) : undefined;
   const price = mounted ? effectivePrice : product.price;
   const strike =
-    mounted && (flashDiscount > 0 || isClearance) ? product.originalPrice ?? product.price : product.originalPrice;
-  const cut = mounted ? (flashDiscount > 0 ? flashDiscount : lifecycle.discount) : 0;
+    mounted && (flashDiscount > 0 || eventDiscount > 0 || isClearance)
+      ? product.originalPrice ?? product.price
+      : product.originalPrice;
+  const cut = mounted
+    ? flashDiscount > 0
+      ? flashDiscount
+      : eventDiscount > 0
+        ? eventDiscount
+        : lifecycle.discount
+    : 0;
 
   return (
     <div className="group/card relative flex h-full flex-col overflow-hidden rounded-xl border border-border bg-card shadow-sm transition-all duration-200 hover:-translate-y-0.5 hover:shadow-lg hover:shadow-primary/10 active:scale-[0.98]">
