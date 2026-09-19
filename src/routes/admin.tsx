@@ -29,6 +29,7 @@ import {
   Store as StoreIcon,
   Save,
   ImagePlus,
+  CalendarHeart,
 } from "lucide-react";
 import {
   useTooku,
@@ -90,6 +91,7 @@ type Tab =
   | "products"
   | "new"
   | "promo"
+  | "event"
   | "shipping"
   | "lifecycle"
   | "keuangan"
@@ -101,6 +103,7 @@ const tabs: { id: Tab; label: string; short: string; icon: typeof LayoutDashboar
   { id: "products", label: "Produk Saya", short: "Produk", icon: Boxes, tone: "bg-primary/10 text-primary" },
   { id: "new", label: "Tambah Produk", short: "Tambah", icon: PlusCircle, tone: "bg-accent/25 text-accent-foreground" },
   { id: "promo", label: "Flash Sale", short: "Flash Sale", icon: ShoppingBag, tone: "bg-destructive/10 text-destructive" },
+  { id: "event", label: "Event Tanggal Cantik", short: "Event", icon: CalendarHeart, tone: "bg-accent/25 text-accent-foreground" },
   { id: "shipping", label: "Pengiriman & Pembayaran", short: "Kirim & Bayar", icon: Truck, tone: "bg-primary/10 text-primary" },
   { id: "lifecycle", label: "Siklus Barang", short: "Siklus", icon: Recycle, tone: "bg-accent/25 text-accent-foreground" },
   { id: "keuangan", label: "Laporan Keuangan", short: "Keuangan", icon: BarChart3, tone: "bg-primary/10 text-primary" },
@@ -339,6 +342,7 @@ function AdminPage() {
             />
           )}
           {tab === "promo" && <PromoAdmin />}
+          {tab === "event" && <CampaignJoinAdmin />}
           {tab === "shipping" && <ShippingAdmin />}
           {tab === "lifecycle" && <LifecycleAdmin />}
           {tab === "keuangan" && <FinanceAdmin schoolId={mySchoolId} />}
@@ -887,6 +891,176 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
 }
 
 /** Pengaturan pengiriman & metode pembayaran milik koperasi ini. */
+/** Koperasi mendaftarkan barang ke event tanggal cantik yang dibuat Admin Pusat. */
+function CampaignJoinAdmin() {
+  const { user, products, campaigns, campaignJoins, joinCampaign, leaveCampaign } = useTooku();
+  const mySchoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
+  const mine = products.filter((p) => p.schoolId === mySchoolId && p.stock > 0);
+  const now = Date.now();
+  const open = campaigns.filter((c) => c.endsAt > now).sort((a, b) => a.startsAt - b.startsAt);
+
+  const [openId, setOpenId] = useState<string | null>(null);
+  const [picked, setPicked] = useState<string[]>([]);
+  const [pct, setPct] = useState(20);
+  const [msg, setMsg] = useState("");
+
+  const toggle = (id: string) =>
+    setPicked((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+
+  return (
+    <div className="space-y-4">
+      <section className="rounded-2xl border border-primary/20 bg-primary/5 p-4">
+        <h2 className="flex items-center gap-2 text-sm font-bold text-primary">
+          <CalendarHeart className="h-4 w-4" /> Event Tanggal Cantik
+        </h2>
+        <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+          Admin Pusat membuka event serentak (9.9, 10.10, dan seterusnya). Daftarkan barang koperasi Anda dengan
+          diskon yang Anda tentukan sendiri, lalu barang tampil di banner event halaman utama.
+        </p>
+      </section>
+
+      {open.length === 0 && (
+        <p className="text-xs text-muted-foreground">Belum ada event yang dibuka Admin Pusat.</p>
+      )}
+
+      {open.map((c) => {
+        const join = campaignJoins.find((j) => j.campaignId === c.id && j.schoolId === mySchoolId);
+        const peserta = new Set(campaignJoins.filter((j) => j.campaignId === c.id).map((j) => j.schoolId)).size;
+        const running = now >= c.startsAt;
+        const editing = openId === c.id;
+        return (
+          <section key={c.id} className="space-y-3 rounded-2xl border border-border bg-card p-4">
+            <div className="flex items-start gap-3">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent text-[12px] font-extrabold text-accent-foreground">
+                {c.badge}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-bold">{c.name}</p>
+                <p className="text-[11px] text-muted-foreground">{c.tagline}</p>
+                <p className="mt-1 text-[11px] font-semibold text-muted-foreground">
+                  {new Date(c.startsAt).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                  {" – "}
+                  {new Date(c.endsAt).toLocaleString("id-ID", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit" })}
+                </p>
+                <div className="mt-1.5 flex flex-wrap gap-1.5 text-[10px] font-bold">
+                  <span className={`rounded-full px-2 py-0.5 ${running ? "bg-destructive/10 text-destructive" : "bg-primary/10 text-primary"}`}>
+                    {running ? "Sedang berjalan" : "Akan datang"}
+                  </span>
+                  <span className="rounded-full bg-secondary px-2 py-0.5 text-muted-foreground">
+                    Diskon {c.minDiscountPct}–{c.maxDiscountPct}%
+                  </span>
+                  <span className="rounded-full bg-secondary px-2 py-0.5 text-muted-foreground">{peserta} koperasi ikut</span>
+                </div>
+              </div>
+            </div>
+
+            {join && !editing && (
+              <div className="rounded-xl border border-primary/25 bg-primary/5 p-3">
+                <p className="text-[11px] font-bold text-primary">
+                  Koperasi Anda sudah ikut · {join.productIds.length} barang · diskon {join.discountPct}%
+                </p>
+                <div className="mt-2 flex gap-2">
+                  <button
+                    onClick={() => {
+                      setOpenId(c.id);
+                      setPicked(join.productIds);
+                      setPct(join.discountPct);
+                      setMsg("");
+                    }}
+                    className="rounded-xl border border-primary px-3 py-1.5 text-[11px] font-bold text-primary"
+                  >
+                    Ubah Barang
+                  </button>
+                  <button
+                    onClick={() => leaveCampaign(c.id)}
+                    className="rounded-xl border border-destructive px-3 py-1.5 text-[11px] font-bold text-destructive"
+                  >
+                    Keluar dari Event
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {!join && !editing && (
+              <button
+                onClick={() => {
+                  setOpenId(c.id);
+                  setPicked([]);
+                  setPct(Math.max(c.minDiscountPct, Math.min(20, c.maxDiscountPct)));
+                  setMsg("");
+                }}
+                className="w-full rounded-xl bg-primary py-2.5 text-xs font-bold text-primary-foreground"
+              >
+                Ikut Event Ini
+              </button>
+            )}
+
+            {editing && (
+              <div className="space-y-3 rounded-xl border border-border p-3">
+                <label className="block text-xs text-muted-foreground">
+                  Diskon koperasi Anda ({c.minDiscountPct}–{c.maxDiscountPct}%)
+                  <input
+                    type="number"
+                    min={c.minDiscountPct}
+                    max={c.maxDiscountPct}
+                    value={pct}
+                    onChange={(e) => setPct(Number(e.target.value))}
+                    className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+                  />
+                </label>
+                <p className="text-[11px] font-semibold text-muted-foreground">Pilih barang yang ikut event:</p>
+                <div className="grid gap-1.5">
+                  {mine.length === 0 && (
+                    <p className="text-xs text-muted-foreground">Belum ada barang aktif dengan stok.</p>
+                  )}
+                  {mine.map((p) => (
+                    <label
+                      key={p.id}
+                      className={`flex items-center gap-2 rounded-xl border px-3 py-2 text-xs ${
+                        picked.includes(p.id) ? "border-primary bg-primary/5 font-semibold" : "border-border"
+                      }`}
+                    >
+                      <input
+                        type="checkbox"
+                        checked={picked.includes(p.id)}
+                        onChange={() => toggle(p.id)}
+                        className="h-4 w-4"
+                      />
+                      <span className="min-w-0 flex-1 truncate">{p.name}</span>
+                      <span className="shrink-0 text-muted-foreground">{rupiah(p.price)}</span>
+                    </label>
+                  ))}
+                </div>
+                {msg && <p className="text-[11px] font-semibold text-destructive">{msg}</p>}
+                <div className="flex gap-2">
+                  <button
+                    onClick={() => {
+                      const res = joinCampaign({ campaignId: c.id, productIds: picked, discountPct: pct });
+                      if (res.ok) {
+                        setOpenId(null);
+                        setMsg("");
+                      } else setMsg(res.error ?? "Gagal mendaftar event.");
+                    }}
+                    className="flex-1 rounded-xl bg-primary py-2.5 text-xs font-bold text-primary-foreground"
+                  >
+                    Simpan ({picked.length} barang)
+                  </button>
+                  <button
+                    onClick={() => setOpenId(null)}
+                    className="rounded-xl border border-border px-3 py-2.5 text-xs font-bold text-muted-foreground"
+                  >
+                    Batal
+                  </button>
+                </div>
+              </div>
+            )}
+          </section>
+        );
+      })}
+    </div>
+  );
+}
+
 function ShippingAdmin() {
   const { user, shippingConfigs, updateShippingConfig } = useTooku();
   const schoolId = schoolIdForAccount({ username: user?.username, name: user?.name });
