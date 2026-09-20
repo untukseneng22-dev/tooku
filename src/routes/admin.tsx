@@ -708,7 +708,7 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
       }}
       className="space-y-4 rounded-2xl border border-border bg-card p-4 lg:max-w-2xl"
     >
-      <h2 className="text-sm font-bold">{editing ? "Edit Produk" : "Tambah Produk Terkurasi"}</h2>
+      <h2 className="text-sm font-bold">{editing ? "Edit Produk" : "Tambah Produk"}</h2>
       {editing && (
         <p className="rounded-xl bg-secondary px-3 py-2 text-[11px] text-muted-foreground">
           Kamu sedang memperbaiki data produk <span className="font-semibold">{editing.name}</span>. Perubahan langsung
