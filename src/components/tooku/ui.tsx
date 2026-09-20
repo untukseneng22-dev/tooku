@@ -192,11 +192,6 @@ export function ProductCard({ product }: { product: Product }) {
               <span className="text-[8px] font-bold">OFF</span>
             </span>
           )}
-          {product.curated && (
-            <span className="absolute left-1.5 top-10 inline-flex items-center gap-0.5 rounded bg-primary px-1.5 py-0.5 text-[9px] font-bold text-primary-foreground">
-              <BadgeCheck className="h-2.5 w-2.5" /> Terkurasi
-            </span>
-          )}
           {flashDiscount > 0 && mounted ? (
             <span className="absolute inset-x-0 bottom-0 flex items-center justify-center gap-1 bg-sale/95 py-0.5 text-[9px] font-extrabold uppercase tracking-wide text-sale-foreground">
               <Zap className="h-2.5 w-2.5 fill-current" /> Flash Sale

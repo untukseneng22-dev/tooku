@@ -456,7 +456,7 @@ function Home() {
         {/* Grid */}
         <section>
           <div className="mb-3 flex items-center justify-between gap-2">
-            <h2 className="truncate text-sm font-bold">{cat === "Semua" ? "Semua Barang Terkurasi" : cat}</h2>
+            <h2 className="truncate text-sm font-bold">{cat === "Semua" ? "Semua Barang" : cat}</h2>
             <button
               onClick={() => setShowFilter((v) => !v)}
               className={`flex shrink-0 items-center gap-1.5 rounded-full border px-3 py-1.5 text-[11px] font-bold transition-colors ${
