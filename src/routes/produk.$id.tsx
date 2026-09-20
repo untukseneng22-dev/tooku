@@ -27,6 +27,7 @@ import {
   Stars,
 } from "@/components/tooku/ui";
 import { activeFlashFor, flashPrice } from "@/lib/tooku-extras";
+import { campaignDiscountFor, campaignPrice } from "@/lib/tooku-campaign";
 
 export const Route = createFileRoute("/produk/$id")({
   head: () => ({
@@ -49,7 +50,18 @@ export const Route = createFileRoute("/produk/$id")({
 
 function ProductDetail() {
   const { id } = Route.useParams();
-  const { products, addToCart, reviews, wishlist, toggleWishlist, productReviews, addReport, flashSales } =
+  const {
+    products,
+    addToCart,
+    reviews,
+    wishlist,
+    toggleWishlist,
+    productReviews,
+    addReport,
+    flashSales,
+    campaigns,
+    campaignJoins,
+  } =
     useTooku();
   const navigate = useNavigate();
   const product = products.find((p) => p.id === id);
@@ -99,7 +111,14 @@ function ProductDetail() {
 
   const life = lifecyclePrice(product);
   const sale = activeFlashFor(flashSales, product.id);
-  const flash = flashPrice(product.price, sale);
+  const flashOnly = flashPrice(product.price, sale);
+  const event = campaignDiscountFor(campaigns, campaignJoins, product.id);
+  const eventPrice = event ? campaignPrice(product.price, event.discountPct) : product.price;
+  // Tampilkan harga termurah antara flash sale dan event tanggal cantik.
+  const useEvent = !!event && eventPrice < flashOnly.price;
+  const flash = useEvent
+    ? { price: eventPrice, discount: event ? event.discountPct : 0 }
+    : flashOnly;
   const bundleItems = (product.bundleOf ?? [])
     .map((bid) => products.find((x) => x.id === bid))
     .filter(Boolean) as typeof products;
@@ -163,9 +182,16 @@ function ProductDetail() {
             )}
           </div>
           {flash.discount > 0 && (
-            <p className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-[11px] font-bold text-destructive">
-              <Zap className="h-3 w-3" /> Flash Sale {sale?.title} · hemat {rupiah(product.price - flash.price)}
-            </p>
+            useEvent && event ? (
+              <p className="inline-flex items-center gap-1.5 rounded-full bg-primary/10 px-3 py-1 text-[11px] font-bold text-primary">
+                <CalendarHeart className="h-3 w-3" /> Event {event.campaign.badge} · {event.campaign.name} · hemat{" "}
+                {rupiah(product.price - flash.price)}
+              </p>
+            ) : (
+              <p className="inline-flex items-center gap-1.5 rounded-full bg-destructive/10 px-3 py-1 text-[11px] font-bold text-destructive">
+                <Zap className="h-3 w-3" /> Flash Sale {sale?.title} · hemat {rupiah(product.price - flash.price)}
+              </p>
+            )
           )}
           {itemRating !== null && (
             <p className="flex items-center gap-1.5 text-xs font-semibold">
