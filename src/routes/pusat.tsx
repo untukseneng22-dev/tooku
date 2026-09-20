@@ -5,6 +5,7 @@ import {
   BadgeCheck,
   Ban,
   Building2,
+  CalendarHeart,
   CheckCircle2,
   ClipboardList,
   Headphones,
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import { useTooku, roleLabel, type Order, type User } from "@/lib/tooku-store";
 import { rupiah, schools, schoolById } from "@/lib/tooku-data";
+import { campaignPhase, phaseLabel, upcomingPrettyDates } from "@/lib/tooku-campaign";
 
 export const Route = createFileRoute("/pusat")({
   head: () => ({
@@ -39,13 +41,14 @@ export const Route = createFileRoute("/pusat")({
   component: PusatPage,
 });
 
-type Tab = "monitor" | "transaksi" | "akun" | "callcenter" | "voucher" | "laporan";
+type Tab = "monitor" | "transaksi" | "akun" | "callcenter" | "event" | "voucher" | "laporan";
 
 const tabs: { id: Tab; label: string; icon: typeof Activity }[] = [
   { id: "monitor", label: "Pemantauan", icon: Activity },
   { id: "transaksi", label: "Transaksi", icon: ClipboardList },
   { id: "akun", label: "Persetujuan Akun", icon: UserCheck },
   { id: "callcenter", label: "Call Center", icon: Headphones },
+  { id: "event", label: "Event Tanggal Cantik", icon: CalendarHeart },
   { id: "voucher", label: "Voucher Promo", icon: BadgeCheck },
   { id: "laporan", label: "Laporan Produk", icon: ShieldAlert },
 ];
@@ -400,6 +403,176 @@ function CallCenter() {
   );
 }
 
+/** Buat event serentak tanggal cantik (9.9, 10.10, ...) yang bisa diikuti koperasi. */
+function EventAdmin() {
+  const { campaigns, campaignJoins, addCampaign, deleteCampaign, koperasiList } = useTooku();
+  const presets = useMemo(() => upcomingPrettyDates(Date.now(), 6), []);
+  const [badge, setBadge] = useState(presets[0]?.badge ?? "9.9");
+  const [startDate, setStartDate] = useState(
+    presets[0] ? new Date(presets[0].date.getTime() - presets[0].date.getTimezoneOffset() * 60000).toISOString().slice(0, 10) : "",
+  );
+  const [name, setName] = useState(`Event ${presets[0]?.badge ?? "9.9"} Serba Hemat Koperasi`);
+  const [tagline, setTagline] = useState("Diskon spesial tanggal cantik dari koperasi sekolah");
+  const [days, setDays] = useState(1);
+  const [minPct, setMinPct] = useState(10);
+  const [maxPct, setMaxPct] = useState(60);
+  const [msg, setMsg] = useState("");
+
+  const pickPreset = (b: string, d: Date) => {
+    setBadge(b);
+    setStartDate(new Date(d.getTime() - d.getTimezoneOffset() * 60000).toISOString().slice(0, 10));
+    setName(`Event ${b} Serba Hemat Koperasi`);
+  };
+
+  return (
+    <div className="space-y-4">
+      <section className="space-y-3 rounded-2xl border border-border bg-card p-4">
+        <h2 className="flex items-center gap-2 text-sm font-bold">
+          <CalendarHeart className="h-4 w-4 text-primary" /> Buat Event Baru
+        </h2>
+        <p className="text-[11px] text-muted-foreground">
+          Pilih tanggal cantik, lalu koperasi sekolah mendaftarkan barangnya sendiri dari dashboard masing-masing.
+        </p>
+        <div className="flex flex-wrap gap-1.5">
+          {presets.map((pr) => (
+            <button
+              key={pr.badge + pr.date.getFullYear()}
+              onClick={() => pickPreset(pr.badge, pr.date)}
+              className={`rounded-full px-3 py-1.5 text-[11px] font-bold ${
+                badge === pr.badge ? "bg-primary text-primary-foreground" : "bg-secondary text-muted-foreground"
+              }`}
+            >
+              {pr.badge} · {pr.date.toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+            </button>
+          ))}
+        </div>
+        <div className="grid gap-2 sm:grid-cols-2">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Nama event"
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+          <input
+            value={tagline}
+            onChange={(e) => setTagline(e.target.value)}
+            placeholder="Kalimat promo singkat"
+            className="rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+          />
+          <label className="text-xs text-muted-foreground">
+            Tanggal mulai
+            <input
+              type="date"
+              value={startDate}
+              onChange={(e) => setStartDate(e.target.value)}
+              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+          </label>
+          <label className="text-xs text-muted-foreground">
+            Durasi (hari)
+            <input
+              type="number"
+              min={1}
+              max={14}
+              value={days}
+              onChange={(e) => setDays(Number(e.target.value))}
+              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+          </label>
+          <label className="text-xs text-muted-foreground">
+            Diskon minimal (%)
+            <input
+              type="number"
+              min={1}
+              max={90}
+              value={minPct}
+              onChange={(e) => setMinPct(Number(e.target.value))}
+              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+          </label>
+          <label className="text-xs text-muted-foreground">
+            Diskon maksimal (%)
+            <input
+              type="number"
+              min={1}
+              max={90}
+              value={maxPct}
+              onChange={(e) => setMaxPct(Number(e.target.value))}
+              className="mt-1 w-full rounded-xl border border-border bg-background px-3 py-2 text-sm outline-none focus:border-primary"
+            />
+          </label>
+        </div>
+        {msg && <p className="text-[11px] font-semibold text-destructive">{msg}</p>}
+        <button
+          onClick={() => {
+            const starts = startDate ? new Date(`${startDate}T00:00:00`).getTime() : NaN;
+            const res = addCampaign({
+              badge,
+              name,
+              tagline,
+              startsAt: starts,
+              days,
+              minDiscountPct: minPct,
+              maxDiscountPct: maxPct,
+            });
+            setMsg(res.ok ? "Event berhasil dibuat dan diumumkan ke semua koperasi." : res.error ?? "Gagal membuat event.");
+          }}
+          className="w-full rounded-xl bg-primary py-2.5 text-xs font-bold text-primary-foreground"
+        >
+          Buat Event {badge}
+        </button>
+      </section>
+
+      <section className="space-y-2">
+        <h2 className="text-sm font-bold">Daftar Event ({campaigns.length})</h2>
+        {campaigns.length === 0 && <p className="text-xs text-muted-foreground">Belum ada event.</p>}
+        {campaigns.map((c) => {
+          const joins = campaignJoins.filter((j) => j.campaignId === c.id);
+          const phase = campaignPhase(c);
+          return (
+            <div key={c.id} className="rounded-2xl border border-border bg-card p-3">
+              <div className="flex items-start gap-3">
+                <span className="grid h-10 w-10 shrink-0 place-items-center rounded-xl bg-accent text-[12px] font-extrabold text-accent-foreground">
+                  {c.badge}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs font-bold">{c.name}</p>
+                  <p className="text-[11px] text-muted-foreground">
+                    {new Date(c.startsAt).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })} ·{" "}
+                    {Math.round((c.endsAt - c.startsAt) / 86400000)} hari · diskon {c.minDiscountPct}–{c.maxDiscountPct}%
+                  </p>
+                  <p className="mt-1 text-[11px] font-bold text-primary">
+                    {phaseLabel[phase]} · {new Set(joins.map((j) => j.schoolId)).size}/{koperasiList.length} koperasi ikut ·{" "}
+                    {joins.reduce((s, j) => s + j.productIds.length, 0)} barang
+                  </p>
+                </div>
+                <button
+                  onClick={() => deleteCampaign(c.id)}
+                  className="shrink-0 rounded-xl border border-destructive px-3 py-1.5 text-[11px] font-bold text-destructive"
+                >
+                  Hapus
+                </button>
+              </div>
+              {joins.length > 0 && (
+                <ul className="mt-2 space-y-1 border-t border-border pt-2">
+                  {joins.map((j) => (
+                    <li key={j.id} className="flex items-center gap-2 text-[11px]">
+                      <Building2 className="h-3 w-3 shrink-0 text-primary" />
+                      <span className="min-w-0 flex-1 truncate">{schoolById(j.schoolId)?.koperasi ?? j.schoolId}</span>
+                      <span className="shrink-0 font-bold text-sale">−{j.discountPct}%</span>
+                      <span className="shrink-0 text-muted-foreground">{j.productIds.length} barang</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          );
+        })}
+      </section>
+    </div>
+  );
+}
+
 /** Kelola voucher promo yang berlaku di seluruh aplikasi. */
 function VoucherAdmin() {
   const { vouchers, upsertVoucher } = useTooku();
@@ -671,6 +844,7 @@ function PusatPage() {
           {tab === "transaksi" && <Transaksi />}
           {tab === "akun" && <Akun />}
           {tab === "callcenter" && <CallCenter />}
+          {tab === "event" && <EventAdmin />}
           {tab === "voucher" && <VoucherAdmin />}
           {tab === "laporan" && <Laporan />}
         </main>
