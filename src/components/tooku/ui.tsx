@@ -217,9 +217,15 @@ export function ProductCard({ product }: { product: Product }) {
           <p className="line-clamp-2 min-h-[2.2rem] text-[11px] leading-snug text-card-foreground">{product.name}</p>
 
           <div className="flex flex-wrap items-baseline gap-1">
-            <p className="text-[15px] font-extrabold leading-none text-sale">{rupiah(price)}</p>
-            {strike && strike > price && (
-              <p className="text-[10px] text-muted-foreground line-through">{rupiah(strike)}</p>
+            {mounted ? (
+              <>
+                <p className="text-[15px] font-extrabold leading-none text-sale">{rupiah(price)}</p>
+                {strike && strike > price && (
+                  <p className="text-[10px] text-muted-foreground line-through">{rupiah(strike)}</p>
+                )}
+              </>
+            ) : (
+              <span className="h-4 w-16 animate-pulse rounded bg-muted" aria-hidden="true" />
             )}
           </div>
 
