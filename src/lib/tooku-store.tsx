@@ -682,7 +682,10 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       for (const r of rows) syncedRef.current[r.key] = r.s;
       void supabase
         .from("app_state")
-        .upsert(rows.map((r) => ({ key: r.key, data: r.data as never, updated_at: new Date().toISOString() })));
+        .upsert(rows.map((r) => ({ key: r.key, data: r.data as never, updated_at: new Date().toISOString() })))
+        .then(({ error }) => {
+          if (error) { console.error("[TOOKU] cloud sync", error.message); for (const r of rows) delete syncedRef.current[r.key]; }
+        });
     }, 700);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
