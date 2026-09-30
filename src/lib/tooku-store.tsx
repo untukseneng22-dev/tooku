@@ -4,10 +4,12 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type Context,
   type ReactNode,
 } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   seedProducts,
   seedReviews,
