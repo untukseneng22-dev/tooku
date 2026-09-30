@@ -100,7 +100,7 @@ function Home() {
         (cat === "Semua" || p.category === cat) &&
         (schoolId === "Semua" || p.schoolId === schoolId) &&
         (level === "Semua" || schoolById(p.schoolId)?.level === level) &&
-        p.price <= maxPrice &&
+        (maxPrice >= 50000 || p.price <= maxPrice) &&
         conditionPct(p.condition) >= minCondition &&
         (p.name.toLowerCase().includes(query.toLowerCase()) ||
           p.category.toLowerCase().includes(query.toLowerCase())),
