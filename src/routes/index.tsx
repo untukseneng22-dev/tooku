@@ -100,7 +100,7 @@ function Home() {
         (cat === "Semua" || p.category === cat) &&
         (schoolId === "Semua" || p.schoolId === schoolId) &&
         (level === "Semua" || schoolById(p.schoolId)?.level === level) &&
-        p.price <= maxPrice &&
+        (maxPrice >= 50000 || p.price <= maxPrice) &&
         conditionPct(p.condition) >= minCondition &&
         (p.name.toLowerCase().includes(query.toLowerCase()) ||
           p.category.toLowerCase().includes(query.toLowerCase())),
@@ -479,7 +479,7 @@ function Home() {
               <div>
                 <div className="flex items-center justify-between text-[11px] font-semibold">
                   <span>Harga maksimum</span>
-                  <span className="text-primary">Rp{maxPrice.toLocaleString("id-ID")}</span>
+                  <span className="text-primary">{maxPrice >= 50000 ? "Semua harga" : `Rp${maxPrice.toLocaleString("id-ID")}`}</span>
                 </div>
                 <input
                   type="range"
