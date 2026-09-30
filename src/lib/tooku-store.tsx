@@ -4,10 +4,12 @@ import {
   useContext,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type Context,
   type ReactNode,
 } from "react";
+import { supabase } from "@/integrations/supabase/client";
 import {
   seedProducts,
   seedReviews,
@@ -615,6 +617,80 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       /* ignore */
     }
   }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins]);
+
+  // ===== Sinkronisasi cloud lintas perangkat =====
+  const shared = { products, reviews, orders, users, shippingConfigs, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins } as Record<string, unknown>;
+  const applyRemote = (key: string, data: unknown) => {
+    const d = data as never;
+    switch (key) {
+      case "products": setProducts(normalizeProducts(d)); break;
+      case "reviews": setReviews(d); break;
+      case "orders": setOrders(normalizeOrders(d)); break;
+      case "users": setUsers(d); break;
+      case "shippingConfigs": setShippingConfigs(d); break;
+      case "productReviews": setProductReviews(d); break;
+      case "flashSales": setFlashSales(d); break;
+      case "vouchers": setVouchers(d); break;
+      case "points": setPoints(d); break;
+      case "reports": setReports(d); break;
+      case "notifs": setNotifs(d); break;
+      case "schoolEdits": setSchoolEdits(d); break;
+      case "campaigns": setCampaigns(d); break;
+      case "campaignJoins": setCampaignJoins(d); break;
+    }
+  };
+  const syncedRef = useRef<Record<string, string>>({});
+  const [cloudReady, setCloudReady] = useState(false);
+
+  useEffect(() => {
+    if (!hydrated) return;
+    let alive = true;
+    (async () => {
+      const { data } = await supabase.from("app_state").select("key,data");
+      if (!alive) return;
+      for (const row of data ?? []) {
+        syncedRef.current[row.key] = JSON.stringify(row.data);
+        applyRemote(row.key, row.data);
+      }
+      setCloudReady(true);
+    })();
+    const ch = supabase
+      .channel("app_state_sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "app_state" }, (payload) => {
+        const row = payload.new as { key?: string; data?: unknown };
+        if (!row?.key) return;
+        const s = JSON.stringify(row.data);
+        if (syncedRef.current[row.key] === s) return;
+        syncedRef.current[row.key] = s;
+        applyRemote(row.key, row.data);
+      })
+      .subscribe();
+    return () => {
+      alive = false;
+      supabase.removeChannel(ch);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hydrated]);
+
+  useEffect(() => {
+    if (!cloudReady) return;
+    const t = setTimeout(() => {
+      const rows = Object.entries(shared)
+        .map(([key, data]) => ({ key, data, s: JSON.stringify(data) }))
+        .filter((r) => syncedRef.current[r.key] !== r.s);
+      if (!rows.length) return;
+      for (const r of rows) syncedRef.current[r.key] = r.s;
+      void supabase
+        .from("app_state")
+        .upsert(rows.map((r) => ({ key: r.key, data: r.data as never, updated_at: new Date().toISOString() })))
+        .then(({ error }) => {
+          if (error) { console.error("[TOOKU] cloud sync", error.message); for (const r of rows) delete syncedRef.current[r.key]; }
+        });
+    }, 700);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [cloudReady, products, reviews, orders, users, shippingConfigs, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins]);
+
 
 
   // Evaluasi ulang fase siklus hidup (diskon otomatis / donasi) tiap jam.
