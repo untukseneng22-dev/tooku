@@ -172,6 +172,22 @@ export type AppNotif = {
 
 type CartLine = { productId: string; qty: number };
 
+/**
+ * Satu pesan chat yang tersimpan di cloud, sehingga pembeli dan admin koperasi
+ * benar-benar saling berkirim pesan walau memakai perangkat berbeda.
+ * `from`/`to` memakai nama tampilan (nama pembeli, nama koperasi, atau Call Center TOOKU).
+ */
+export type ChatMessage = {
+  id: string;
+  from: string;
+  to: string;
+  text: string;
+  at: number;
+  readBy: string[];
+};
+
+export const CALL_CENTER_NAME = "Call Center TOOKU";
+
 const seedUsers: User[] = [
   {
     id: "u1",
