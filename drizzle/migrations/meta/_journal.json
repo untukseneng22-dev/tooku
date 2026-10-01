@@ -8,6 +8,13 @@
       "when": 1790751038564,
       "tag": "0000_shared_app_state",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790828324225,
+      "tag": "0001_allow_chats_shared_state",
+      "breakpoints": true
     }
   ]
 }
