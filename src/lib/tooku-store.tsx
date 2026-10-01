@@ -637,15 +637,16 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           schoolEdits,
           campaigns,
           campaignJoins,
+          chats,
         }),
       );
     } catch {
       /* ignore */
     }
-  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins]);
+  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins, chats]);
 
   // ===== Sinkronisasi cloud lintas perangkat =====
-  const shared = { products, reviews, orders, users, shippingConfigs, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins } as Record<string, unknown>;
+  const shared = { products, reviews, orders, users, shippingConfigs, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins, chats } as Record<string, unknown>;
   const applyRemote = (key: string, data: unknown) => {
     const d = data as never;
     switch (key) {
