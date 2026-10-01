@@ -172,6 +172,22 @@ export type AppNotif = {
 
 type CartLine = { productId: string; qty: number };
 
+/**
+ * Satu pesan chat yang tersimpan di cloud, sehingga pembeli dan admin koperasi
+ * benar-benar saling berkirim pesan walau memakai perangkat berbeda.
+ * `from`/`to` memakai nama tampilan (nama pembeli, nama koperasi, atau Call Center TOOKU).
+ */
+export type ChatMessage = {
+  id: string;
+  from: string;
+  to: string;
+  text: string;
+  at: number;
+  readBy: string[];
+};
+
+export const CALL_CENTER_NAME = "Call Center TOOKU";
+
 const seedUsers: User[] = [
   {
     id: "u1",
@@ -453,6 +469,14 @@ type Store = {
     error?: string;
   };
   leaveCampaign: (campaignId: string) => void;
+
+  /** ==== Chat tersimpan di cloud (dua arah, lintas perangkat) ==== */
+  chats: ChatMessage[];
+  /** Nama-nama yang mewakili akun ini dalam percakapan. */
+  myChatNames: string[];
+  sendChat: (to: string, text: string) => { ok: boolean; error?: string };
+  markChatRead: (partner: string) => void;
+  unreadChatCount: number;
 };
 
 type TookuContextRegistry = typeof globalThis & {
@@ -529,6 +553,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   const [notifs, setNotifs] = useState<AppNotif[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>(seedCampaigns);
   const [campaignJoins, setCampaignJoins] = useState<CampaignJoin[]>([]);
+  const [chats, setChats] = useState<ChatMessage[]>([]);
 
   const [hydrated, setHydrated] = useState(false);
 
@@ -572,6 +597,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         if (p.notifs) setNotifs(p.notifs);
         if (p.campaigns) setCampaigns(p.campaigns as Campaign[]);
         if (p.campaignJoins) setCampaignJoins(p.campaignJoins as CampaignJoin[]);
+        if (p.chats) setChats(p.chats as ChatMessage[]);
       }
     } catch {
       /* ignore */
@@ -611,15 +637,16 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           schoolEdits,
           campaigns,
           campaignJoins,
+          chats,
         }),
       );
     } catch {
       /* ignore */
     }
-  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins]);
+  }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins, chats]);
 
   // ===== Sinkronisasi cloud lintas perangkat =====
-  const shared = { products, reviews, orders, users, shippingConfigs, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins } as Record<string, unknown>;
+  const shared = { products, reviews, orders, users, shippingConfigs, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins, chats } as Record<string, unknown>;
   const applyRemote = (key: string, data: unknown) => {
     const d = data as never;
     switch (key) {
@@ -637,6 +664,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       case "schoolEdits": setSchoolEdits(d); break;
       case "campaigns": setCampaigns(d); break;
       case "campaignJoins": setCampaignJoins(d); break;
+      case "chats": setChats(d); break;
     }
   };
   const syncedRef = useRef<Record<string, string>>({});
@@ -1271,8 +1299,48 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         const schoolId = schoolIdForAccount({ username: user.username, name: user.name });
         setCampaignJoins((js) => js.filter((j) => !(j.campaignId === campaignId && j.schoolId === schoolId)));
       },
+
+      chats,
+      myChatNames,
+      sendChat: (to, text) => {
+        if (!user) return { ok: false, error: "Masuk dulu untuk mengirim pesan." };
+        const body = text.trim().slice(0, 1000);
+        if (!body) return { ok: false, error: "Pesan masih kosong." };
+        const me = myChatNames[0] ?? user.name;
+        setChats((cs) => [
+          ...cs,
+          {
+            id: "c" + Date.now() + Math.floor(Math.random() * 999),
+            from: me,
+            to,
+            text: body,
+            at: Date.now(),
+            readBy: [me],
+          },
+        ].slice(-500));
+        return { ok: true };
+      },
+      markChatRead: (partner) => {
+        if (!user) return;
+        const me = myChatNames[0] ?? user.name;
+        setChats((cs) =>
+          cs.map((c) =>
+            myChatNames.includes(c.to) && c.from === partner && !c.readBy.includes(me)
+              ? { ...c, readBy: [...c.readBy, me] }
+              : c,
+          ),
+        );
+      },
+      unreadChatCount: user
+        ? chats.filter(
+            (c) =>
+              myChatNames.includes(c.to) &&
+              !myChatNames.includes(c.from) &&
+              !c.readBy.includes(myChatNames[0] ?? user.name),
+          ).length
+        : 0,
     }),
-    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, koperasiList, campaigns, campaignJoins],
+    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, koperasiList, campaigns, campaignJoins, chats, myChatNames],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
