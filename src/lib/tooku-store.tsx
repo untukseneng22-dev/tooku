@@ -469,6 +469,14 @@ type Store = {
     error?: string;
   };
   leaveCampaign: (campaignId: string) => void;
+
+  /** ==== Chat tersimpan di cloud (dua arah, lintas perangkat) ==== */
+  chats: ChatMessage[];
+  /** Nama-nama yang mewakili akun ini dalam percakapan. */
+  myChatNames: string[];
+  sendChat: (to: string, text: string) => { ok: boolean; error?: string };
+  markChatRead: (partner: string) => void;
+  unreadChatCount: number;
 };
 
 type TookuContextRegistry = typeof globalThis & {
