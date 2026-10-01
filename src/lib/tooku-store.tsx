@@ -1299,8 +1299,48 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         const schoolId = schoolIdForAccount({ username: user.username, name: user.name });
         setCampaignJoins((js) => js.filter((j) => !(j.campaignId === campaignId && j.schoolId === schoolId)));
       },
+
+      chats,
+      myChatNames,
+      sendChat: (to, text) => {
+        if (!user) return { ok: false, error: "Masuk dulu untuk mengirim pesan." };
+        const body = text.trim().slice(0, 1000);
+        if (!body) return { ok: false, error: "Pesan masih kosong." };
+        const me = myChatNames[0] ?? user.name;
+        setChats((cs) => [
+          ...cs,
+          {
+            id: "c" + Date.now() + Math.floor(Math.random() * 999),
+            from: me,
+            to,
+            text: body,
+            at: Date.now(),
+            readBy: [me],
+          },
+        ].slice(-500));
+        return { ok: true };
+      },
+      markChatRead: (partner) => {
+        if (!user) return;
+        const me = myChatNames[0] ?? user.name;
+        setChats((cs) =>
+          cs.map((c) =>
+            myChatNames.includes(c.to) && c.from === partner && !c.readBy.includes(me)
+              ? { ...c, readBy: [...c.readBy, me] }
+              : c,
+          ),
+        );
+      },
+      unreadChatCount: user
+        ? chats.filter(
+            (c) =>
+              myChatNames.includes(c.to) &&
+              !myChatNames.includes(c.from) &&
+              !c.readBy.includes(myChatNames[0] ?? user.name),
+          ).length
+        : 0,
     }),
-    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, koperasiList, campaigns, campaignJoins],
+    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, koperasiList, campaigns, campaignJoins, chats, myChatNames],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
