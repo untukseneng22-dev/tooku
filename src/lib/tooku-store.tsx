@@ -672,10 +672,12 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [hydrated]);
 
+  const sharedRef = useRef(shared);
+  sharedRef.current = shared;
   useEffect(() => {
     if (!cloudReady) return;
-    const t = setTimeout(() => {
-      const rows = Object.entries(shared)
+    const push = () => {
+      const rows = Object.entries(sharedRef.current)
         .map(([key, data]) => ({ key, data, s: JSON.stringify(data) }))
         .filter((r) => syncedRef.current[r.key] !== r.s);
       if (!rows.length) return;
@@ -686,10 +688,11 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         .then(({ error }) => {
           if (error) { console.error("[TOOKU] cloud sync", error.message); for (const r of rows) delete syncedRef.current[r.key]; }
         });
-    }, 700);
-    return () => clearTimeout(t);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [cloudReady, products, reviews, orders, users, shippingConfigs, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins]);
+    };
+    push();
+    const t = setInterval(push, 1000);
+    return () => clearInterval(t);
+  }, [cloudReady]);
 
 
 
