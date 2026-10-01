@@ -553,6 +553,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   const [notifs, setNotifs] = useState<AppNotif[]>([]);
   const [campaigns, setCampaigns] = useState<Campaign[]>(seedCampaigns);
   const [campaignJoins, setCampaignJoins] = useState<CampaignJoin[]>([]);
+  const [chats, setChats] = useState<ChatMessage[]>([]);
 
   const [hydrated, setHydrated] = useState(false);
 
