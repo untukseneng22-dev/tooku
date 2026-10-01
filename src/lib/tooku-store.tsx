@@ -597,6 +597,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
         if (p.notifs) setNotifs(p.notifs);
         if (p.campaigns) setCampaigns(p.campaigns as Campaign[]);
         if (p.campaignJoins) setCampaignJoins(p.campaignJoins as CampaignJoin[]);
+        if (p.chats) setChats(p.chats as ChatMessage[]);
       }
     } catch {
       /* ignore */
