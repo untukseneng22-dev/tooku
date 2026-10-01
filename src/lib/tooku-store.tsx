@@ -664,6 +664,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       case "schoolEdits": setSchoolEdits(d); break;
       case "campaigns": setCampaigns(d); break;
       case "campaignJoins": setCampaignJoins(d); break;
+      case "chats": setChats(d); break;
     }
   };
   const syncedRef = useRef<Record<string, string>>({});
