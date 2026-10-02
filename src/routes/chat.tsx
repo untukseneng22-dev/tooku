@@ -2,7 +2,7 @@ import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, MessageCircle, Search, Send, Store } from "lucide-react";
 import { schools } from "@/lib/tooku-data";
-import { useTooku } from "@/lib/tooku-store";
+import { CALL_CENTER_NAME, useTooku } from "@/lib/tooku-store";
 
 
 export const Route = createFileRoute("/chat")({
@@ -193,7 +193,14 @@ function ChatPage() {
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center justify-between gap-2">
                         <span className="truncate text-sm font-bold">{s}</span>
-                        {last && <span className="shrink-0 text-[10px] text-muted-foreground">{last.time}</span>}
+                        <span className="flex shrink-0 items-center gap-1.5">
+                          {last && <span className="text-[10px] text-muted-foreground">{last.time}</span>}
+                          {(unreadFrom[s] ?? 0) > 0 && (
+                            <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                              {unreadFrom[s]}
+                            </span>
+                          )}
+                        </span>
                       </span>
                       <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">
                         {last
@@ -268,6 +275,7 @@ function ChatPage() {
       </div>
 
       <div className={`fixed inset-x-0 z-40 ${isSuperAdmin ? "bottom-0" : "bottom-[68px]"} border-t border-border bg-card p-3`}>
+        {err && <p className="mx-auto mb-2 max-w-2xl text-[11px] text-destructive">{err}</p>}
         <div className="mx-auto flex max-w-2xl items-center gap-2">
           <input
             value={draft}
