@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { Ticket, MapPin, Check, Clock, Wallet, Store, XCircle, Truck, Copy, Star, ClipboardList } from "lucide-react";
+import { Ticket, MapPin, Check, Clock, Wallet, Store, XCircle, Truck, Copy, Star, ClipboardList, Receipt } from "lucide-react";
 import { useState } from "react";
 import { useTooku, useCountdown, flowFor, isFinalStatus, type Order } from "@/lib/tooku-store";
 import { rupiah, schoolById } from "@/lib/tooku-data";
@@ -135,6 +135,72 @@ function Timeline({ order }: { order: Order }) {
   );
 }
 
+/** Struk digital pengambilan: ditunjukkan ke petugas koperasi atau dicetak. */
+function ReceiptButton({ order }: { order: Order }) {
+  const [open, setOpen] = useState(false);
+  const school = schoolById(order.items[0]?.schoolId ?? "");
+  const total = order.items.reduce((s, i) => s + i.price * i.qty, 0);
+  const paid = order.paymentStatus === "Lunas";
+  return (
+    <>
+      <button
+        onClick={() => setOpen(true)}
+        className="inline-flex w-full items-center justify-center gap-1.5 rounded-xl border border-primary/30 bg-primary/5 py-2 text-xs font-bold text-primary"
+      >
+        <Receipt className="h-3.5 w-3.5" /> Lihat Struk Digital
+      </button>
+      {open && (
+        <div className="fixed inset-0 z-[60] grid place-items-center bg-foreground/50 p-4 print:static print:bg-transparent" onClick={() => setOpen(false)}>
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="tooku-receipt w-full max-w-sm space-y-3 rounded-2xl bg-card p-5 text-foreground shadow-xl"
+          >
+            <div className="text-center">
+              <p className="text-lg font-extrabold text-primary">TOOKU</p>
+              <p className="text-[11px] text-muted-foreground">Struk {order.fulfillment === "delivery" ? "Pengiriman" : "Pengambilan"}</p>
+            </div>
+            <div className="rounded-xl border-2 border-dashed border-primary p-3 text-center">
+              <p className="text-[10px] font-semibold text-muted-foreground">KODE PENGAMBILAN</p>
+              <p className="font-mono text-2xl font-extrabold tracking-widest">{order.code}</p>
+            </div>
+            <div className="space-y-0.5 text-[11px]">
+              <p><b>Pembeli:</b> {order.buyer}</p>
+              <p><b>Koperasi:</b> {school?.koperasi ?? "-"}</p>
+              {school?.pickup && <p><b>Lokasi ambil:</b> {school.pickup}</p>}
+              <p><b>Status:</b> {order.status}</p>
+              <p>
+                <b>Pembayaran:</b>{" "}
+                {paid ? "Lunas" : order.paymentMethod === "online" ? "Menunggu konfirmasi koperasi" : "Dibayar saat pengambilan"}
+              </p>
+            </div>
+            <div className="space-y-1 border-y border-dashed border-border py-2 text-[11px]">
+              {order.items.map((i) => (
+                <div key={i.productId} className="flex justify-between gap-2">
+                  <span className="truncate">{i.qty}x {i.name}</span>
+                  <span className="shrink-0">{rupiah(i.price * i.qty)}</span>
+                </div>
+              ))}
+              <div className="flex justify-between pt-1 text-xs font-bold">
+                <span>Total barang</span>
+                <span>{rupiah(total)}</span>
+              </div>
+            </div>
+            <p className="text-center text-[10px] text-muted-foreground">Tunjukkan kode ini ke petugas koperasi.</p>
+            <div className="flex gap-2 print:hidden">
+              <button onClick={() => setOpen(false)} className="flex-1 rounded-xl border border-border py-2 text-xs font-bold">
+                Tutup
+              </button>
+              <button onClick={() => window.print()} className="flex-1 rounded-xl bg-primary py-2 text-xs font-bold text-primary-foreground">
+                Cetak
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
+
 function OrderCard({ order }: { order: Order }) {
   const { expired, label, percent } = useCountdown(order.deadline);
   const active = !isFinalStatus(order.status);
@@ -164,6 +230,9 @@ function OrderCard({ order }: { order: Order }) {
       </div>
 
       <Timeline order={order} />
+
+      <ReceiptButton order={order} />
+
 
       <div className="space-y-1 rounded-xl bg-secondary/50 p-3">
         {order.items.map((i) => (

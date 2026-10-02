@@ -758,6 +758,18 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
     );
 
   /** Data koperasi = seed + hasil edit admin koperasi masing-masing. */
+  /** Nama yang mewakili akun ini di chat: nama koperasi untuk admin, Call Center untuk pusat. */
+  const myChatNames = useMemo<string[]>(() => {
+    if (!user) return [];
+    if (user.role === "superadmin") return [CALL_CENTER_NAME, user.name];
+    if (user.role === "admin") {
+      const sid = schoolIdForAccount({ username: user.username, name: user.name });
+      const kop = SCHOOLS_SELLER[sid];
+      return kop && kop !== user.name ? [kop, user.name] : [user.name];
+    }
+    return [user.name];
+  }, [user]);
+
   const koperasiList = useMemo<School[]>(
     () => seedSchools.map((s) => ({ ...s, ...(schoolEdits[s.id] ?? {}) })),
     [schoolEdits],

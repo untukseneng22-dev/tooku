@@ -2,7 +2,7 @@ import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ArrowLeft, MessageCircle, Search, Send, Store } from "lucide-react";
 import { schools } from "@/lib/tooku-data";
-import { useTooku } from "@/lib/tooku-store";
+import { CALL_CENTER_NAME, useTooku } from "@/lib/tooku-store";
 
 
 export const Route = createFileRoute("/chat")({
@@ -32,121 +32,109 @@ export const Route = createFileRoute("/chat")({
   component: ChatPage,
 });
 
-type ChatMsg = { id: string; from: "me" | "them"; text: string; time: string };
+type ChatMsg = { id: string; from: "me" | "them"; text: string; time: string; at: number };
 type Threads = Record<string, ChatMsg[]>;
 
-const KOPERASI = "Admin Koperasi Sekolah";
-const CALLCENTER = "Call Center TOOKU";
-const CHAT_KEY = "tooku.chats.v1";
+const CALLCENTER = CALL_CENTER_NAME;
 
-const seedThreads: Threads = {
-  [KOPERASI]: [
-    { id: "k1", from: "them", text: "Halo! Ada yang bisa koperasi bantu? 😊", time: "08:40" },
-    { id: "k2", from: "me", text: "Kalau pesan hari ini, batas ambilnya kapan?", time: "08:42" },
-    {
-      id: "k3",
-      from: "them",
-      text: "Batas ambil 1x24 jam sejak booking ya, tunjukkan kode pengambilan di meja koperasi.",
-      time: "08:43",
-    },
-  ],
-  "Alumni 2024 — Kelas XII IPA 2": [
-    { id: "s1", from: "them", text: "Seragam putih ukuran M masih ada 4 pcs kak 🙌", time: "07:55" },
-  ],
-  "Rafi — XII IPS 1": [
-    { id: "s2", from: "me", text: "Buku Matematika kelas XI masih ada?", time: "Kemarin" },
-    { id: "s3", from: "them", text: "Masih ada, kondisi baik 80%. Boleh dibooking lewat aplikasi.", time: "Kemarin" },
-  ],
+const fmtTime = (at: number) => {
+  const d = new Date(at);
+  const today = new Date();
+  return d.toDateString() === today.toDateString()
+    ? d.toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" })
+    : d.toLocaleDateString("id-ID", { day: "numeric", month: "short" });
 };
 
-function autoReply(name: string, asAdmin: boolean) {
-  if (name === CALLCENTER)
-    return "Call Center TOOKU (Admin Pusat) menerima laporanmu. Kami bantu koordinasikan dengan koperasi sekolah terkait ya 🙏";
-  if (asAdmin) return `Terima kasih infonya! Saya (${name}) akan ambil barangnya di koperasi sesuai kode pengambilan 🙏`;
-  return name === KOPERASI
-    ? "Pesan kamu diterima admin koperasi, akan dibalas pada jam operasional (07.00–15.00)."
-    : "Siap kak! Barangnya masih tersedia. Silakan booking lewat aplikasi, pengambilan di koperasi sekolah ya 🙏";
-}
-
 function ChatPage() {
-  const { user, users, isAdmin, isSuperAdmin, products, hydrated: storeHydrated } = useTooku();
+  const {
+    user,
+    users,
+    isAdmin,
+    isSuperAdmin,
+    products,
+    hydrated,
+    chats,
+    myChatNames,
+    sendChat,
+    markChatRead,
+  } = useTooku();
   const { penjual, produk } = Route.useSearch();
   const navigate = Route.useNavigate();
-  const [threads, setThreads] = useState<Threads>(seedThreads);
-  const [hydrated, setHydrated] = useState(false);
   const [q, setQ] = useState("");
   const [draft, setDraft] = useState(produk ? `Halo, saya mau tanya soal "${produk}". Apakah masih tersedia?` : "");
+  const [err, setErr] = useState("");
   const endRef = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
-    try {
-      const raw = localStorage.getItem(CHAT_KEY);
-      if (raw) setThreads({ ...seedThreads, ...(JSON.parse(raw) as Threads) });
-    } catch {
-      /* ignore */
+  // Kelompokkan pesan cloud per lawan bicara.
+  const threads = useMemo<Threads>(() => {
+    const t: Threads = {};
+    for (const c of chats) {
+      const mine = myChatNames.includes(c.from);
+      const toMe = myChatNames.includes(c.to);
+      if (!mine && !toMe) continue;
+      const partner = mine ? c.to : c.from;
+      (t[partner] ??= []).push({ id: c.id, from: mine ? "me" : "them", text: c.text, time: fmtTime(c.at), at: c.at });
     }
-    setHydrated(true);
-  }, []);
+    return t;
+  }, [chats, myChatNames]);
 
-  useEffect(() => {
-    if (hydrated) localStorage.setItem(CHAT_KEY, JSON.stringify(threads));
-  }, [hydrated, threads]);
+  const unreadFrom = useMemo(() => {
+    const me = myChatNames[0];
+    const r: Record<string, number> = {};
+    for (const c of chats)
+      if (me && myChatNames.includes(c.to) && !myChatNames.includes(c.from) && !c.readBy.includes(me))
+        r[c.from] = (r[c.from] ?? 0) + 1;
+    return r;
+  }, [chats, myChatNames]);
 
   useEffect(() => {
     if (penjual) endRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [penjual, threads]);
 
-  // Pembeli bisa chat langsung ke admin koperasi & para penjual (seller) barang;
-  // admin koperasi melihat semua percakapan dari pembeli.
-  const contacts = useMemo(() => {
-    // Penjual di TOOKU hanya koperasi sekolah (lintas sekolah se-Kab. Magetan).
-    const sellerNames = Array.from(new Set([...schools.map((sc) => sc.koperasi), ...products.map((p) => p.seller)]));
-    if (isSuperAdmin) {
-      // Admin Pusat = call center: melayani pembeli dan koperasi sekolah.
-      const all = Array.from(
-        new Set([
-          ...users.filter((u) => u.id !== user?.id && u.status === "aktif").map((u) => u.name),
-          ...Object.keys(threads).filter((k) => k !== CALLCENTER),
-        ]),
-      );
-      return all.filter((s2) => s2.toLowerCase().includes(q.trim().toLowerCase()));
-    }
-    const list = isAdmin
-      ? Array.from(
-          new Set([
-            CALLCENTER,
-            ...users.filter((u) => u.role === "buyer").map((u) => u.name),
-            // Admin koperasi juga bisa jadi pembeli: chat koperasi sekolah lain.
-            ...sellerNames.filter((n) => n !== user?.name),
-            ...Object.keys(threads).filter((k) => k !== KOPERASI),
-          ]),
-        )
-      : Array.from(new Set([CALLCENTER, KOPERASI, ...sellerNames, ...Object.keys(threads)]));
-    return list.filter((s) => s.toLowerCase().includes(q.trim().toLowerCase()));
-  }, [isAdmin, isSuperAdmin, users, user, threads, q, products]);
+  useEffect(() => {
+    if (penjual && unreadFrom[penjual]) markChatRead(penjual);
+  }, [penjual, unreadFrom, markChatRead]);
 
-  if (!hydrated || !storeHydrated) return null;
+  // Pembeli chat ke koperasi sekolah & call center; admin koperasi membalas pembeli
+  // dan bisa chat ke koperasi lain; admin pusat melayani semua.
+  const contacts = useMemo(() => {
+    const sellerNames = Array.from(new Set([...schools.map((sc) => sc.koperasi), ...products.map((p) => p.seller)]));
+    const withThreads = Object.keys(threads).sort(
+      (a, b) => (threads[b]?.at(-1)?.at ?? 0) - (threads[a]?.at(-1)?.at ?? 0),
+    );
+    let list: string[];
+    if (isSuperAdmin) {
+      list = [...withThreads, ...users.filter((u) => u.id !== user?.id && u.status === "aktif").map((u) => u.name)];
+    } else if (isAdmin) {
+      list = [
+        ...withThreads,
+        CALLCENTER,
+        ...users.filter((u) => u.role === "buyer" && u.status === "aktif").map((u) => u.name),
+        ...sellerNames,
+      ];
+    } else {
+      list = [...withThreads, CALLCENTER, ...sellerNames];
+    }
+    return Array.from(new Set(list))
+      .filter((n) => !myChatNames.includes(n))
+      .filter((s) => s.toLowerCase().includes(q.trim().toLowerCase()));
+  }, [isAdmin, isSuperAdmin, users, user, threads, q, products, myChatNames]);
+
+  if (!hydrated) return null;
   if (!user) return <Navigate to="/auth" replace />;
 
   const active = penjual ?? null;
   const messages = (active && threads[active]) || [];
 
-
   function send() {
-    const text = draft.trim();
-    if (!text || !active) return;
-    const time = new Date().toLocaleTimeString("id-ID", { hour: "2-digit", minute: "2-digit" });
-    setThreads((prev) => ({
-      ...prev,
-      [active]: [...(prev[active] ?? []), { id: `m${Date.now()}`, from: "me", text, time }],
-    }));
+    if (!active) return;
+    const res = sendChat(active, draft);
+    if (!res.ok) {
+      setErr(res.error ?? "Pesan gagal dikirim.");
+      return;
+    }
+    setErr("");
     setDraft("");
-    setTimeout(() => {
-      setThreads((prev) => ({
-        ...prev,
-        [active]: [...(prev[active] ?? []), { id: `m${Date.now() + 1}`, from: "them", text: autoReply(active, isAdmin), time }],
-      }));
-    }, 900);
   }
 
   if (!active) {
@@ -205,7 +193,14 @@ function ChatPage() {
                     <span className="min-w-0 flex-1">
                       <span className="flex items-center justify-between gap-2">
                         <span className="truncate text-sm font-bold">{s}</span>
-                        {last && <span className="shrink-0 text-[10px] text-muted-foreground">{last.time}</span>}
+                        <span className="flex shrink-0 items-center gap-1.5">
+                          {last && <span className="text-[10px] text-muted-foreground">{last.time}</span>}
+                          {(unreadFrom[s] ?? 0) > 0 && (
+                            <span className="grid h-5 min-w-5 place-items-center rounded-full bg-destructive px-1 text-[10px] font-bold text-destructive-foreground">
+                              {unreadFrom[s]}
+                            </span>
+                          )}
+                        </span>
                       </span>
                       <span className="mt-0.5 block truncate text-[12px] text-muted-foreground">
                         {last
@@ -280,6 +275,7 @@ function ChatPage() {
       </div>
 
       <div className={`fixed inset-x-0 z-40 ${isSuperAdmin ? "bottom-0" : "bottom-[68px]"} border-t border-border bg-card p-3`}>
+        {err && <p className="mx-auto mb-2 max-w-2xl text-[11px] text-destructive">{err}</p>}
         <div className="mx-auto flex max-w-2xl items-center gap-2">
           <input
             value={draft}
