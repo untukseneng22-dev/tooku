@@ -138,9 +138,9 @@ function Timeline({ order }: { order: Order }) {
 /** Struk digital pengambilan: ditunjukkan ke petugas koperasi atau dicetak. */
 function ReceiptButton({ order }: { order: Order }) {
   const [open, setOpen] = useState(false);
-  const school = schoolById(order.schoolId);
+  const school = schoolById(order.items[0]?.schoolId ?? "");
   const total = order.items.reduce((s, i) => s + i.price * i.qty, 0);
-  const paid = order.paymentStatus === "paid";
+  const paid = order.paymentStatus === "Lunas";
   return (
     <>
       <button
@@ -166,7 +166,7 @@ function ReceiptButton({ order }: { order: Order }) {
             <div className="space-y-0.5 text-[11px]">
               <p><b>Pembeli:</b> {order.buyer}</p>
               <p><b>Koperasi:</b> {school?.koperasi ?? "-"}</p>
-              {school?.address && <p><b>Alamat:</b> {school.address}</p>}
+              {school?.pickup && <p><b>Lokasi ambil:</b> {school.pickup}</p>}
               <p><b>Status:</b> {order.status}</p>
               <p>
                 <b>Pembayaran:</b>{" "}
