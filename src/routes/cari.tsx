@@ -11,7 +11,7 @@ type Sort = "populer" | "termurah" | "termahal" | "terbaru";
 
 export const Route = createFileRoute("/cari")({
   validateSearch: (s: Record<string, unknown>) => ({
-    q: typeof s.q === "string" ? s.q : "",
+    q: typeof s["q"] === "string" ? s["q"] : "",
   }),
   head: () => ({
     meta: [
