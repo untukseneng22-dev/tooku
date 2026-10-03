@@ -650,6 +650,23 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
         },
   );
   const [specs, setSpecs] = useState<Record<string, string>>(() => ({ ...(editing?.specs ?? {}) }));
+  const [extraPhotos, setExtraPhotos] = useState<string[]>(() => [...(editing?.photos ?? [])].slice(0, 3));
+  const onExtraPhoto = async (e: ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []).slice(0, 3 - extraPhotos.length);
+    e.target.value = "";
+    if (!files.length) return;
+    setCompressing(true);
+    try {
+      const { compressImage } = await import("@/lib/image-compress");
+      const out: string[] = [];
+      for (const f of files) out.push((await compressImage(f)).dataUrl);
+      setExtraPhotos((p) => [...p, ...out].slice(0, 3));
+    } catch {
+      setPhotoInfo("Gagal memproses gambar, coba foto lain.");
+    } finally {
+      setCompressing(false);
+    }
+  };
 
   const [photoInfo, setPhotoInfo] = useState<string | null>(null);
   const [compressing, setCompressing] = useState(false);
