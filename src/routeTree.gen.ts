@@ -13,6 +13,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as AdminRouteImport } from './routes/admin'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as BantuanRouteImport } from './routes/bantuan'
+import { Route as CariRouteImport } from './routes/cari'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as FavoritRouteImport } from './routes/favorit'
 import { Route as KeranjangRouteImport } from './routes/keranjang'
@@ -43,6 +44,11 @@ const AuthRoute = AuthRouteImport.update({
 const BantuanRoute = BantuanRouteImport.update({
   id: '/bantuan',
   path: '/bantuan',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CariRoute = CariRouteImport.update({
+  id: '/cari',
+  path: '/cari',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ChatRoute = ChatRouteImport.update({
@@ -106,6 +112,7 @@ export interface FileRoutesByFullPath {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/bantuan': typeof BantuanRoute
+  '/cari': typeof CariRoute
   '/chat': typeof ChatRoute
   '/favorit': typeof FavoritRoute
   '/keranjang': typeof KeranjangRoute
@@ -123,6 +130,7 @@ export interface FileRoutesByTo {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/bantuan': typeof BantuanRoute
+  '/cari': typeof CariRoute
   '/chat': typeof ChatRoute
   '/favorit': typeof FavoritRoute
   '/keranjang': typeof KeranjangRoute
@@ -141,6 +149,7 @@ export interface FileRoutesById {
   '/admin': typeof AdminRoute
   '/auth': typeof AuthRoute
   '/bantuan': typeof BantuanRoute
+  '/cari': typeof CariRoute
   '/chat': typeof ChatRoute
   '/favorit': typeof FavoritRoute
   '/keranjang': typeof KeranjangRoute
@@ -160,6 +169,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/bantuan'
+    | '/cari'
     | '/chat'
     | '/favorit'
     | '/keranjang'
@@ -177,6 +187,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/bantuan'
+    | '/cari'
     | '/chat'
     | '/favorit'
     | '/keranjang'
@@ -194,6 +205,7 @@ export interface FileRouteTypes {
     | '/admin'
     | '/auth'
     | '/bantuan'
+    | '/cari'
     | '/chat'
     | '/favorit'
     | '/keranjang'
@@ -212,6 +224,7 @@ export interface RootRouteChildren {
   AdminRoute: typeof AdminRoute
   AuthRoute: typeof AuthRoute
   BantuanRoute: typeof BantuanRoute
+  CariRoute: typeof CariRoute
   ChatRoute: typeof ChatRoute
   FavoritRoute: typeof FavoritRoute
   KeranjangRoute: typeof KeranjangRoute
@@ -253,6 +266,13 @@ declare module '@tanstack/react-router' {
       path: '/bantuan'
       fullPath: '/bantuan'
       preLoaderRoute: typeof BantuanRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cari': {
+      id: '/cari'
+      path: '/cari'
+      fullPath: '/cari'
+      preLoaderRoute: typeof CariRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/chat': {
@@ -340,6 +360,7 @@ const rootRouteChildren: RootRouteChildren = {
   AdminRoute: AdminRoute,
   AuthRoute: AuthRoute,
   BantuanRoute: BantuanRoute,
+  CariRoute: CariRoute,
   ChatRoute: ChatRoute,
   FavoritRoute: FavoritRoute,
   KeranjangRoute: KeranjangRoute,

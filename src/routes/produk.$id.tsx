@@ -149,22 +149,38 @@ function ProductDetail() {
       )}
 
       <div className="mx-auto max-w-2xl">
-        <div className="aspect-square w-full overflow-hidden bg-muted">
-          <ProductThumb product={product} />
-        </div>
-        <div className="flex gap-2 px-4 py-3">
-          {[0, 1, 2].map((i) => (
-            <button
-              key={i}
-              onClick={() => setActive(i)}
-              className={`h-16 w-16 overflow-hidden rounded-xl border-2 ${
-                active === i ? "border-accent" : "border-border"
-              }`}
-            >
-              <ProductThumb product={product} />
-            </button>
-          ))}
-        </div>
+        {(() => {
+          const gallery = [product.photo, ...(product.photos ?? [])].filter((x): x is string => Boolean(x));
+          const idx = Math.min(active, Math.max(0, gallery.length - 1));
+          return (
+            <>
+              <div className="aspect-square w-full overflow-hidden bg-muted">
+                {gallery.length ? (
+                  <img src={gallery[idx]} alt={product.name} className="h-full w-full object-cover" />
+                ) : (
+                  <ProductThumb product={product} />
+                )}
+              </div>
+              {gallery.length > 1 && (
+                <div className="flex gap-2 px-4 py-3">
+                  {gallery.map((src, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setActive(i)}
+                      aria-label={`Foto ${i + 1}`}
+                      className={`h-16 w-16 overflow-hidden rounded-xl border-2 ${
+                        idx === i ? "border-accent" : "border-border"
+                      }`}
+                    >
+                      <img src={src} alt="" className="h-full w-full object-cover" />
+                    </button>
+                  ))}
+                </div>
+              )}
+              {gallery.length <= 1 && <div className="h-3" />}
+            </>
+          );
+        })()}
 
         <section className="space-y-3 border-b border-border px-4 pb-5">
           <div className="flex flex-wrap items-center gap-2">

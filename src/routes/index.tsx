@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
   Search,
   Zap,
@@ -48,6 +48,7 @@ function Home() {
   useEffect(() => setMounted(true), []);
   // Barang yang sudah masuk fase donasi / daur ulang tidak lagi dijual.
   const products = mounted ? allProducts.filter((p) => isSellable(p)) : allProducts;
+  const navigate = useNavigate();
   const [query, setQuery] = useState("");
   const [cat, setCat] = useState<Category | "Semua">("Semua");
   const [showFilter, setShowFilter] = useState(false);
@@ -89,7 +90,10 @@ function Home() {
     const t = q.trim();
     setQuery(t);
     setFocused(false);
-    if (t) pushRecent(t);
+    if (t) {
+      pushRecent(t);
+      void navigate({ to: "/cari", search: { q: t } });
+    }
   };
 
   const conditionPct = (c: string) => Number(c.match(/(\d+)%/)?.[1] ?? 0);

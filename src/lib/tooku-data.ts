@@ -238,6 +238,8 @@ export type Product = {
   contributor?: string;
   sold: number;
   photo?: string;
+  /** Foto tambahan (maks 3) untuk galeri detail produk. */
+  photos?: string[];
   specs?: Record<string, string>;
   /** ==== Siklus Hidup Barang (anti dead-stock) ==== */
   /** Waktu barang mulai tayang di TOOKU. */
