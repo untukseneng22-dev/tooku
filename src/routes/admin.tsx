@@ -718,6 +718,7 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
           schoolId: mySchool.id,
           specs: cleanSpecs,
           ...(form.photo ? { photo: form.photo } : {}),
+          photos: extraPhotos,
         };
         if (editing) updateProduct(editing.id, payload);
         else addProduct(payload);
@@ -755,6 +756,28 @@ function NewProduct({ editId, onDone }: { editId?: string | null; onDone: () => 
                 : (photoInfo ?? "Foto otomatis dikompres (maks ±160 KB, 1000px) agar aplikasi tetap ringan.")}
             </p>
           </div>
+        </div>
+        <label className="pt-1 text-xs font-semibold">Foto Tambahan (opsional, maks 3)</label>
+        <div className="flex flex-wrap gap-2">
+          {extraPhotos.map((src, i) => (
+            <div key={i} className="relative h-16 w-16 overflow-hidden rounded-xl border border-border">
+              <img src={src} alt={`Foto tambahan ${i + 1}`} className="h-full w-full object-cover" />
+              <button
+                type="button"
+                aria-label="Hapus foto"
+                onClick={() => setExtraPhotos((p) => p.filter((_, j) => j !== i))}
+                className="absolute right-0.5 top-0.5 grid h-5 w-5 place-items-center rounded-full bg-foreground/70 text-[10px] text-background"
+              >
+                ✕
+              </button>
+            </div>
+          ))}
+          {extraPhotos.length < 3 && (
+            <label className="grid h-16 w-16 cursor-pointer place-items-center rounded-xl border border-dashed border-border bg-secondary text-xl">
+              +
+              <input type="file" accept="image/*" multiple onChange={onExtraPhoto} className="hidden" />
+            </label>
+          )}
         </div>
       </div>
 
