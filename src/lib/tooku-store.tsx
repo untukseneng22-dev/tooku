@@ -815,6 +815,11 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           registeredAt: Date.now(),
         };
         setUsers((us) => [...us, newUser]);
+        users
+          .filter((u) => u.role === "superadmin")
+          .forEach((sa) =>
+            pushNotif(sa.id, "sistem", "Pendaftar baru menunggu persetujuan", `${newUser.name} (@${uname}) mendaftar. Cek tab Persetujuan Akun di Admin Pusat.`),
+          );
         return { ok: true, role: newUser.role, pending: true };
       },
       pendingUsers: users.filter((u) => u.status === "menunggu"),
