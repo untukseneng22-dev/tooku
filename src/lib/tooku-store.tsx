@@ -551,6 +551,8 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   const [reports, setReports] = useState<ProductReport[]>([]);
   const [schoolEdits, setSchoolEdits] = useState<Record<string, SchoolPatch>>({});
   const [notifs, setNotifs] = useState<AppNotif[]>([]);
+  /** Status baca notifikasi contoh/umum per akun, tersinkron cloud. */
+  const [notifReads, setNotifReads] = useState<Record<string, string[]>>({});
   const [campaigns, setCampaigns] = useState<Campaign[]>(seedCampaigns);
   const [campaignJoins, setCampaignJoins] = useState<CampaignJoin[]>([]);
   const [chats, setChats] = useState<ChatMessage[]>([]);
