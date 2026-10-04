@@ -109,9 +109,9 @@ function NotifikasiPage() {
   }, [storeNotifs, user?.id, seedRead]);
   const readOne = (n: Notif & { realId?: string }) => {
     if (n.realId) markNotifRead(n.realId);
-    else if (!seedRead.includes(n.id)) saveSeedRead([...seedRead, n.id]);
+    else if (!seedRead.includes(n.id)) markSeedReads([n.id]);
   };
-  const readAll = () => { markAllNotifsRead(); saveSeedRead(seedNotifs.map((x) => x.id)); };
+  const readAll = () => { markAllNotifsRead(); markSeedReads(seedNotifs.map((x) => x.id)); };
 
   const unread = mine.filter((n) => !n.read).length;
   const shown = useMemo(
