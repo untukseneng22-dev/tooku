@@ -441,6 +441,9 @@ type Store = {
   notifs: AppNotif[];
   markAllNotifsRead: () => void;
   markNotifRead: (id: string) => void;
+  /** ID notifikasi contoh/umum yang sudah dibaca pengguna saat ini (tersinkron cloud). */
+  seedReads: string[];
+  markSeedReads: (ids: string[]) => void;
   /** Laporan barang bermasalah dari pembeli. */
   /** Profil koperasi — nama, logo, jenjang, alamat; diedit admin koperasi sendiri. */
   koperasiList: School[];
@@ -551,6 +554,8 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   const [reports, setReports] = useState<ProductReport[]>([]);
   const [schoolEdits, setSchoolEdits] = useState<Record<string, SchoolPatch>>({});
   const [notifs, setNotifs] = useState<AppNotif[]>([]);
+  /** Status baca notifikasi contoh/umum per akun, tersinkron cloud. */
+  const [notifReads, setNotifReads] = useState<Record<string, string[]>>({});
   const [campaigns, setCampaigns] = useState<Campaign[]>(seedCampaigns);
   const [campaignJoins, setCampaignJoins] = useState<CampaignJoin[]>([]);
   const [chats, setChats] = useState<ChatMessage[]>([]);
@@ -646,7 +651,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
   }, [hydrated, products, cart, orders, users, userId, reviews, shippingConfigs, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins, chats]);
 
   // ===== Sinkronisasi cloud lintas perangkat =====
-  const shared = { products, reviews, orders, users, shippingConfigs, productReviews, flashSales, vouchers, points, reports, notifs, schoolEdits, campaigns, campaignJoins, chats } as Record<string, unknown>;
+  const shared = { products, reviews, orders, users, shippingConfigs, productReviews, flashSales, vouchers, points, reports, notifs, notifReads, schoolEdits, campaigns, campaignJoins, chats } as Record<string, unknown>;
   const applyRemote = (key: string, data: unknown) => {
     const d = data as never;
     switch (key) {
@@ -661,6 +666,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       case "points": setPoints(d); break;
       case "reports": setReports(d); break;
       case "notifs": setNotifs(d); break;
+      case "notifReads": setNotifReads(d); break;
       case "schoolEdits": setSchoolEdits(d); break;
       case "campaigns": setCampaigns(d); break;
       case "campaignJoins": setCampaignJoins(d); break;
@@ -1206,6 +1212,14 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       markAllNotifsRead: () =>
         setNotifs((ns) => ns.map((n) => (n.userId === null || (user && n.userId === user.id) ? { ...n, read: true } : n))),
       markNotifRead: (id) => setNotifs((ns) => ns.map((n) => (n.id === id ? { ...n, read: true } : n))),
+      seedReads: user ? (notifReads[user.id] ?? []) : [],
+      markSeedReads: (ids) =>
+        setNotifReads((m) => {
+          if (!user) return m;
+          const cur = m[user.id] ?? [];
+          const merged = Array.from(new Set([...cur, ...ids]));
+          return { ...m, [user.id]: merged };
+        }),
       koperasiList,
       getSchool: (id) => koperasiList.find((s) => s.id === id),
       updateSchool: (id, patch) => {
@@ -1357,7 +1371,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           ).length
         : 0,
     }),
-    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, koperasiList, campaigns, campaignJoins, chats, myChatNames],
+    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, notifReads, koperasiList, campaigns, campaignJoins, chats, myChatNames],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;

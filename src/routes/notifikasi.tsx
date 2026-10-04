@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { Bell, MessageCircle, ShieldCheck, Package, Tag, Clock } from "lucide-react";
 import { useTooku } from "@/lib/tooku-store";
 import { EmptyState } from "@/components/tooku/ui";
@@ -88,17 +88,9 @@ const fmtAgo = (at: number) => {
 };
 
 function NotifikasiPage() {
-  const { user, notifs: storeNotifs, markNotifRead, markAllNotifsRead, hydrated } = useTooku();
+  const { user, notifs: storeNotifs, markNotifRead, markAllNotifsRead, seedReads, markSeedReads, hydrated } = useTooku();
   const [filter, setFilter] = useState<"semua" | NotifKind | "belum">("semua");
-  const seedKey = `tooku-seed-read-${user?.id ?? "x"}`;
-  const [seedRead, setSeedRead] = useState<string[]>([]);
-  useEffect(() => {
-    try { setSeedRead(JSON.parse(localStorage.getItem(seedKey) || "[]")); } catch { setSeedRead([]); }
-  }, [seedKey]);
-  const saveSeedRead = (ids: string[]) => {
-    setSeedRead(ids);
-    try { localStorage.setItem(seedKey, JSON.stringify(ids)); } catch {}
-  };
+  const seedRead = seedReads;
 
   // Gabung notifikasi nyata dari sistem (pesanan, promo) dengan info umum.
   const mine: (Notif & { realId?: string })[] = useMemo(() => {
@@ -117,9 +109,9 @@ function NotifikasiPage() {
   }, [storeNotifs, user?.id, seedRead]);
   const readOne = (n: Notif & { realId?: string }) => {
     if (n.realId) markNotifRead(n.realId);
-    else if (!seedRead.includes(n.id)) saveSeedRead([...seedRead, n.id]);
+    else if (!seedRead.includes(n.id)) markSeedReads([n.id]);
   };
-  const readAll = () => { markAllNotifsRead(); saveSeedRead(seedNotifs.map((x) => x.id)); };
+  const readAll = () => { markAllNotifsRead(); markSeedReads(seedNotifs.map((x) => x.id)); };
 
   const unread = mine.filter((n) => !n.read).length;
   const shown = useMemo(
