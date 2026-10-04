@@ -88,17 +88,9 @@ const fmtAgo = (at: number) => {
 };
 
 function NotifikasiPage() {
-  const { user, notifs: storeNotifs, markNotifRead, markAllNotifsRead, hydrated } = useTooku();
+  const { user, notifs: storeNotifs, markNotifRead, markAllNotifsRead, seedReads, markSeedReads, hydrated } = useTooku();
   const [filter, setFilter] = useState<"semua" | NotifKind | "belum">("semua");
-  const seedKey = `tooku-seed-read-${user?.id ?? "x"}`;
-  const [seedRead, setSeedRead] = useState<string[]>([]);
-  useEffect(() => {
-    try { setSeedRead(JSON.parse(localStorage.getItem(seedKey) || "[]")); } catch { setSeedRead([]); }
-  }, [seedKey]);
-  const saveSeedRead = (ids: string[]) => {
-    setSeedRead(ids);
-    try { localStorage.setItem(seedKey, JSON.stringify(ids)); } catch {}
-  };
+  const seedRead = seedReads;
 
   // Gabung notifikasi nyata dari sistem (pesanan, promo) dengan info umum.
   const mine: (Notif & { realId?: string })[] = useMemo(() => {
