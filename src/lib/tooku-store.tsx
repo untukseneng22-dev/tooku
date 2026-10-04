@@ -1371,7 +1371,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
           ).length
         : 0,
     }),
-    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, koperasiList, campaigns, campaignJoins, chats, myChatNames],
+    [products, cart, orders, users, user, addToCart, reviews, wishlist, productReviews, flashSales, vouchers, points, reports, notifs, notifReads, koperasiList, campaigns, campaignJoins, chats, myChatNames],
   );
 
   return <StoreContext.Provider value={value}>{children}</StoreContext.Provider>;
