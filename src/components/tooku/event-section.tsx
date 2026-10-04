@@ -26,8 +26,11 @@ export function EventSection() {
   const running = campaigns
     .filter((c) => campaignPhase(c, now) === "berjalan")
     .sort((a, b) => a.endsAt - b.endsAt)[0];
+  // Teaser event "akan datang" hanya tampil H-5 sebelum Hari H (ala e-commerce),
+  // agar banner tidak muncul terlalu jauh hari. Pendaftaran koperasi tetap bisa jauh hari.
+  const TEASER_WINDOW_MS = 5 * 24 * 60 * 60 * 1000;
   const soon = campaigns
-    .filter((c) => campaignPhase(c, now) === "akan-datang")
+    .filter((c) => campaignPhase(c, now) === "akan-datang" && c.startsAt - now <= TEASER_WINDOW_MS)
     .sort((a, b) => a.startsAt - b.startsAt)[0];
   const campaign = running ?? soon;
   if (!campaign) return null;
