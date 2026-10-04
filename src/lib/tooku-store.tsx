@@ -1212,6 +1212,14 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       markAllNotifsRead: () =>
         setNotifs((ns) => ns.map((n) => (n.userId === null || (user && n.userId === user.id) ? { ...n, read: true } : n))),
       markNotifRead: (id) => setNotifs((ns) => ns.map((n) => (n.id === id ? { ...n, read: true } : n))),
+      seedReads: user ? (notifReads[user.id] ?? []) : [],
+      markSeedReads: (ids) =>
+        setNotifReads((m) => {
+          if (!user) return m;
+          const cur = m[user.id] ?? [];
+          const merged = Array.from(new Set([...cur, ...ids]));
+          return { ...m, [user.id]: merged };
+        }),
       koperasiList,
       getSchool: (id) => koperasiList.find((s) => s.id === id),
       updateSchool: (id, patch) => {
