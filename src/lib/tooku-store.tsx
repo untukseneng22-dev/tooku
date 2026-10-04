@@ -663,6 +663,7 @@ function TookuStoreProvider({ children }: { children: ReactNode }) {
       case "points": setPoints(d); break;
       case "reports": setReports(d); break;
       case "notifs": setNotifs(d); break;
+      case "notifReads": setNotifReads(d); break;
       case "schoolEdits": setSchoolEdits(d); break;
       case "campaigns": setCampaigns(d); break;
       case "campaignJoins": setCampaignJoins(d); break;
