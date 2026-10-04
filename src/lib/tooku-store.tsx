@@ -441,6 +441,9 @@ type Store = {
   notifs: AppNotif[];
   markAllNotifsRead: () => void;
   markNotifRead: (id: string) => void;
+  /** ID notifikasi contoh/umum yang sudah dibaca pengguna saat ini (tersinkron cloud). */
+  seedReads: string[];
+  markSeedReads: (ids: string[]) => void;
   /** Laporan barang bermasalah dari pembeli. */
   /** Profil koperasi — nama, logo, jenjang, alamat; diedit admin koperasi sendiri. */
   koperasiList: School[];
