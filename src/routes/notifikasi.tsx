@@ -1,5 +1,5 @@
 import { createFileRoute, Link, Navigate } from "@tanstack/react-router";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Bell, MessageCircle, ShieldCheck, Package, Tag, Clock } from "lucide-react";
 import { useTooku } from "@/lib/tooku-store";
 import { EmptyState } from "@/components/tooku/ui";
@@ -90,6 +90,15 @@ const fmtAgo = (at: number) => {
 function NotifikasiPage() {
   const { user, notifs: storeNotifs, markNotifRead, markAllNotifsRead, hydrated } = useTooku();
   const [filter, setFilter] = useState<"semua" | NotifKind | "belum">("semua");
+  const seedKey = `tooku-seed-read-${user?.id ?? "x"}`;
+  const [seedRead, setSeedRead] = useState<string[]>([]);
+  useEffect(() => {
+    try { setSeedRead(JSON.parse(localStorage.getItem(seedKey) || "[]")); } catch { setSeedRead([]); }
+  }, [seedKey]);
+  const saveSeedRead = (ids: string[]) => {
+    setSeedRead(ids);
+    try { localStorage.setItem(seedKey, JSON.stringify(ids)); } catch {}
+  };
 
   // Gabung notifikasi nyata dari sistem (pesanan, promo) dengan info umum.
   const mine: (Notif & { realId?: string })[] = useMemo(() => {
@@ -104,8 +113,13 @@ function NotifikasiPage() {
         time: fmtAgo(n.at),
         read: n.read,
       }));
-    return [...real, ...seedNotifs];
-  }, [storeNotifs, user?.id]);
+    return [...real, ...seedNotifs.map((x) => ({ ...x, read: x.read || seedRead.includes(x.id) }))];
+  }, [storeNotifs, user?.id, seedRead]);
+  const readOne = (n: Notif & { realId?: string }) => {
+    if (n.realId) markNotifRead(n.realId);
+    else if (!seedRead.includes(n.id)) saveSeedRead([...seedRead, n.id]);
+  };
+  const readAll = () => { markAllNotifsRead(); saveSeedRead(seedNotifs.map((x) => x.id)); };
 
   const unread = mine.filter((n) => !n.read).length;
   const shown = useMemo(
@@ -165,7 +179,7 @@ function NotifikasiPage() {
         <div className="mt-3 flex items-center justify-between">
           <p className="text-[11px] text-muted-foreground">{shown.length} notifikasi</p>
           {unread > 0 && (
-            <button onClick={() => markAllNotifsRead()} className="text-[11px] font-bold text-primary">
+            <button onClick={readAll} className="text-[11px] font-bold text-primary">
               Tandai semua dibaca
             </button>
           )}
@@ -184,7 +198,7 @@ function NotifikasiPage() {
               return (
                 <button
                   key={n.id}
-                  onClick={() => n.realId && markNotifRead(n.realId)}
+                  onClick={() => readOne(n)}
                   className={`flex w-full gap-3 rounded-2xl border p-3 text-left transition-colors ${
                     n.read ? "border-border bg-card" : "border-primary/30 bg-primary/5"
                   }`}
